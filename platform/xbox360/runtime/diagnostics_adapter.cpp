@@ -98,22 +98,23 @@ void Consume(const Record& record, void*) {
     QueryPerformanceCounter(&end);
     const double milliseconds = 1000.0 / clock.QuadPart;
     EmitReport("DIAGNOSTIC report producer_ms=%.3f queue_ms=%.3f worker_ms=%.3f producer_thread=%lu output_thread=%lu",
-        record.capture_ticks * milliseconds,
-        (start.QuadPart - record.queued_at.QuadPart) * milliseconds,
+        record.metadata.capture_ticks * milliseconds,
+        (start.QuadPart - record.metadata.queued_at.QuadPart) * milliseconds,
         (end.QuadPart - start.QuadPart) * milliseconds,
-        record.producer, GetCurrentThreadId());
+        record.metadata.producer, GetCurrentThreadId());
 }
 void SinkError(void*) {
     DbgPrint("SMASH360 diagnostic sink callback failed; later records retained\n");
 }
-void BeginRecord(Record& record, void*) {
+void BeginRecord(const Record& record, Shipyard::Diagnostics::Metadata& metadata, void*) {
     if (record.format) {
-        record.producer = GetCurrentThreadId();
-        QueryPerformanceCounter(&record.queued_at);
+        metadata.producer = GetCurrentThreadId();
+        QueryPerformanceCounter(&metadata.queued_at);
     }
 }
-void Accepted(Record& record, uint32_t captureStart, void*) {
-    if (record.format) record.capture_ticks = __mftb32() - captureStart;
+void Accepted(const Record& record, uint32_t captureStart,
+              Shipyard::Diagnostics::Metadata& metadata, void*) {
+    if (record.format) metadata.capture_ticks = __mftb32() - captureStart;
 }
 void WorkerStarted(void*) {
     if (XSetThreadProcessor(GetCurrentThread(), 3) == (DWORD)-1 ||
