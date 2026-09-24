@@ -17,6 +17,7 @@ these commands from this repository root in PowerShell:
 & ./tools/fetch-sources.ps1
 & ./tools/fetch-dependencies.ps1
 & ./tools/setup-host-deps.ps1
+& python -B tools/empty-owned-generated.py --clean
 & ./tools/build-assets.ps1 -Rom 'C:\path\to\your\Super Smash Bros. (USA).n64'
 & ./platform/xbox360/build.ps1 -Regenerate -Rebuild
 ```
@@ -24,7 +25,10 @@ these commands from this repository root in PowerShell:
 `fetch-sources.ps1` checks the BattleShip commit and its three submodules;
 `fetch-dependencies.ps1` checks out every exact dependency commit. For an
 existing checkout, `fetch-dependencies.ps1 -VerifyOnly` checks without changing
-it. `build-assets.ps1` produces owned game archives from the user's ROM.
+it. The cleanup script preserves the old XEX and receipts, then empties only
+named generator/build outputs and generated project files; `--list` previews
+the targets. It retains pinned source and host dependency caches.
+`build-assets.ps1` produces owned game archives from the user's ROM.
 `build.ps1 -Regenerate` runs the named projection owners and assembles the
 generated project; `-Rebuild` compiles the native projects and links a new XEX.
 It then verifies the native link and copies the owned archives beside
