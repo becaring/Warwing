@@ -22,6 +22,9 @@ class Lowering(unittest.TestCase):
     def test_mapping_and_determinism(self):
         first=GEN['prepare']();second=GEN['prepare']()
         self.assertEqual(first['output_hashes'],second['output_hashes'])
+        self.assertEqual(first['cvars_header_sha256'],second['cvars_header_sha256'])
+        self.assertIn('#define CVAR_VSYNC_ENABLED "gVsyncEnabled"',
+                      (ROOT/'scratch/config-xdk/cvars.h').read_text())
         for relative in first['output_hashes']:
             text=(ROOT/'scratch/config-xdk/generated'/relative).read_text()
             self.assertIn('#line',text)

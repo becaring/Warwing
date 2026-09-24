@@ -5,6 +5,7 @@ ROOT=Path(__file__).resolve().parents[1]
 LUS=ROOT/'upstream/BattleShip/libultraship'
 OUT=ROOT/'scratch/config-xdk'
 BASE=ROOT/'platform/xbox360/cpp-compat/config'
+CVARS_SHA256='6702cf2eb377ea9d87f49731e1eca514ae0894799a643f6f67b4a3248668648f'
 LOCKS={'include/ship/config/Config.h': '36e187fe87aeee9f9e2c981c19f2a3ce30dd39787cb98324c2ad3c2b8f7505bb', 'src/ship/config/Config.cpp': '46cb055dd668c0629e30fdef187f3b8b22cc403e9ec61276ab9c04a46c6407da', 'include/ship/config/ConsoleVariable.h': 'bde2827a62726e488f53343f605155b28fc908ce209cb3385332ab815756fb95', 'src/ship/config/ConsoleVariable.cpp': '7274d237da2cc62a649e5ed274ed17cf6c33a070d95a196060d1a2670a9de76d', 'include/ship/Context.h': 'b37f3c4f9cf938d9f612d1dee89fdc876d8ea12559a0df7ea25075c9e172597c', 'include/ship/window/Window.h': '6cfc2876cc9fa17cabffa82cbf7741abcaee2a8b0ee57cbc1ebcb4b222d98f69', 'src/ship/window/Window.cpp': 'de5031138c0a8d0d6116917d4466b58e4e3e6bfdea0c09a3cf06abe5ce4f4598', 'include/ship/audio/Audio.h': '9e5ed13cadfb1992aa1e9ce3cd6611f3852daac0337905e7ac7e4763a3af5450', 'include/ship/utils/StringHelper.h': '9082dd8682021b2e9b01005da53714d1810391ec171247a70d394fba965cf8f5', 'src/ship/utils/StringHelper.cpp': '4aa58597047642106571828ceb41886c51d914dcb315a573eab992f8f568391c', 'include/ship/utils/filesystemtools/DiskFile.h': '9383b3591e97034cd4beb6f569cda9fc5795887e738ae81d556d17ecf498123b', 'include/ship/utils/filesystemtools/Path.h': '226d2b64395888b88e9b7a1a1689e7bcd2c768f06176b5426347b2f30d556392', 'include/ship/utils/filesystemtools/Directory.h': 'ade3cdd25fb79d9a9dbd0421fdc91997624a3d4267bb0114bbd8911808ae26d8'}
 LOWER=runpy.run_path(str(BASE/'lowering.py'))
 PRISM=runpy.run_path(str(ROOT/'tools/prepare_prism_xdk.py'))
@@ -90,7 +91,15 @@ def prepare():
         target=OUT/'generated'/relative
         PRISM['mapped']('upstream/BattleShip/libultraship/'+relative,text,target)
         results[relative]=hashlib.sha256(target.read_bytes()).hexdigest()
-    manifest={'input_hashes':LOCKS,'output_hashes':results,'audio_integration_patch_sha256':AUDIO['SHA'],'source_mapping':'Prism centralized mapped function; range lowering derived from donor and Prism cached-end fix','real_application_classes_retained':True,'window_initializer_relocation':'generated/src/ship/window/Window.cpp primary ctor; full Window compile not included','dependencies':['scratch/audio-xdk/generated/include','Shipyard:sources/json/include','cpp-compat/filesystem','scratch/logging-xdk/core-include','scratch/logging-xdk/include'],'verification_report':'scratch/config-xdk/native-verification.json'}
+    cvars_source=(LUS/'cmake/cvars.cmake').read_bytes()
+    if hashlib.sha256(cvars_source).hexdigest()!=CVARS_SHA256:
+        raise ValueError('Config CVar definitions SHA drift')
+    cvars=re.findall(r'set\((CVAR_\w+) "([^"\n]+)" CACHE STRING ""\)',cvars_source.decode('utf-8'))
+    if not cvars:
+        raise ValueError('Config CVar definitions are empty')
+    cvars_header=OUT/'cvars.h'
+    cvars_header.write_text('\n'.join('#define '+key+' "'+value+'"' for key,value in cvars)+'\n',encoding='utf-8')
+    manifest={'input_hashes':LOCKS,'output_hashes':results,'cvars_source_sha256':CVARS_SHA256,'cvars_header_sha256':hashlib.sha256(cvars_header.read_bytes()).hexdigest(),'audio_integration_patch_sha256':AUDIO['SHA'],'source_mapping':'Prism centralized mapped function; range lowering derived from donor and Prism cached-end fix','real_application_classes_retained':True,'window_initializer_relocation':'generated/src/ship/window/Window.cpp primary ctor; full Window compile not included','dependencies':['scratch/audio-xdk/generated/include','Shipyard:sources/json/include','cpp-compat/filesystem','scratch/logging-xdk/core-include','scratch/logging-xdk/include'],'verification_report':'scratch/config-xdk/native-verification.json'}
     OUT.mkdir(parents=True,exist_ok=True);(OUT/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
     return manifest
 if __name__=='__main__':prepare();print('Staged real Config/CVar/Audio source; verification is recorded separately.')
