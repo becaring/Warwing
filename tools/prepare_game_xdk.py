@@ -110,9 +110,9 @@ def main():
     for directory in ('sources', 'objects', 'logs', 'drivers'):
         (output / directory).mkdir(parents=True, exist_ok=True)
     (output / 'drivers' / (sha256(__file__) + '.py')).write_bytes(Path(__file__).read_bytes())
-    # Install with: python -m pip install --target scratch/game-xdk/python-tools
+    # Install with: python -m pip install --target scratch/host-python
     # tree-sitter==0.25.2 tree-sitter-c==0.24.1
-    sys.path.insert(0, str(output / 'python-tools'))
+    sys.path.insert(0, str(ROOT / 'scratch/host-python'))
     sys.path.insert(0, str(COMPAT))
     from typed_generic import lower_port_generics, lower_rumble_initializers
     from semantic_bool import lower_booleans

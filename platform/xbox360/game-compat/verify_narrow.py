@@ -14,7 +14,7 @@ from prepare_game_xdk import prepare_stdarg_header
 def main():
     out = ROOT / 'scratch/game-xdk/verification/narrow'
     out.mkdir(parents=True, exist_ok=True)
-    sys.path.insert(0, str(ROOT / 'scratch/game-xdk/python-tools'))
+    sys.path.insert(0, str(ROOT / 'scratch/host-python'))
     from xbox360_platform import c89_lower
     enums = re.search(rb'typedef enum GRKind\s*\{.*?\} GRKind;', (UPSTREAM / 'decomp/src/gr/grdef.h').read_bytes(), re.S)[0]
     vector = re.search(rb'typedef struct Vec3f\s*\{.*?\} Vec3f;', (UPSTREAM / 'decomp/include/ssb_types.h').read_bytes(), re.S)[0]

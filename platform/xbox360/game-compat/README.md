@@ -7,7 +7,7 @@ game globals, scheduler replacement, application entry point, or XEX.
 Run from `D:/Projects/Smash360` using Python 3.13:
 
 ```powershell
-python -m pip install --target scratch/game-xdk/python-tools tree-sitter==0.25.2 tree-sitter-c==0.24.1
+python -m pip install --target scratch/host-python tree-sitter==0.25.2 tree-sitter-c==0.24.1
 python tools/game_source_manifest.py
 python platform/xbox360/game-compat/verify.py
 python platform/xbox360/game-compat/verify_bool.py

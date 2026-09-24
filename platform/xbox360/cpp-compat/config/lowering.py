@@ -3,7 +3,7 @@ from pathlib import Path
 import sys
 ROOT=Path(__file__).resolve().parents[4]
 sys.dont_write_bytecode=True
-sys.path.insert(0,str(ROOT/'platform/xbox360/cpp-compat/prism/python'))
+sys.path.insert(0,str(ROOT/'scratch/host-python'))
 import tree_sitter as ts
 import tree_sitter_cpp
 PARSER=ts.Parser(ts.Language(tree_sitter_cpp.language()))

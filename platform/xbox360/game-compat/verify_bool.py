@@ -19,7 +19,7 @@ def run(command):
 
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
-    sys.path.insert(0, str(ROOT / 'scratch/game-xdk/python-tools'))
+    sys.path.insert(0, str(ROOT / 'scratch/host-python'))
     from xbox360_platform import c89_lower
     fixture = b'''typedef struct { _Bool Cancelled; } IEvent;
 typedef struct { IEvent Event; int value; } ActualShape;

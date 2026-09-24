@@ -148,7 +148,7 @@ def main():
             data_sections.append(coff[raw:raw+size])
     assert any(section[:8] == bytes.fromhex('7f7fffffff7fffff') for section in data_sections), 'XDK float data bytes differ'
 
-    sys.path.insert(0, str(ROOT / 'scratch/game-xdk/python-tools'))
+    sys.path.insert(0, str(ROOT / 'scratch/host-python'))
     from xbox360_platform import c89_lower
     # Scope shadowing, evaluation order, continue/break, nested loops, and jumps
     # past a declaration with a side effect are checked against the C11 original.
