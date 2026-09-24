@@ -1,0 +1,12 @@
+{
+  "include/ship/window/gui/Gui.h": "f5b908f8b28615137085c1fdd5c118effbd9af181b2ad929aa6bd4815c03a541",
+  "src/ship/window/gui/Gui.cpp": "8247c08e7198c0c03c37c8a06673577cb9ac92fd63bd567260f3aa2a171cc54f",
+  "include/fast/Fast3dWindow.h": "df2429d91f480fb1e60f91945ebd0627be548f39f05ca61489ea0d02e2f7008c",
+  "src/fast/Fast3dWindow.cpp": "ae71119bd9662c52fc4e1a835e2584c7a1aebd7defe7c7e9f4932bd231ee519a",
+  "include/fast/FastMouseStateManager.h": "cfe770a85801f67237a8be3253c6ee018ef6bcf0d372ca24345abe02b0f8f573",
+  "src/fast/FastMouseStateManager.cpp": "72ac60eb3f03b37176a88cb51172495d9968ea232d40f6debc71e43e32c0dcd0",
+  "include/ship/window/MouseStateManager.h": "e423d023ca33f20376b607a228746b940e29c4c4c1bba96bcd9358e1a552c417",
+  "src/ship/window/MouseStateManager.cpp": "12d99d850ca9dc5acf0245bb579269e59b79ee0a13c8639096e80adfa30bdaf1",
+  "src/ship/window/Window.cpp": "de5031138c0a8d0d6116917d4466b58e4e3e6bfdea0c09a3cf06abe5ce4f4598",
+  "include/ship/window/gui/Fonts.h": "b731e1c4f46679d26d64e819efe5d6f74904b30ec08af50c0cab778c3821298b"
+}

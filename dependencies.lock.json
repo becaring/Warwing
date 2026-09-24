@@ -1,0 +1,68 @@
+[
+  {
+    "path": "upstream/dependencies/thread-pool",
+    "url": "https://github.com/bshoshany/thread-pool.git",
+    "revision": "097aa718f25d44315cadb80b407144ad455ee4f9",
+    "selection": "Pinned LUS common.cmake v4.1.0"
+  },
+  {
+    "path": "upstream/dependencies/prism",
+    "url": "https://github.com/KiritoDv/prism-processor.git",
+    "revision": "1de054450e7b3c5f777d2e3dfcb228ad120c329d",
+    "selection": "Pinned LUS common.cmake exact commit"
+  },
+  {
+    "path": "upstream/dependencies/imgui",
+    "url": "https://github.com/ocornut/imgui.git",
+    "revision": "4806a1924ff6181180bf5e4b8b79ab4394118875",
+    "selection": "Pinned LUS common.cmake v1.91.9b-docking; LUS patches must be applied to generated copy"
+  },
+  {
+    "path": "upstream/dependencies/json",
+    "url": "https://github.com/nlohmann/json.git",
+    "revision": "55f93686c01528224f448c19128836e7df245f72",
+    "selection": "LUS Android recipe v3.12.0, chosen explicitly because Windows package version is not pinned"
+  },
+  {
+    "path": "upstream/dependencies/spdlog",
+    "url": "https://github.com/gabime/spdlog.git",
+    "revision": "486b55554f11c9cccc913e11a87085b2a91f706f",
+    "selection": "LUS Android recipe v1.16.0, chosen explicitly because Windows package version is not pinned"
+  },
+  {
+    "path": "upstream/dependencies/SDL",
+    "url": "https://github.com/libsdl-org/SDL.git",
+    "revision": "5d249570393f7a37e037abf22cd6012a4cc56a71",
+    "selection": "LUS Android recipe release-2.32.10; currently host consumer-test headers only"
+  },
+  {
+    "path": "upstream/dependencies/tinyxml2",
+    "url": "https://github.com/leethomason/tinyxml2.git",
+    "revision": "9148bdf719e997d1f474be6bcc7943881046dba1",
+    "selection": "LUS Android recipe 11.0.0, chosen explicitly because Windows package version is not pinned"
+  },
+  {
+    "path": "upstream/dependencies/fmt-xdk",
+    "url": "https://github.com/fmtlib/fmt.git",
+    "revision": "135ab5cf71ed731fc9fa0653051e7d4884a3652f",
+    "selection": "Explicit temporary Xbox compiler dependency fmt4.1.0; requires reached-format audit, not equivalent to bundled fmt12"
+  },
+  {
+    "path": "upstream/dependencies/stb",
+    "url": "https://github.com/nothings/stb.git",
+    "revision": "0bc88af4de5fb022db643c2d8e549a0927749354",
+    "selection": "Exact LUS common.cmake stb_image.h revision"
+  },
+  {
+    "path": "upstream/dependencies/libzip",
+    "url": "https://github.com/nih-at/libzip.git",
+    "revision": "6f8a0cdd24a0dc6cce9dac4a7679da784ab124ea",
+    "selection": "Pinned LUS Android/iOS recipe v1.11.4; real native archive runtime"
+  },
+  {
+    "path": "upstream/dependencies/zlib",
+    "url": "https://github.com/madler/zlib.git",
+    "revision": "51b7f2abdade71cd9bb0e7a373ef2610ec6f9daf",
+    "selection": "Explicit native runtime compression dependency v1.3.1; libzip does not pin a zlib revision"
+  }
+]

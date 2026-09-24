@@ -1,0 +1,23 @@
+{
+  "donor_root": "SoH360",
+  "files": {
+    "tools/c89_lower.py": {
+      "donor_sha256": "5ea53ea8c5bf0712672462e45191880fdb8f7d4ddb053134561e84472f469551",
+      "shipyard_source": "python/xbox360_platform/c89_lower.py"
+    },
+    "tools/prepare_xbox_c.py": {
+      "donor_sha256": "03f96ac566341656ced786d96e7222409930067df55f53d22093362b5eea6cdb",
+      "local_copy": null
+    },
+    "platform/xbox360/SoHCore.vcxproj": {
+      "donor_sha256": "145d30cbc24151c5f57400018763251d80ec8bca34f5e850c2ddff8f9da9c291",
+      "local_copy": null
+    },
+    "upstream/libultraship/libultraship/Lib/Fast3D/U64/PR/ultra64/gbi.h": {
+      "donor_sha256": "7929435624e933861af493a332b6a8fc13b6bcd343cb8bd54f6eea6504c58186",
+      "local_copy": null,
+      "adaptation": "Active CALL_2(A,B) A B macro-rescan pattern only; namespaced SMASH360_GBI_APPLY. No commented no-op or other donor GBI code imported."
+    }
+  },
+  "runtime_dependency_on_donor": false
+}

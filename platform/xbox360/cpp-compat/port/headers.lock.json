@@ -1,0 +1,13 @@
+{
+  "port/resource/RelocFile.h": "ba12f77cd7234bebbe5857c29c6bd3190b9205752d834b936b2a8c8812fec14d",
+  "port/enhancements/enhancements.h": "7110bca49cbc4ae1ff264e6fc1eeed2f35bbc13571924823be5a0d7d02062ea3",
+  "port/enhancements/internal/buttons.h": "9f03f69a9e5fcd2e8591a63e163633748e0fb533fc1c6f7d357a9505c72aac7f",
+  "port/resource/RelocFileFactory.h": "8e0a9d212ee5478bbffd4059e2b19fcae52bb2d1aa20b93583bee80a94a2fb0e",
+  "port/shaders/fast3d_shader_manifest.h": "46daaa91b730c2bac5779b434d430b6fcc547b49c3f87b8acaddbf035fb59cb9",
+  "port/gui/Compat.h": "a4ab3463f4e946450dd4d979d3ad9892b117e849b1c2e8183ee2c44864c7e4ce",
+  "port/gui/Menu.h": "f87349e833cdc7d414035a0a3c7212391b7c7caf3af376158a1af97f6b2ff5b7",
+  "port/gui/MenuTypes.h": "02ba315378cc74fa1f1e9607cbde7f5909f512ce7dacb8b5b56e439a7a3b23c4",
+  "port/gui/PortMenu.h": "86367a60af42410ec058f532fa230e74d3e54eb6e135206dccea0fae2fe61270",
+  "port/gui/UIWidgets.hpp": "e96068fca92098ff7e9a7acd6d11685773a5e1c229852f25bb9c9ce1bedd359d",
+  "port/resource/ResourceType.h": "35a94c311696f90f9c082c0124c22d2bda38a50867450557bccd2b641ac463cd"
+}

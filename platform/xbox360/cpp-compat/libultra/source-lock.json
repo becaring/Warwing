@@ -1,0 +1,15 @@
+{
+  "src/libultraship/libultra/AudioDmaRegistry.cpp": "d3c0546a235ed30b6be9850d2e168881573ad0d8038828216d91cf288593f294",
+  "src/libultraship/libultra/os.cpp": "50c34351fa2d3358921049b97d610e2b0d4b56e85d109d8f9b01bfc67202798e",
+  "src/libultraship/libultra/os_cache.cpp": "8b9f74cf1a6f34c28e4bfac2afeb64bb99e5d97ea47a818479aa0583cbc913dc",
+  "src/libultraship/libultra/os_eeprom.cpp": "0f8dc85654388a8605cc99975d3d0c44612334b2a631f7a2bea940d7c5a81226",
+  "src/libultraship/libultra/os_mesg.cpp": "312e4ad340f0b173d2f710141a34560b804309e5fbf3d522bf9ec2cd0081989a",
+  "src/libultraship/libultra/os_pi.cpp": "57d07822bba925d275966eefeb228978377c049f04b273ed414f7e8f350c7395",
+  "src/libultraship/libultra/os_time.cpp": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "src/libultraship/libultra/os_vi.cpp": "5781d4c3658003d4df35d3723495f10f1618194d0c9ab68a24104426dffc33b6",
+  "src/libultraship/libultra/os_vm.cpp": "29a788eaaab6240c47ff5039766d6e27830fe5e0bf20fd156fea40dc090215fe",
+  "src/libultraship/libultra/AudioDmaRegistry.h": "7c7dba53ac0fc860c4f5b2cd3f845202051c0509848b045f50e3ed9370d05aa7",
+  "src/libultraship/bridge/audiobridge.cpp": "f6a5fdc3da7c855a4dae42538f3af0e33a9a7164f4b94e1ec1c9c7a3d23adac4",
+  "src/ship/audio/NullAudioPlayer.cpp": "482cb32da4ab360d244cb75b2650c81ea082ec0cb339040235d038ed0f220a1a",
+  "include/ship/audio/NullAudioPlayer.h": "2bb93cef4932351978b9f1004bf41e83ed98d75e9a95c2099774282afdf9d304"
+}

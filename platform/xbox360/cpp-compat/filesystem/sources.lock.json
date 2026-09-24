@@ -1,0 +1,28 @@
+{
+  "donor_sha256": "18ed5127d03e933df041a33f1691becf29a058580f335535f3efcd2c832cd419",
+  "sources": {
+    "upstream/BattleShip/libultraship/include/ship/utils/filesystemtools/Directory.h": "ade3cdd25fb79d9a9dbd0421fdc91997624a3d4267bb0114bbd8911808ae26d8",
+    "upstream/BattleShip/libultraship/include/ship/utils/filesystemtools/DiskFile.h": "9383b3591e97034cd4beb6f569cda9fc5795887e738ae81d556d17ecf498123b",
+    "upstream/BattleShip/libultraship/include/ship/utils/filesystemtools/FileHelper.h": "e2ddc49cea313dd5d5bf8b919bc6804daad7e62e764f0f9ad87a97e7317f3806",
+    "upstream/BattleShip/libultraship/include/ship/utils/filesystemtools/Path.h": "226d2b64395888b88e9b7a1a1689e7bcd2c768f06176b5426347b2f30d556392",
+    "upstream/BattleShip/libultraship/include/ship/utils/filesystemtools/PathHelper.h": "b923c0d21a1278a148dd6ea156f143a1175960190816ff36bad98c35de086d4c",
+    "upstream/BattleShip/libultraship/src/fast/postprocess/PostProcessSourceLoader.cpp": "89b44cda8b62ef9862229435f6cb01e4f4c236219d17ff793b331adf3ffcae61",
+    "upstream/BattleShip/libultraship/src/ship/config/Config.cpp": "46cb055dd668c0629e30fdef187f3b8b22cc403e9ec61276ab9c04a46c6407da",
+    "upstream/BattleShip/libultraship/src/ship/config/ConsoleVariable.cpp": "7274d237da2cc62a649e5ed274ed17cf6c33a070d95a196060d1a2670a9de76d",
+    "upstream/BattleShip/libultraship/src/ship/Context.cpp": "d4634c8cb547741b72cebd50a95128f0eb444120a0b8f564c2264efa5df09524",
+    "upstream/BattleShip/libultraship/src/ship/resource/archive/ArchiveManager.cpp": "6c8236ca97277ed7e7c669c0a3a485e4c70733429e52c2d14d488e11d871d738",
+    "upstream/BattleShip/libultraship/src/ship/scripting/ScriptLoader.cpp": "56b0b4b922a7b315dda7424e886b22324b4d4e74c98a45726fc3a44cb975009d",
+    "upstream/BattleShip/port/android_torch_bridge.cpp": "fd75a39dfb7bbf2787fc8083c12fe56accbc5f68742e68c369e2345cca4b8308",
+    "upstream/BattleShip/port/app_paths.cpp": "f979b9f336d69c46d78c04185ce6e11bf78b530b2fce43899c5b7588f003a025",
+    "upstream/BattleShip/port/enhancements/ShaderDownloader.cpp": "22e0f5578b02152e04a4cfbff29441b3483b9b5536570385d912d8f3a302e536",
+    "upstream/BattleShip/port/first_run.cpp": "11e47a80fd8b3a876d7e189e38a92a9c7666fb814969adf70f2f135dee3bd47b",
+    "upstream/BattleShip/port/gameloop.cpp": "8d8e84cb0a6f57d37da8a1c515790f1469033caf5ceff5b5c21d58bd40810a67",
+    "upstream/BattleShip/port/gui/Menu.cpp": "66896036e101d8fec9a56ce0a79503d2a80eada56ffdaecbae4c052fa0831b28",
+    "upstream/BattleShip/port/gui/PortMenu.cpp": "934a4ee9728816870f8c5400490b554ca180ff5a23bbb7c9b65c1bfcd5e7691a",
+    "upstream/BattleShip/port/hires/HiResHook.cpp": "9b8e9529e945070520e1541820ad73a8a5e4020ce5a7e758235b3db7744ca8b5",
+    "upstream/BattleShip/port/hires/HiResPack.cpp": "651bf3ff6bc81a6dc89ec1bdd13c30e653dbe84016e6b365fd95592a7850f131",
+    "upstream/BattleShip/port/mods/ModRegistry.cpp": "1e85ca9c24f7a3acc14624915c9b5aa746ef540dacb227f8dce8562431ade39b",
+    "upstream/BattleShip/port/port.cpp": "1ec711478ca6308aaed1d58ae04aadb3579f6685588e0dc2780b173a2f6d8451",
+    "upstream/BattleShip/port/renderdoc_trigger.cpp": "28e429653fe94fe16dcbf9490dbd039743cc1d2e04d6b5df1ca1a8998f2345e2"
+  }
+}

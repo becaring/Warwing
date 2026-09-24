@@ -1,0 +1,15 @@
+{
+  "upstream": {
+    "cmake/dependencies/patches/imgui-fixes-and-config.patch": "b0e43001fefca1f2a13ddd25a14d05948d469fcb923c3ab92ae6e60ba139be49",
+    "include/fast/backends/gfx_rendering_api.h": "b51b895396cc915989f095b24ebd1b780ea362a2c952cb5e9bfe6b23fca5c78f",
+    "src/fast/shaders/directx/default.shader.hlsl": "ae79a9cb4f4abde2a75e099b4bb7590d0f22d12cc6b03ac126a1d66bf546372e",
+    "include/fast/backends/gfx_window_manager_api.h": "34b2cfd7661a0de2f088466f9d19d875d2a3e43a84207b84cf0e269997800d6a",
+    "include/fast/postprocess/PostProcessTypes.h": "000f9ca7d44b03a34a30ff131d8312fee61cc9ab9a7012c98c9dd4a275aa2051",
+    "include/fast/interpreter.h": "106753b1d542a409d1ce8b3cfae78583f3a3492b4f293db6da0828e895e710cd",
+    "include/fast/postprocess/PostProcessPreset.h": "abf08235f6e80accf4427bee731fabb4ca43cbb7fdf61b2895748712a8830402"
+  },
+  "shared": {
+    "sources/graphics/shader_lower.cpp": "658149fcbc16b0665c3be44f21a49211ad5d0b1de978c50d49ada85de016e0ae"
+  },
+  "libultraship_commit": "89d9de83a8d09bd7d3b7bc7f8d08554ee2ce8459"
+}

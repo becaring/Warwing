@@ -1,0 +1,10 @@
+{
+  "libultraship/include/ship/controller/controldevice/controller/mapping/ControllerDefaultMappings.h": "0ba6a4cfb49e1d444b1717de37898229f23afd2e08579f6fe2dd69f6cbc57d73",
+  "libultraship/include/ship/controller/controldevice/controller/mapping/sdl/SDLMapping.h": "4f7eea62c39a2f4e5efa207997ebbeefb0c64ba4bde5d9775c88755ed4b2bb53",
+  "libultraship/include/ship/controller/physicaldevice/ConnectedPhysicalDeviceManager.h": "f53c5fa3ab89bec3aedc40cffd5e92a9212e31478a61fe16e9bfb42cf3e94387",
+  "libultraship/src/libultraship/controller/controldeck/ControlDeck.cpp": "4d5b48019e166be06c5825284b569281974c6cb276bf82119eb789784bd3de3b",
+  "libultraship/src/libultraship/controller/controldevice/controller/Controller.cpp": "1b54e21887ae4b4a618f6d048f12508f26eff13c938e751f1413870ab62f86f6",
+  "libultraship/src/ship/controller/controldevice/controller/Controller.cpp": "bab829c9c4f98eebdc52ebf977a114c9cdd8cd6046984c1cc6df6de2074fde1b",
+  "libultraship/src/ship/controller/physicaldevice/ConnectedPhysicalDeviceManager.cpp": "67eb743063093393896362aa5e05c57b98a1a1333c8f46eab45665a483493fd1",
+  "libultraship/src/ship/controller/physicaldevice/SDLAddRemoveDeviceEventHandler.cpp": "3129f982c4e119d47775b855670b9b5bb8d66af4ff89a59f65a34a773c327f7c"
+}

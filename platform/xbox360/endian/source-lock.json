@@ -1,0 +1,11 @@
+{
+  "decomp/include/config.h": "548295105e4a52892243be2bb4e48a464ae1aad209674f06e7fdfcadae0f24c5",
+  "decomp/include/PR/guint.h": "e29e68df7df4e5862415bc5074fb03a5874200ec8065125b3f153e0c04a22266",
+  "decomp/src/lb/lbparticle.c": "523afb894c64715f17fa318a797133adc47e26ee857f2dda31fcf283d6284d3d",
+  "decomp/src/sys/audio.c": "6478afd4f963380cf317d995df59117abc73dc246dd26eccc25e88f44dfdd7ed",
+  "port/bridge/lbreloc_byteswap.cpp": "785c01dea0abce9a3342e5be0ed31eb0ab08b87c50699125aed6117a23031985",
+  "port/bridge/lbreloc_bridge.cpp": "fd9fe681e0f3446d5957ca717c7a0301c30446da495cde1ea65fa30664d9a662",
+  "port/bridge/particle_bank_bridge.cpp": "8e48d89f235c8ef0b1edf22f4f0f83d7abb4de7d1ae0f3a1709a324bed3b7fdd",
+  "port/bridge/audio_bridge.cpp": "81edd1998c74eeb10d2d391f8a28508afd2226eb27deb879103c3dc0e9466a43",
+  "decomp/src/wp/wptypes.h": "48e09fe82df17fb851e936f8640be03a309772a57192b6234be01a6be9f5ac4f"
+}

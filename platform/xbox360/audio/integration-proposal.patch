@@ -1,0 +1,125 @@
+--- a/upstream/BattleShip/libultraship/include/ship/audio/Audio.h
++++ b/upstream/BattleShip/libultraship/include/ship/audio/Audio.h
+@@ -6,7 +6,7 @@
+ #include "ship/audio/AudioPlayer.h"
+ 
+ namespace Ship {
+-enum class AudioBackend { WASAPI, SDL, COREAUDIO, NUL };
++enum class AudioBackend { WASAPI, SDL, COREAUDIO, NUL, XAUDIO2 };
+ 
+ class Audio {
+   public:
+--- a/upstream/BattleShip/libultraship/src/ship/audio/Audio.cpp
++++ b/upstream/BattleShip/libultraship/src/ship/audio/Audio.cpp
+@@ -1,4 +1,8 @@
+ #include "ship/audio/Audio.h"
++#ifdef _XBOX
++#include "sources/audio/XAudio2AudioPlayer.h"
++#include "runtime/runtime.h"
++#endif
+ 
+ #ifdef __APPLE__
+ #include "ship/audio/CoreAudioAudioPlayer.h"
+@@ -15,7 +19,7 @@
+ 
+ void Audio::InitAudioPlayer() {
+     switch (GetCurrentAudioBackend()) {
+-#ifdef _WIN32
++#if defined(_WIN32) && !defined(_XBOX)
+         case AudioBackend::WASAPI:
+             mAudioPlayer = std::make_shared<WasapiAudioPlayer>(this->mAudioSettings);
+             break;
+@@ -25,24 +29,40 @@
+             mAudioPlayer = std::make_shared<CoreAudioAudioPlayer>(this->mAudioSettings);
+             break;
+ #endif
++#ifdef _XBOX
++        case AudioBackend::XAUDIO2:
++            mAudioPlayer = std::make_shared<XAudio2AudioPlayer>(this->mAudioSettings, false);
++            break;
++        default:
++            Smash360_Fatal("unsupported Xbox audio backend", E_INVALIDARG);
++#else
+         case AudioBackend::SDL:
+             mAudioPlayer = std::make_shared<SDLAudioPlayer>(this->mAudioSettings);
+             break;
+         default:
+             mAudioPlayer = std::make_shared<NullAudioPlayer>(this->mAudioSettings);
+             break;
++#endif
+     }
+ 
+     if (mAudioPlayer && !mAudioPlayer->Init()) {
+         // Failed to initialize system audio player.
+         // Fallback to Null if the native system player does not work.
++#ifdef _XBOX
++        Smash360_Fatal("Xbox audio initialization failed", E_FAIL);
++#else
+         SetCurrentAudioBackend(AudioBackend::NUL);
++#endif
+     }
+ }
+ 
+ void Audio::Init() {
+     mAvailableAudioBackends = std::make_shared<std::vector<AudioBackend>>();
+-#ifdef _WIN32
++#ifdef _XBOX
++    mAvailableAudioBackends->push_back(AudioBackend::XAUDIO2);
++    SetCurrentAudioBackend(AudioBackend::XAUDIO2);
++#else
++#if defined(_WIN32) && !defined(_XBOX)
+     mAvailableAudioBackends->push_back(AudioBackend::WASAPI);
+ #endif
+ #ifdef __APPLE__
+@@ -52,6 +72,7 @@
+     mAvailableAudioBackends->push_back(AudioBackend::NUL);
+ 
+     SetCurrentAudioBackend(Context::GetInstance()->GetConfig()->GetCurrentAudioBackend());
++#endif
+ }
+ 
+ std::shared_ptr<AudioPlayer> Audio::GetAudioPlayer() {
+@@ -75,11 +96,21 @@
+ }
+ 
+ void Audio::SetAudioChannels(AudioChannelsSetting channels) {
++#ifdef _XBOX
++    if (channels != audioStereo && channels != audioMatrix51) {
++        Smash360_Log("BattleShip stereo mixer does not supply raw 5.1 PCM");
++        return;
++    }
++#endif
+     if (mAudioSettings.ChannelSetting != channels) {
+         mAudioSettings.ChannelSetting = channels;
+         // Reinitialize the existing audio player with the new channel configuration
+         if (mAudioPlayer) {
++#ifdef _XBOX
++            if (!mAudioPlayer->SetAudioChannels(channels)) Smash360_Fatal("Xbox audio channel initialization failed", E_FAIL);
++#else
+             mAudioPlayer->SetAudioChannels(channels);
++#endif
+         }
+     }
+ }
+--- a/upstream/BattleShip/libultraship/src/ship/config/Config.cpp
++++ b/upstream/BattleShip/libultraship/src/ship/config/Config.cpp
+@@ -248,6 +248,9 @@
+ 
+ AudioBackend Config::GetCurrentAudioBackend() {
+     std::string backendName = GetString("Window.AudioBackend");
++#ifdef _XBOX
++    if (backendName == "xaudio2") return AudioBackend::XAUDIO2;
++#endif
+     if (backendName == "wasapi") {
+         return AudioBackend::WASAPI;
+     }
+@@ -300,6 +303,9 @@
+ 
+ void Config::SetCurrentAudioBackend(AudioBackend backend) {
+     switch (backend) {
++        case AudioBackend::XAUDIO2:
++            SetString("Window.AudioBackend", "xaudio2");
++            break;
+         case AudioBackend::WASAPI:
+             SetString("Window.AudioBackend", "wasapi");
+             break;

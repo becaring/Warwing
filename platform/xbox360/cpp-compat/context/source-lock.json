@@ -1,0 +1,19 @@
+{
+  "libultraship/src/ship/Context.cpp": "d4634c8cb547741b72cebd50a95128f0eb444120a0b8f564c2264efa5df09524",
+  "libultraship/src/ship/debug/CrashHandler.cpp": "e19cfc8e84dcf401c330d3ed39fe7ef9b840e31f41d1b01dcfc27fcd613ca3db",
+  "libultraship/src/ship/window/FileDropMgr.cpp": "9a71a89e8451e4e8ae55e98efe0516e92244de329793be50315182ee11820cb1",
+  "libultraship/src/ship/events/EventSystem.cpp": "e329a76f92a228b48a788f0d35d1ee274cf493db5c5f84a133a9de822271ce8a",
+  "libultraship/include/ship/debug/CrashHandler.h": "bb1749c944d08c4d0d37a18389a4b793fa1b6d02d9a424fc0df22dc31878e463",
+  "libultraship/include/ship/window/FileDropMgr.h": "8c8faeec287a7780be730b5a31bd3ed94a0de532f17bc0047da7df33e164658b",
+  "libultraship/include/ship/events/EventSystem.h": "28a3110c6eb4ba8b082295e435cf9e647be50003cf925d29e7eb57423f0e3131",
+  "libultraship/src/libultraship/log/luslog.cpp": "22f4ef269df5b87d0ff8eb9da46d4799e7322b87ea3ba28b0f80f1c1913a8edf",
+  "libultraship/src/libultraship/bridge/consolevariablebridge.cpp": "56ff11f9304bd3df850a9340b50b6731a01c68bfc4440b4af73f5a425aea6c08",
+  "libultraship/src/libultraship/bridge/controllerbridge.cpp": "5813a21785648b782ad29f38904d6376766c270096a2cf404dcc2736c2d7678e",
+  "libultraship/src/libultraship/bridge/windowbridge.cpp": "3723696889f0c22a6922fb2359aac03ffa02acac72c83a928b2f965e20b39f0d",
+  "libultraship/src/libultraship/bridge/eventsbridge.cpp": "cdeb230763690813f156c48962bb92ecf6b62572ee2d8bf9ec31b843112e7ac9",
+  "libultraship/src/libultraship/bridge/crashhandlerbridge.cpp": "545e4d11e9e0b5fd419960a82a840b03370d47e42344302bbc3c7e222d3b1759",
+  "libultraship/src/libultraship/bridge/gfxdebuggerbridge.cpp": "885a2dd95f6dbe9956901e1374124ab039fa20905908f9880f74b96d295c9692",
+  "libultraship/src/libultraship/bridge/gfxbridge.cpp": "b45c3c3fa5827c638b2fd87ed62f3a52cae42ad08a58e22b48aa20be2e8e41fe",
+  "libultraship/src/libultraship/bridge/resourcebridge.cpp": "032cc67dc82220da962be1fb0722e255333956b28f11fc9deb8db727106f5af9",
+  "libultraship/src/ship/utils/stox.cpp": "06d2eb0ee84e9ef8e5d6038b75bb577b93e85f04e8aaabe3284b4dd03eebb7e2"
+}

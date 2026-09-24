@@ -1,0 +1,48 @@
+{
+  "python_origin": "D:/Projects/SoH360/scratch/python-tools",
+  "prism_commit": "1de054450e7b3c5f777d2e3dfcb228ad120c329d",
+  "source": {
+    "upstream/dependencies/prism/src/prism/utils/invoke.c": "b72c295e5d5322a1ba01d4b6ededf75bed812f705de58d691b65894da0a29153",
+    "upstream/BattleShip/libultraship/src/fast/interpreter.cpp": "f9aa8f8e23ada829cd95148783615728730d7c0982d1c93e7be5fec073d6fb01",
+    "upstream/dependencies/prism/src/prism/utils/gv.cpp": "48d2cab3c65516ef7ee67a5fd64ba4c46a3d0c7936a84d236750adb713b3f46c",
+    "upstream/dependencies/prism/src/prism/utils/invoke.h": "29d6cf3ddb8478b40d9d6e715c440ea5de4f46e0dc99217fa264ae7689a08e44",
+    "upstream/dependencies/prism/src/prism/processor.h": "2383dfb72317896be9ce2858ae3cf4770f4be527938e551d4dbe434ad0cece4b",
+    "upstream/dependencies/prism/src/prism/lexer.cpp": "bda63cb6c36a1804b170040bb9a87a88194592183dff792a690774e01cabe794",
+    "upstream/BattleShip/libultraship/src/fast/backends/gfx_direct3d11.cpp": "31cf14893b0a1cc2a1a60642c29751edeef7df96ebee3b4cbb036647645b2947",
+    "upstream/dependencies/prism/src/prism/utils/exceptions.h": "7499ead4a6caa92fb7de1ac0d7dc3d098e53ae476dfc14829bf9c765509b710b",
+    "upstream/dependencies/prism/src/prism/processor.cpp": "99dd6e19dd414e6a19311e5b7df24a1864cf6f2e5425af682657fffab59b15d3",
+    "upstream/dependencies/prism/src/prism/ast.cpp": "1aafc889af0729168267cb630d85ef1db6f0e8ec19be2e227bd252e269a73349",
+    "upstream/dependencies/prism/src/prism/ast.h": "556a732d094072b0f77a2c15c6bdc387def1a7b9b63ab00940491723d2d1cf8c",
+    "upstream/dependencies/prism/src/prism/utils/gv.h": "421ef89cebac5e7b60bfa9848fc6398477ddf36d2056f85cc40889423a6f5744",
+    "upstream/dependencies/prism/src/prism/lexer.h": "4de9543e1752fdf2ddf5442b77587ad6691c0c32026e285921394407a7444aea",
+    "upstream/BattleShip/libultraship/include/fast/interpreter.h": "106753b1d542a409d1ce8b3cfae78583f3a3492b4f293db6da0828e895e710cd",
+    "upstream/BattleShip/libultraship/src/fast/shaders/directx/default.shader.hlsl": "ae79a9cb4f4abde2a75e099b4bb7590d0f22d12cc6b03ac126a1d66bf546372e"
+  },
+  "donor_origin": "D:/Projects/SoH360/scratch/native_save/cpp_range_lower.py",
+  "historical_imported": {
+    "donor/cpp_range_lower.py": "ad6d1f24d5d821da1c5f1608442706b8bd8b8605edce8e1c48733c22d7d01e88",
+    "python/tree_sitter/py.typed": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "python/tree_sitter_cpp/queries/tags.scm": "029731ca946e32f919491d9f76c85a50e5deb5ad1934e37fd6849312c0d4a705",
+    "python/tree_sitter_cpp/py.typed": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "python/tree_sitter/__init__.pyi": "505c2b5a1d167b249afc3ef99d3708db17c05b8c125820f971ee1ac5bfe57dfc",
+    "python/tree_sitter_cpp/binding.c": "215b265b930e2865758500b0c563129d68c2d24f30cf3534b68736fc9baa9779",
+    "python/tree_sitter_cpp/queries/injections.scm": "0791a308ef7c0a9e40b8415a2e9cee85b528a8bb21697e65c79872e8848dd972",
+    "python/tree_sitter_cpp/queries/highlights.scm": "52136576a9a9dacd9e95a8de0f351689bf46140738572ab4e9f24c9278e6b458",
+    "python/tree_sitter_cpp/__init__.py": "64400285f8ebb84d8acd90205abc20cd7c97a3f5c20c3c1835f701e0b345aaaa",
+    "python/tree_sitter/__init__.py": "b632d915b1ef3a8e0a3c8c12316deb67063ea9eadf89bfda51350733d01a22e2",
+    "python/tree_sitter/_binding.cp313-win_amd64.pyd": "2b7cc585c9c8b091a36b139fbdab75eebb84edd5d43cceeca565da1204f913ed",
+    "python/tree_sitter_cpp/__init__.pyi": "c58d914a565a66885029b46c5356709734ac94177a3777c99acf62cc9de2ef93",
+    "python/tree_sitter_cpp/_binding.pyd": "167193e79bd6dc6a2ded6e6ff6e61f52d2d0ae936a27e51f8c5ce7f5837d4db0",
+    "python/tree_sitter-0.25.2.dist-info/METADATA": "8cb272d687133fe4c5fbf741339b83ff1ba62f08386311d7654092a7b53360cc",
+    "python/tree_sitter-0.25.2.dist-info/WHEEL": "a95d0420f9638f55c2fefb926ad4568e7d369d9233dcdd6df23b19cfb1c1af65",
+    "python/tree_sitter-0.25.2.dist-info/licenses/LICENSE": "c40a115b3d7d429c839bc51ace3464c2f37c9559bad6c6251a86281c27ea5431",
+    "python/tree_sitter_cpp-0.23.4.dist-info/METADATA": "b5ec71fdca2ecd1dce125b1e192d8884aea95969521ef7c4b4349be79d2c495d",
+    "python/tree_sitter_cpp-0.23.4.dist-info/WHEEL": "974493adf3e51212a9d8ecb7371d19bc6683d07604edf400de5708eaa628dd01",
+    "python/tree_sitter_cpp-0.23.4.dist-info/LICENSE": "2e0110e07abef7c2548b26ec9d6969775617ca539a0dc8dbeeb14d6452c711d1"
+  },
+  "host_requirements": {
+    "python": "CPython 3.13 x64 Windows",
+    "tree_sitter": "0.25.2",
+    "tree_sitter_cpp": "0.23.4"
+  }
+}

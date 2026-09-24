@@ -1,0 +1,6 @@
+{
+  "port/hires/HiResPack.h": "f416c9d7003a4084f475be1a1a88fbfaf96c3fa6c19a0587918766cd4a236cac",
+  "port/hires/HiResPack.cpp": "651bf3ff6bc81a6dc89ec1bdd13c30e653dbe84016e6b365fd95592a7850f131",
+  "port/hires/HiResHook.h": "a3dfbdc27c21ccf0fc2c7ebfc94101f5528d17f6a3914773a7c896afeabe902f",
+  "port/hires/HiResHook.cpp": "9b8e9529e945070520e1541820ad73a8a5e4020ce5a7e758235b3db7744ca8b5"
+}
