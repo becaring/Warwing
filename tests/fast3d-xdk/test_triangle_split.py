@@ -6,6 +6,7 @@ import unittest
 ROOT=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(ROOT/'tools'))
 import triangle_split_projection as split
+SIGNATURE=split.fast3d_triangle_split.SIGNATURE
 
 class SplitTests(unittest.TestCase):
     def test_original_cull_to_emit_and_scope_lifetime(self):
@@ -13,10 +14,10 @@ class SplitTests(unittest.TestCase):
         # Use the unchanged upstream culling front; production additionally
         # uses the separately tested projection cache. Substitute only the
         # heavy suffix with a test observer after checking byte preservation.
-        source=source.replace(split.SIGNATURE,split.SIGNATURE+'\n    SmashTriangleTrace triangleTrace;')
+        source=source.replace(SIGNATURE,SIGNATURE+'\n    SmashTriangleTrace triangleTrace;')
         projected=split.transform(source)
-        a=source[source.index(split.SIGNATURE):source.index('\nvoid Interpreter::GfxSpGeometryMode(')]
-        b=projected[projected.index(split.SIGNATURE):projected.index('\nvoid Interpreter::GfxSpGeometryMode(')]
+        a=source[source.index(SIGNATURE):source.index('\nvoid Interpreter::GfxSpGeometryMode(')]
+        b=projected[projected.index(SIGNATURE):projected.index('\nvoid Interpreter::GfxSpGeometryMode(')]
         self.assertEqual(a[a.index(split.BOUNDARY):],b[b.index(split.BOUNDARY):])
         original=a[:a.index(split.BOUNDARY)]+'    Observe(vtx1_idx,vtx2_idx,vtx3_idx,is_rect,triangleTrace);\n}\n'
         candidate=b[:b.index(split.BOUNDARY)]+'    Observe(vtx1_idx,vtx2_idx,vtx3_idx,is_rect,triangleTrace);\n}\n'

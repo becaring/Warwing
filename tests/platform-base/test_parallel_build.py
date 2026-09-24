@@ -14,7 +14,7 @@ import build_parallel_xdk
 
 class ParallelBuildTests(unittest.TestCase):
     def test_both_projects_use_exact_generated_items_and_objects(self):
-        for name, expected in (('Libultraship360', 140), ('Smash360', 111)):
+        for name, expected in (('Libultraship360', 140), ('Smash360', 112)):
             with self.subTest(name=name):
                 planned = build_parallel_xdk.project_plan(name, jobs=8)
                 self.assertEqual(len(planned.sources), expected)
@@ -29,6 +29,8 @@ class ParallelBuildTests(unittest.TestCase):
                             if row.source.is_relative_to(build_parallel_xdk.PLATFORM_BASE)]
                 if name == 'Smash360':
                     self.assertTrue(physical)
+                    self.assertIn('shipyard/sources/diagnostics/queue.cpp',
+                                  {item['path'] for item in build_parallel_xdk.items(name)})
                 self.assertEqual(sum(len(shard.sources) for shard in planned.shards), expected)
 
     def test_shard_projects_remain_until_link_receipt_is_verified(self):
