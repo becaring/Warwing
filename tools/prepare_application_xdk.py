@@ -239,7 +239,7 @@ def project(name,items,game=()):
     group=node(root,'PropertyGroup')
     node(group,'SmashNativeRoot','$(ProjectDir)..\\..\\scratch\\application-xdk\\native\\')
     node(group,'SmashSourceRoot','$(SmashNativeRoot)source\\')
-    node(group,'ShipyardRoot','$(ProjectDir)..\\..\\..\\LibUltraShip+Fast3D360\\',Condition="'$(ShipyardRoot)'==''")
+    node(group,'ShipyardRoot',str(PLATFORM_BASE)+'\\',Condition="'$(ShipyardRoot)'==''")
     node(group,'SmashFullProfiling','0',Condition="'$(SmashFullProfiling)'==''")
     node(group,'OutDir','$(SmashNativeRoot)build\\');node(group,'OutputPath','$(OutDir)');node(group,'IntDir','$(SmashNativeRoot)obj\\'+name+'\\')
     node(group,'TargetName',name);node(group,'LinkIncremental','false')

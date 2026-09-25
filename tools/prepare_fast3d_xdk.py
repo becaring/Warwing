@@ -37,6 +37,8 @@ from xbox360_platform import fast3d_opcode
 from xbox360_platform.cpp_syntax import collect_member_defaults
 
 ROOT=Path(__file__).resolve().parents[1]
+from platform_base import resolve as resolve_platform_base
+PLATFORM_BASE=resolve_platform_base(ROOT)
 BASE=ROOT/'platform/xbox360/cpp-compat/fast3d'
 OUT=ROOT/'scratch/fast3d-xdk'
 UPSTREAM=ROOT/'upstream/BattleShip'
@@ -172,6 +174,21 @@ def lower(text,name):
     if name=='Texture.cpp':
         text=once(text,'Texture::Texture() : Resource(std::shared_ptr<Ship::ResourceInitData>()) {','Texture::Texture() : Resource(std::shared_ptr<Ship::ResourceInitData>()), Flags(0), HByteScale(1.0), VPixelScale(1.0), ImageData(nullptr) {')
     if name=='interpreter.cpp':
+        text=once(text,'''    const std::string name = nameCStr != nullptr ? nameCStr : "";
+
+    const bool wantActive = enabled && !name.empty();
+    const bool nameChanged = name != mPostProcessName;
+    const bool enabledChanged = enabled != mPostProcessEnabled;''',
+                  '''    const char* stableName = nameCStr != nullptr ? nameCStr : "";
+    const bool nameChanged = mPostProcessName != stableName;
+    const bool enabledChanged = enabled != mPostProcessEnabled;
+    const bool wantActive = enabled && stableName[0] != '\\0';
+    if (!nameChanged && !enabledChanged &&
+        (wantActive ? (mPostProcessChain.IsActive() || mPostProcessLoadFailed)
+                    : !mPostProcessChain.IsActive())) {
+        return;
+    }
+    const std::string name(stableName);''')
         text=profile_projections.interpreter(text)
         text=dispatch_owner_projection.transform(text)
         text=cull_projection.transform(text)
@@ -417,9 +434,9 @@ def compile_xdk():
     tree=OUT/'compile-tree'
     include=[OUT,tree/'libultraship/include',tree/'libultraship/src',tree/'include',ROOT/'platform/xbox360',
              ROOT/'platform/xbox360/cpp-compat',
-             ROOT.parent/'LibUltraShip+Fast3D360/sources/value_types',ROOT/'scratch/thread-pool-xdk',
-             ROOT/'platform/xbox360/cpp-compat/thread-pool',ROOT/'platform/xbox360/cpp-compat/async',ROOT.parent/'LibUltraShip+Fast3D360',ROOT.parent/'LibUltraShip+Fast3D360/sources',
-             ROOT.parent/'LibUltraShip+Fast3D360/sources/json/include',ROOT/'scratch/json-xdk/backend-generated',
+             PLATFORM_BASE/'sources/value_types',ROOT/'scratch/thread-pool-xdk',
+             ROOT/'platform/xbox360/cpp-compat/thread-pool',ROOT/'platform/xbox360/cpp-compat/async',PLATFORM_BASE,PLATFORM_BASE/'sources',
+             PLATFORM_BASE/'sources/json/include',ROOT/'scratch/json-xdk/backend-generated',
              ROOT/'scratch/logging-xdk/core-include',ROOT/'scratch/logging-xdk/include',
              ROOT/'upstream/dependencies/fmt-xdk',ROOT/'scratch/imgui-xdk/source',ROOT/'platform/xbox360/imgui',xdk/'include/xbox']
     records=[]

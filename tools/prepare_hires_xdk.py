@@ -3,6 +3,8 @@ from pathlib import Path
 import argparse,hashlib,json,re,runpy,subprocess,sys
 sys.dont_write_bytecode=True
 ROOT=Path(__file__).resolve().parents[1];UP=ROOT/'upstream/BattleShip';OUT=ROOT/'scratch/hires-xdk';BASE=ROOT/'platform/xbox360/cpp-compat/hires'
+from platform_base import resolve as resolve_platform_base
+PLATFORM_BASE=resolve_platform_base(ROOT)
 PRISM=runpy.run_path(str(ROOT/'tools/prepare_prism_xdk.py'))
 LOWER=runpy.run_path(str(ROOT/'platform/xbox360/cpp-compat/controllers/lowering.py'))
 STAGE=runpy.run_path(str(ROOT/'platform/xbox360/game-compat/source_tree.py'))['stage_sources']
@@ -81,11 +83,11 @@ def prepare():
         if rel.endswith('.cpp'):
             target=OUT/'composed'/rel;target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes((OUT/'overlay'/rel).read_bytes())
     staged=STAGE(UP,OUT/'compile-tree',[r for r in locks if r.endswith('.cpp')],[OUT/'composed'])
-    (OUT/'manifest.json').write_text(json.dumps({'transforms':records,'staged':staged,'support':{str(p.relative_to(ROOT) if p.is_relative_to(ROOT) else p.relative_to(ROOT.parent/'LibUltraShip+Fast3D360')):hashlib.sha256(p.read_bytes()).hexdigest() for p in [BASE/'compiler.h',ROOT/'platform/xbox360/cpp-compat/config/string_view.h',ROOT.parent/'LibUltraShip+Fast3D360/sources/atomic/atomic.h']}},indent=2)+'\n')
+    (OUT/'manifest.json').write_text(json.dumps({'transforms':records,'staged':staged,'support':{str(p.relative_to(ROOT) if p.is_relative_to(ROOT) else p.relative_to(PLATFORM_BASE)):hashlib.sha256(p.read_bytes()).hexdigest() for p in [BASE/'compiler.h',ROOT/'platform/xbox360/cpp-compat/config/string_view.h',PLATFORM_BASE/'sources/atomic/atomic.h']}},indent=2)+'\n')
 def compile_xdk():
     base=json.loads((ROOT/'scratch/context-xdk/compile-report.json').read_text())[0]['command']
     includes=[a.replace(str(ROOT/'scratch/context-xdk/compile-tree'),str(OUT/'compile-tree')) for a in base if a.startswith('/I')]
-    includes+=['/I'+str(ROOT.parent/'LibUltraShip+Fast3D360'),'/I'+str(ROOT.parent/'LibUltraShip+Fast3D360/sources'),'/I'+str(ROOT.parent/'LibUltraShip+Fast3D360/sources/value_types'),'/I'+str(ROOT.parent/'LibUltraShip+Fast3D360/sources/json/include'),'/I'+str(ROOT/'scratch/json-xdk/backend-generated'),'/I'+str(ROOT/'upstream/dependencies/libzip/lib'),'/I'+str(ROOT/'scratch/resources-xdk/libzip-public')]
+    includes+=['/I'+str(PLATFORM_BASE),'/I'+str(PLATFORM_BASE/'sources'),'/I'+str(PLATFORM_BASE/'sources/value_types'),'/I'+str(PLATFORM_BASE/'sources/json/include'),'/I'+str(ROOT/'scratch/json-xdk/backend-generated'),'/I'+str(ROOT/'upstream/dependencies/libzip/lib'),'/I'+str(ROOT/'scratch/resources-xdk/libzip-public')]
     sdk=Path('C:/Program Files (x86)/Microsoft Xbox 360 SDK');results=[]
     for name in ('HiResPack','HiResHook'):
         cmd=[str(sdk/'bin/win32/cl.exe'),'/nologo','/c','/TP','/EHsc','/MT','/W3','/D_XBOX','/DNOMINMAX','/DDISABLE_SCRIPTING','/FI'+str(ROOT/'scratch/config-xdk/cvars.h')]+includes+['/Fo'+str(OUT/(name+'.obj')),str(OUT/'compile-tree/port/hires'/(name+'.cpp'))]

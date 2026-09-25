@@ -15,6 +15,8 @@ from prepare_prism_xdk import PARSER, walk
 from xbox360_platform.cpp_syntax import lower_if_initializers
 
 ROOT = Path(__file__).resolve().parents[1]
+from platform_base import resolve as resolve_platform_base
+PLATFORM_BASE = resolve_platform_base(ROOT)
 UP = ROOT / 'upstream/BattleShip'
 OUT = ROOT / 'scratch/port-xdk'
 OWN = ROOT / 'platform/xbox360/cpp-compat/port'
@@ -160,6 +162,13 @@ def transform(relative, text):
         text = text.replace('constexpr ', 'const ')
         text = text.replace('#include <cmath>', '#include <cmath>\n#include "fast3d/platform.h"')
         text = text.replace('std::lrint(v)', 'Smash360Fast3D::RoundSignedWord(v)')
+        # WAV capture is a diagnostic. Keep byte-identical opted-in output,
+        # but do no synchronous cache I/O during ordinary playback.
+        anchor = 'static void wavMaybeOpen(void)\n{\n'
+        if text.count(anchor) != 1: raise ValueError('Audio capture entry drift')
+        text = text.replace(anchor, anchor +
+            '    const char* capture = XboxEnv_Get("SSB64_AUDIO_WAV_DUMP");\n'
+            '    if (capture == nullptr || capture[0] != \'1\') return;\n')
         # Existing bounded PCM diagnostic: Xbox has no /tmp mount. Its native
         # header/sample writes are BE, which is RIFX, not little-endian RIFF.
         # This changes only the diagnostic file, never the submitted audio.
@@ -314,8 +323,8 @@ def main():
                  'platform/xbox360', 'platform/xbox360/input', 'upstream/dependencies/stb', 'upstream/dependencies/fmt-xdk', 'scratch/thread-pool-xdk',
                  'platform/xbox360/cpp-compat/thread-pool', 'platform/xbox360/cpp-compat/async',
                  'upstream/dependencies/libzip/lib', 'scratch/resources-xdk/libzip-public', 'upstream/BattleShip/libultraship/extern/StormLib/src')]
-    includes += [ROOT.parent / 'LibUltraShip+Fast3D360', ROOT.parent / 'LibUltraShip+Fast3D360/sources', ROOT.parent / 'LibUltraShip+Fast3D360/sources/value_types',
-                 ROOT.parent / 'LibUltraShip+Fast3D360/sources/json/include', sdk / 'include/xbox']
+    includes += [PLATFORM_BASE, PLATFORM_BASE / 'sources', PLATFORM_BASE / 'sources/value_types',
+                 PLATFORM_BASE / 'sources/json/include', sdk / 'include/xbox']
     report = {'scope': 'Actual selected port C++/C object audit; no final executable link', 'driver_sha256': sha(__file__),
               'owned_helpers': {p.relative_to(ROOT).as_posix(): sha(p) for p in sorted(OWN.rglob('*')) if p.suffix in ('.py', '.h', '.json')},
               'staging_sha256': sha(OUT / 'staging.json'), 'results': []}

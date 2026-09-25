@@ -8,6 +8,8 @@ import argparse, hashlib, json, re, runpy, subprocess
 import texture_binding_projection
 import profile_projections
 ROOT=Path(__file__).resolve().parents[1]
+from platform_base import resolve as resolve_platform_base
+PLATFORM_BASE=resolve_platform_base(ROOT)
 UP=ROOT/'upstream/BattleShip'
 LUS=UP/'libultraship'
 OUT=ROOT/'scratch/gui-xdk'
@@ -203,8 +205,8 @@ def compile_xdk():
     sdk=Path('C:/Program Files (x86)/Microsoft Xbox 360 SDK');tree=OUT/'compile-tree'
     include=[tree/'libultraship/include',tree/'libultraship/src',tree/'include',
              ROOT/'platform/xbox360/cpp-compat',
-             ROOT.parent/'LibUltraShip+Fast3D360/sources/json/include',ROOT.parent/'LibUltraShip+Fast3D360/sources/value_types',
-             ROOT/'scratch/thread-pool-xdk',ROOT/'platform/xbox360/cpp-compat/thread-pool',ROOT/'platform/xbox360/cpp-compat/async',ROOT.parent/'LibUltraShip+Fast3D360',ROOT.parent/'LibUltraShip+Fast3D360/sources',
+             PLATFORM_BASE/'sources/json/include',PLATFORM_BASE/'sources/value_types',
+             ROOT/'scratch/thread-pool-xdk',ROOT/'platform/xbox360/cpp-compat/thread-pool',ROOT/'platform/xbox360/cpp-compat/async',PLATFORM_BASE,PLATFORM_BASE/'sources',
              ROOT/'scratch/logging-xdk/core-include',ROOT/'scratch/logging-xdk/include',ROOT/'upstream/dependencies/fmt-xdk',
              ROOT/'scratch/imgui-xdk/source',ROOT/'platform/xbox360/imgui',ROOT/'platform/xbox360/graphics',ROOT/'platform/xbox360/input',ROOT/'upstream/dependencies/stb',sdk/'include/xbox']
     results=[]
