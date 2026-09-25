@@ -27,7 +27,7 @@ class FramebufferClearTests(unittest.TestCase):
         out = ROOT/'scratch/graphics-xdk/clear-contract'
         out.mkdir(exist_ok=True)
         (out/'actual_framebuffer_clear.inc').write_text(
-            function(source, 'void BeginFramebuffer() {') + function(source, 'void Clear(bool color,bool depth) {'))
+            function(source, 'void BeginFramebuffer() {') + function(source, 'void Clear(bool color, bool depth) {'))
         vswhere = Path(os.environ['ProgramFiles(x86)'])/'Microsoft Visual Studio/Installer/vswhere.exe'
         vs = subprocess.check_output([str(vswhere), '-latest', '-products', '*', '-requires',
                                       'Microsoft.VisualStudio.Component.VC.Tools.x86.x64', '-property', 'installationPath'], text=True).strip()
