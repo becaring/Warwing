@@ -30,10 +30,16 @@ thread_local UnknownCache sUnknownCache = {0, {0, 0}, false};''')
     Smash360_PerfDetailCount(SMASH_COUNT_BOUNDS_MISS);''')
     text = once(text, '    bool walked_past = false;', '''    Shipyard::Memory::AddressGap unknownGap = {0, ~uintptr_t(0)};
     bool walked_past = false;''')
-    text = once(text, '        Smash360_PerfDetailCount(SMASH_COUNT_BOUNDS_VISITS);', '''        Smash360_PerfDetailCount(SMASH_COUNT_BOUNDS_VISITS);
-        unknownGap.Exclude(addr, e.base, e.size);
-        // Preserve the original unsigned wrapped endpoint for walked-past.
-        unknownGap.Exclude(addr, uintptr_t(e.base + e.size), kWalkPastWindow);''')
+    scan_end = '        }\n    }\n    Smash360_PerfDetailCount(walked_past'
+    text = once(text, scan_end, '''        }
+        // Only UNKNOWN results publish a gap. Keep scanning for overlapping hits.
+        if (!walked_past) {
+            unknownGap.Exclude(addr, e.base, e.size);
+            // Preserve the original unsigned wrapped endpoint for walked-past.
+            unknownGap.Exclude(addr, uintptr_t(e.base + e.size), kWalkPastWindow);
+        }
+    }
+    Smash360_PerfDetailCount(walked_past''')
     text = once(text, '    Smash360_PerfDetailCount(walked_past ? SMASH_COUNT_BOUNDS_PAST : SMASH_COUNT_BOUNDS_UNKNOWN);', '''    if (!walked_past) {
         sUnknownCache.gen = gen;
         sUnknownCache.gap = unknownGap;

@@ -10,6 +10,7 @@ extern "C" void original_register(const void*,size_t,const char*);
 extern "C" void original_unregister(const void*);
 extern "C" int original_check(uintptr_t);
 extern thread_local unsigned testBoundsScans;
+extern thread_local unsigned testBoundsExcludes;
 static const uintptr_t maxAddress=~uintptr_t(0);
 static void require(bool ok,const char* message) { if(!ok) { fprintf(stderr,"FAIL %s\n",message); exit(1); } }
 static void add(uintptr_t b,size_t n,const char*label="test") { original_register((void*)b,n,label);port_dl_range_register((void*)b,n,label); }
@@ -19,6 +20,23 @@ static uint32_t rng=0x3911abde;
 static uint32_t next() { rng=rng*1664525u+1013904223u; return rng; }
 int main() {
     require(sizeof(uintptr_t)==4,"test must exercise Xbox-width unsigned arithmetic");
+    // Gap construction is discarded by positive and walked-past classifications.
+    add(0x20000,0x100); add(0x60000,0x100); add(0xa0000,0x100);
+    testBoundsExcludes=0;
+    require(compare(0x20000)==PORT_DL_IN_RANGE,"first range positive");
+    require(testBoundsExcludes==0,"positive miss must skip unused gap construction");
+    testBoundsExcludes=0;
+    require(compare(0x20100)==PORT_DL_WALKED_PAST,"first range tail");
+    require(testBoundsExcludes==0,"walked-past must skip remaining gap construction");
+    testBoundsExcludes=0;
+    require(compare(0x48000)==PORT_DL_UNKNOWN,"three-range unknown");
+    require(testBoundsExcludes==6,"unknown must exclude each range and tail");
+    add(0x28000,0x100);
+    testBoundsExcludes=0;
+    require(compare(0x28000)==PORT_DL_IN_RANGE,"later positive overrides first tail");
+    require(testBoundsExcludes==0,"overlap must not revive discarded gap construction");
+    remove(0x28000); remove(0x20000); remove(0x60000); remove(0xa0000);
+    puts("PASS gap exclusions: first positive 2->0, first tail across 3 ranges 6->0, unknown 6->6, later overlap 8->0");
     // Consecutive unknown commands must reuse a proved gap, not rescan all ranges.
     add(0x20000,0x100); add(0x60000,0x100);
     require(compare(0x48000)==PORT_DL_UNKNOWN,"gap address");

@@ -17,7 +17,10 @@ class BoundsCacheTest(unittest.TestCase):
         text=(upstream/'port_dl_ranges.cpp').read_text()
         candidate=profile_projections.port('port/port_dl_ranges.cpp',text)
         candidate=bounds_cache_projection.transform(candidate)
-        (out/'candidate.cpp').write_text(candidate)
+        # Count only the generated candidate's gap operations; production stays uninstrumented.
+        instrumented = 'extern thread_local unsigned testBoundsExcludes;\n' + candidate.replace(
+            'unknownGap.Exclude(', '++testBoundsExcludes; unknownGap.Exclude(')
+        (out/'candidate.cpp').write_text(instrumented)
         names={'port_dl_range_register':'original_register','port_dl_range_unregister':'original_unregister','port_dl_check_addr':'original_check','port_dl_range_classify_str':'original_classify','port_dl_ranges_init':'original_init'}
         (out/'original.cpp').write_text('\n'.join('#define '+a+' '+b for a,b in names.items())+'\n'+text)
         (out/'fast').mkdir(exist_ok=True); (out/'runtime').mkdir(exist_ok=True)
@@ -32,7 +35,7 @@ extern thread_local unsigned testBoundsScans;
 struct Smash360PerfScope { Smash360PerfScope(int section,bool) { if(section==SMASH_PERF_BOUNDS_SCAN) ++testBoundsScans; } };
 inline void Smash360_PerfDetailCount(int) {}
 ''')
-        (out/'counter.cpp').write_text('thread_local unsigned testBoundsScans=0;\n')
+        (out/'counter.cpp').write_text('thread_local unsigned testBoundsScans=0;\nthread_local unsigned testBoundsExcludes=0;\n')
         sources=[out/'original.cpp',out/'candidate.cpp',out/'counter.cpp',Path(__file__).with_name('bounds_cache_contract.cpp')]
         batch=out/'build.cmd'
         shipyard=resolve_platform_base(ROOT)

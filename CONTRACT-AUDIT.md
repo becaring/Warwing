@@ -93,3 +93,35 @@ The lexical desktop/compiler inventory is `scratch/audit/source-candidates.json`
 4031 matching lines across 300 files. It includes inactive platform branches and
 comments; it is a review worklist, not proof that every match executes at boot
 or an exhaustive semantic classification of all portability work.
+
+## Bounds miss projection: avoid discarded gap construction
+
+Class A, consumer owner: `tools/bounds_cache_projection.py` adapts BattleShip's
+`port_dl_check_addr`; `prepare_port_xdk.transform` emits
+`scratch/application-xdk/native/composed-overlay/port/port_dl_ranges.cpp` for the
+selected `Smash360` Release project. The GBI walker invokes the checker per command;
+only positive/unknown cache misses reach `XboxCheckDLBoundsMiss`.
+
+The unknown-gap cache needs two exclusions per visited range to prove an UNKNOWN
+interval. Previously this work preceded membership checks and continued after a
+walked-past match, although either classification discards the gap. Exclusions now
+follow classification and run only while UNKNOWN remains possible. All ranges
+are still checked for overlapping positive matches. Acquire/load, locked scan,
+TLS generation and publication order, range arithmetic (including wrapped
+unsigned endpoints), and cache ownership are unchanged. The generic AddressGap
+primitive remains in Shipyard; this decision belongs to the BattleShip adapter.
+
+Test-only ILP32 counters measured baseline/current exclusions: first-range positive
+2/0; first-range walked-past across three ranges 6/0; later overlapping positive
+8/0; true UNKNOWN across three ranges 6/6. The original-versus-projected checker
+differential also covers boundary/wraparound probes, randomized mutations, and
+2,000 cross-thread generation transitions. The new positive-count assertion
+failed before the projection edit and passed afterward. Instrumentation exists
+only in the host test's generated translation unit. The emitted checker compiled
+with XDK; these counts establish conditional work removal, not measured FPS.
+
+Class B retained: diagnostic record formatting/allocation cost needs enabled-log
+call counts from a representative gameplay interval before shared diagnostics
+changes are justified. Audio's first-nonzero WAV gate is not per-buffer repeated
+work. No historical 4.0.5 comparison or hardware performance measurement was
+performed in this bounded change.
