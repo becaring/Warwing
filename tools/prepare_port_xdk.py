@@ -319,6 +319,7 @@ def main():
     includes = [tree, tree / 'port', tree / 'decomp/src', tree / 'debug_tools', tree / 'libultraship/include', tree / 'libultraship/src']
     includes += [ROOT / p for p in ('scratch/generated/include', 'scratch/generated/css_icons', 'scratch/generated/port/resource', 'scratch/graphics-xdk/include',
                  'scratch/logging-xdk/core-include', 'scratch/logging-xdk/include', 'scratch/imgui-xdk/source',
+                 'scratch/json-xdk/backend-generated',
                  'platform/xbox360/imgui', 'platform/xbox360/cpp-compat',
                  'platform/xbox360', 'platform/xbox360/input', 'upstream/dependencies/stb', 'upstream/dependencies/fmt-xdk', 'scratch/thread-pool-xdk',
                  'platform/xbox360/cpp-compat/thread-pool', 'platform/xbox360/cpp-compat/async',
