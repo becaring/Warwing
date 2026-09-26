@@ -68,7 +68,7 @@ python tests/config-xdk/compile.py
 
 Host tests use original production consumer bodies versus the generated ones,
 with the same JSON backend, and require identical saved bytes. The original
-Config/CVar public consumer fixtures are supplied from parent-owned
+Config/CVar public consumer fixtures are supplied by
 `tests/json-consumers`; their Context/window definitions are explicitly test-only.
 No fixture is in a production source manifest. Legacy migration additionally
 exercises actual DiskFile/Path/Directory/StringHelper and file removal solely on

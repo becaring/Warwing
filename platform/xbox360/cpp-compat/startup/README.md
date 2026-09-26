@@ -19,19 +19,19 @@ methods, retaining successful teardown order.
 Before LUS workers, the native helper initializes the donor QPC frequency cache,
 loads immutable `game:\smash360.env`, and validates logical cwd `game:\`. Missing
 optional environment file is permitted; invalid, unreadable or repeated loading
-fails startup. The donor's XContent device selector/container mount now supplies
+fails startup. The XContent device selector/container mount supplies
 `smashsave:\` for Context's writable app-data path (logs, configuration and SRAM).
 Its mount and flush/close bodies are generated from the hash-locked SoH platform
 source with only title/container names changed. Mounting occurs before LUS workers;
 closing occurs after real Context teardown. BattleShip's normal file code remains.
 The bundle path and logical cwd remain `game:\`; actual app_paths lookup retains
-its app-data-then-bundle order. No UWP `E:/BattleShip` assumption is applied to XDK.
+its app-data-then-bundle order.
 Port logging has the donor-style cache fallback and flushes startup diagnostics;
 the actual rotating LUS logger remains in the mounted app-data directory.
 App-relative native paths call the central filesystem `make_preferred()` before
-reaching CRT consumers: Xenia kernel tracing proved mixed `\logs/BattleShip.log`
-resolved incorrectly on reopen. This follows the donor's slash normalization;
-the game-owned relative name and file contents do not change.
+reaching CRT consumers: mixed separators such as `\logs/BattleShip.log` can
+resolve incorrectly on reopen. Normalization preserves the game-owned relative
+name and file contents.
 
 The Xbox path requires actual regular files for f3d.o2r and the region-selected
 game archive. Missing files fail with an actionable diagnostic. The actual
@@ -61,11 +61,9 @@ Run `python platform/xbox360/cpp-compat/startup/verify.py` for generation/lifecy
 source checks and XDK objects. The native startup helper, actual generated
 app_paths.cpp and original port_log.c pass PowerPC object compilation. The combined
 build uses the corrected port_log projection as C (`/TC`), with declarations moved
-before statements and the centralized complete-string formatter. The first native
-run reproduced InitLogging failure on the read-only game mount. Runtime verification
-of the mounted app-data correction is pending.
+before statements and the centralized complete-string formatter. Writable logs
+and configuration belong in mounted app-data, not the read-only game bundle.
 
-`compile_closure.py` records an older isolated dependency probe. Its failures are
-superseded by the complete canonical application composition, which compiles and
-links actual Port.cpp and Context.cpp. See BRINGUP.md and the native build logs for
-current execution evidence; no visible game output is yet proven.
+`compile_closure.py` is an isolated dependency probe; use the
+[integrated build](../../../../docs/XBOX360_BUILDING.md) for the selected
+application and [project status](../../../../README.md) for validation limits.

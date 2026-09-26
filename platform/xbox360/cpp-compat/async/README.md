@@ -83,13 +83,13 @@ races without polling. Predicate overloads loop on spurious notifications. As
 with standard condition variables, all waiters must use the same external mutex
 and the condition variable must outlive them.
 
-## Donor and library investigation
+## Provenance and library boundary
 
-Read-only inspection found the native event/critical-section/worker-lifetime
-patterns in these SoH360 files. The compatibility code is newly implemented;
-no SoH queue, save, audio, logging, thread-placement, or game policy is imported.
+The native event, critical-section, and worker-lifetime patterns derive from
+these SoH360 references. Their game, queue, save, audio, logging, and thread
+placement policies are outside the compatibility layer.
 
-| Reference under `D:/Projects/SoH360` | SHA-256 at inspection |
+| SoH360 source | Reference SHA-256 |
 | --- | --- |
 | `platform/xbox360/save_worker.cpp` | `64A194F4AA80399F7CE1D5BEFED876A4F5634C51C3C6D2166D042B3127408B47` |
 | `platform/xbox360/audio_worker.cpp` | `9AF7C79E386F1C5347F30E5327E2298300C899C342668CC6A13827A435470538` |
@@ -101,16 +101,15 @@ idle event; that persistent broadcast mechanism is appropriate for future
 readers. Donor queued writes and mixer scheduling are not future algorithms.
 
 The pinned LUS dependency declaration selects BS thread-pool v4.1.0. It consumes
-standard futures; it is not an XDK adapter. Searches in the supplied SoH360 and
-BattleShip trees found no future/promise, tinythread, or Boost-thread adapter to
-reuse. XDK's installed `exception` header already supplies reference-counted
+standard futures. XDK's installed `exception` header supplies reference-counted
 exception transport, and its `memory` header supplies shared/unique ownership;
 those implementations are reused. The XDK exception pointer supports equality
 but lacks the modern boolean conversion, so empty checks use equality.
 
 ## Verification boundary
 
-Run `powershell -File tools/test_async_compat.ps1` from Smash360 (or use pwsh).
+Run `powershell -File tools/test_async_compat.ps1` from the repository root
+(or use pwsh).
 `-HostOnly` omits XDK compilation. The script locates MSVC with vswhere, compiles
 with `/W4 /WX`, runs a hidden host test with a 30-second deadlock deadline, then
 compiles the same implementation and complete test source to XDK objects. Logs
@@ -125,6 +124,7 @@ retry, mutex contention, destructor join, moved workers, manual event reset, and
 shapes using a test resource object. No resource manager, archive loader, or pool
 is mocked or declared integrated by these tests.
 
-Host execution and XDK object compilation pass. Xbox execution, XDK link/runtime
-exception transport, real BS thread-pool integration and application boot remain
-unverified. No standalone test XEX is built.
+This suite covers host execution and XDK object compilation. It does not exercise
+Xbox exception transport or the integrated resource manager. No standalone test
+XEX is built; use the [integrated build](../../../../docs/XBOX360_BUILDING.md)
+and target tests for those boundaries.

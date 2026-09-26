@@ -11,10 +11,9 @@ remain. No GPU fence, readback or idle wait is added.
 and `SMASH360_PROFILE_DETAIL=0` into the hardware package. It is mutually
 exclusive with `-ProfileDetail`. Copy the resulting `smash360.env` with the XEX;
 otherwise an old console environment file can leave the expensive scopes on.
-The fully populated Yoshi intro produced an estimated 5.540 ms/frame of active
-scope overhead in an earlier detail capture. Runtime disabling still leaves
-scope branches and stack traffic compiled in. The normal build now removes
-those sites; its console benefit must be measured separately. Startup logs
+Runtime disabling still leaves compiled scope branches and stack traffic.
+Use a normal build to remove those sites and a separate target measurement to
+assess their cost. Startup logs
 `PERF full_scopes_compiled=0` or `1`. Environment variables cannot restore
 compiled-out scopes. Build/package receipts bind this option to the XEX hash.
 
@@ -101,25 +100,18 @@ self time and calls. Add the remainder when checking total self accounting;
 never sum inclusive costs. Nested operations can dominate an opcode even when
 its own self time is small. All slots contribute to observer/call totals.
 
-Detailed execution was verified before the endian optimization in Xenia run
-`20260920-173207-860` (evidence in `scratch/evidence/interpreter-detail`). Texture
-repair self time was 1.24-1.277 ms/frame in three sustained intro windows;
-the startup window was 6.224 ms/frame. Those are emulator measurements, not
-console predictions. Bounds scans also repeatedly returned UNKNOWN, which the
-existing one-hit cache does not retain. Both findings identify real executed
-operations; only the endian work has been removed at this stage.
-
-Detail can substantially perturb timing: one recorded Xenia window estimated
-2.232 ms/frame of scope overhead, versus 7.035 ms summed measured self time.
-Per-range counter updates and changed code layout are not fully covered by that
-estimate. Compare equivalent detail settings and run a profile-disabled control.
+Detail can substantially perturb timing. Per-range counter updates and changed
+code layout are not fully covered by the observer estimate. Compare equivalent
+detail settings and run a profile-disabled control.
 
 ## UNKNOWN bounds-cache correction
 
 The Xbox projection now caches a proved UNKNOWN interval as well as the existing
 positive hit. Each call still acquires the unchanged registry generation. A
 locked miss intersects the gaps outside every registered range and every
-walked-past window; only a final UNKNOWN result publishes that interval. Resizing,
+walked-past window; only a final UNKNOWN result publishes that interval. Gap construction stops
+once walked-past is known and is skipped for a positive match, while the scan
+continues to honor overlapping positive ranges. Resizing,
 registering or removing ranges invalidates it through the existing generation.
 The original scan remains authoritative for every cache miss and overlapping
 positive ranges still take precedence over walked-past classification.

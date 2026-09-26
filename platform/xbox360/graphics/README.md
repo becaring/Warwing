@@ -2,9 +2,8 @@
 
 This directory adapts the pinned BattleShip Fast3D interfaces, without replacing
 its interpreter, combiner equations, scene logic, display-list normalization, or
-resource/relocation ownership. It now forms the linked native application;
-current XEX, production validation and limitations are recorded in
-`../../../BRINGUP.md`.
+resource/relocation ownership. See the [project status](../../../README.md)
+and [architecture](../../../docs/ARCHITECTURE.md) for the integrated application.
 
 `source-lock.json` pins the upstream interface inputs. The renderer, shader
 cache, and presentation pacing use the Shipyard checkout directly;
@@ -22,8 +21,8 @@ their original `#line` locations; adapted spans refer to their actual generated
 file/line. Headers keep every upstream virtual operation and data member.
 Scoped postprocess enums use four-byte wrappers with their original enumerator
 values; in-class initializers become constructors. This generated header family
-must be shared with the eventual interpreter build, not mixed with separate
-handwritten interface facades. ImTextureID remains `void*`, as explicitly set in
+is shared with the interpreter build; do not mix it with separately maintained
+interface declarations. ImTextureID remains `void*`, as explicitly set in
 the pinned LUS ImGui patch.
 
 The concrete `Fast::GfxRenderingAPIXenos` adapts the shared Shipyard renderer.
@@ -74,7 +73,7 @@ are outstanding parity work, not silently considered implemented. Custom
 Fast3D shaders also require actual provider integration and supported-source
 validation; arbitrary desktop HLSL is not promised to fit Xenos SM3.
 
-Verification on 2026-09-20:
+## Verification scope
 
 - XDK objects compile for native renderer, shader cache, HLSL lowering, window
   backend and a test allocating both concrete backend classes.
@@ -89,9 +88,7 @@ Compiler warnings remain in imported native code for alignment padding,
 bounded integer narrowing, signed comparisons, and the XDK's device factory
 macro. Full logs are retained. Host fixture compilation uses warnings-as-errors.
 
-These checks do not prove framebuffer orientation, region/copy/MSAA behavior,
-depth-only writes, memory lifetime under GPU load, complete shader permutations,
-or game output. Those initial object checks did not include application/XEX
-execution. Subsequent real-game Xenia validation is recorded in
-`../../../BRINGUP.md`, including the published-framebuffer lifetime fix and native
-1x/2x/4x MSAA. Physical Xbox 360 validation remains required.
+These focused checks do not establish framebuffer orientation, region/copy/MSAA
+behavior, depth-only writes, lifetime under GPU load, complete shader permutations,
+or game output. Verify those paths on the target and associate results with the
+exact executable; see [development](../../../docs/DEVELOPMENT.md).

@@ -1,40 +1,58 @@
-# Smash360 Xbox build
+# Warwing
 
-This repository holds the Smash360 Xbox adapters, generators, tests, and lock
-files. `upstream/`, `scratch/`, `dist/`, the generated Visual Studio projects,
-and user-supplied ROMs are deliberately outside its Git checkpoint. The
-BattleShip and dependency revisions are pinned by `tools/fetch-sources.ps1`,
-`tools/audit_sources.py`, and `dependencies.lock.json`. Shipyard is a separate
-checkout selected by `platform-base.lock.json`.
+Warwing brings **Super Smash Bros. for Nintendo 64 to Xbox 360** through
+[BattleShip](https://github.com/JRickey/BattleShip) and the shared
+[Shipyard](https://github.com/becaring/Shipyard) Xbox platform. The executable and
+build scripts retain the `Smash360` name.
 
-On Windows with Git, Python, CMake/Visual Studio 2022, and Xbox 360 SDK 21256.3,
-place Shipyard alongside this checkout (or set `XBOX360_PLATFORM_BASE` to its
-absolute path). Its commit and package manifest must match the lock. Supply a
-legally obtained US Smash Bros. ROM locally; the ROM is never committed. Run
-these commands from this repository root in PowerShell:
+The project contains the Xbox integration, compiler projections, dependency
+locks, and regression tests. BattleShip provides the game port, its Smash
+decompilation-based game sources, libultraship/Fast3D, and Torch asset tooling.
+Game data is extracted locally from a supported US ROM supplied by the builder.
+ROMs, extracted assets, Microsoft SDK files, and compiled game packages are not
+included.
 
-```powershell
-& ./tools/fetch-sources.ps1
-& ./tools/fetch-dependencies.ps1
-& ./tools/setup-host-deps.ps1
-& python -B tools/empty-owned-generated.py --clean
-& ./tools/build-assets.ps1 -Rom 'C:\path\to\your\Super Smash Bros. (USA).n64'
-& ./platform/xbox360/build.ps1 -Regenerate -Rebuild
-```
+## Status
 
-`fetch-sources.ps1` checks the BattleShip commit and its three submodules;
-`fetch-dependencies.ps1` checks out every exact dependency commit. For an
-existing checkout, `fetch-dependencies.ps1 -VerifyOnly` checks without changing
-it. The cleanup script preserves the old XEX and receipts, then empties only
-named generator/build outputs and generated project files; `--list` previews
-the targets. It retains pinned source and host dependency caches.
-`build-assets.ps1` produces owned game archives from the user's ROM.
-`build.ps1 -Regenerate` runs the named projection owners and assembles the
-generated project; `-Rebuild` compiles the native projects and links a new XEX.
-It then verifies the native link and copies the owned archives beside
-`scratch/application-xdk/native/build/Smash360.xex`.
+Native boot and controller-driven gameplay have been demonstrated on Xbox 360,
+and the selected Release build has compilation, link-ownership, and focused
+regression checks. Development continues on demanding-scene performance, audio
+underruns during slow frames, and broader rendering/gameplay validation. A
+successful build is not a guarantee of complete compatibility or a fixed frame
+rate. The most recent source changes have not all been retested on hardware.
 
-The generated source, project, compiler objects, logs, XEX, and assets live
-under `scratch/` or `dist/`; they are reproducible outputs, not source authority.
-The source-control checkpoint never contains Xbox SDK files or ROM data. See
-`platform/xbox360/` and `tests/` for the adapter contracts and focused checks.
+The Xbox integration uses Xenos graphics, XInput, XAudio2, and native storage.
+Four controller slots are supported. Native keyboard/text entry and Raphnet USB
+HID transport are unavailable. Optional desktop postprocessing/slang pipelines
+are unsupported; arbitrary custom desktop shaders are not guaranteed to work.
+
+## Building
+
+Build on Windows with Git, Python, CMake, Visual Studio C++ host tools, and an
+appropriately installed Xbox 360 SDK. Check out the Shipyard revision selected
+by `platform-base.lock.json`; do not substitute its latest revision implicitly.
+Follow [Xbox 360 building](docs/XBOX360_BUILDING.md) for source acquisition,
+ROM extraction, generation, compilation, and output locations.
+
+## Controls
+
+The enhancement menu uses the Xbox controller: Back/View toggles the menu,
+the right stick moves its cursor, A clicks/drags, B right-clicks, LT/RT scroll,
+and R3 switches between cursor and D-pad navigation. Game mappings remain under
+the port's controller configuration.
+
+## Documentation
+
+- [Architecture](docs/ARCHITECTURE.md): source ownership and runtime contracts.
+- [Xbox 360 building](docs/XBOX360_BUILDING.md): prerequisites and commands.
+- [Upstream and provenance](docs/UPSTREAM.md): dependencies, credits, and updates.
+- [Development](docs/DEVELOPMENT.md): verification and performance work.
+
+## Credits
+
+Warwing builds on the work of BattleShip, ssb-decomp-re, libultraship/Fast3D,
+Torch, and their contributors. Xbox platform work also derives from SoH360 and
+is maintained through Shipyard. Dependency licenses, copyright notices, and
+source provenance retain their original terms; see
+[Upstream and provenance](docs/UPSTREAM.md). Super Smash Bros. and its game assets
+belong to their respective rights holders. This is an unofficial project.

@@ -1,6 +1,6 @@
 # JSON verification
 
-Run from the Smash360 root:
+Run from the repository root:
 
 ```
 python tools/prepare_json_xdk.py
@@ -20,8 +20,8 @@ Commands, stdout/stderr and verification hashes are under `scratch/json-xdk`.
 and the early actual RFC6901 leaf lowering. Its expected original JSON/XDK failure
 does not describe the concrete backend's compilation result.
 
-`tests/json-consumers` is parent-owned and validates actual original LUS consumer
-source against both libraries. This test suite does not replace those consumers.
+`tests/json-consumers` validates original LUS consumer source against both
+libraries. This test suite does not replace those consumers.
 
 See `platform/xbox360/cpp-compat/json/README.md` for source mapping, build include
 order and explicit unsupported API vocabulary. No test here creates a standalone

@@ -5,7 +5,7 @@
 It emits objects and an explicit failure audit, not an executable or boot claim.
 Upstream BattleShip and the SoH360 donor remain read-only.
 
-Run from `D:\Projects\Smash360` after generating the canonical owner overlays:
+Run from the repository root after generating the required subsystem overlays:
 
 ```powershell
 python tools/prepare_port_xdk.py
@@ -41,7 +41,7 @@ The compile flags include the pinned US CMake definitions `NON_MATCHING`,
 `NON_EQUIVALENT`, `AVOID_UB`, `PORT`, `F3DEX_GBI_2`, `_LANGUAGE_C`, `N_MICRO`,
 `_USE_MATH_DEFINES`, `CIMGUI_DEFINE_ENUMS_AND_STRUCTS`, and
 `PORT_HIRES_ENABLED=1`. Region and archive identity are US/BattleShip. Scripting
-is disabled by the approved target contract. Updater version and asset recipe
+is disabled by the target configuration. Updater version and asset recipe
 identity remain final startup/build inputs, not fabricated audit values.
 
 ## Preserved contracts

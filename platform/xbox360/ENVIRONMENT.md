@@ -1,15 +1,13 @@
 # Xbox environment lookup
 
-XDK excludes desktop `getenv`; SoH360 has no equivalent environment service.
-Shipyard's `sources/environment/launch_environment.h` owns the bounded reader,
+XDK excludes desktop `getenv`. Shipyard's `sources/environment/launch_environment.h` owns the bounded reader,
 parser and immutable lookup. `environment.cpp` maps that service to the
-`XboxEnv_*` ABI. The reader retains the donor `platform.cpp::ReadPath`
-CreateFile/GetFileSize/ReadFile/CloseHandle pattern. It does not replace game
-configuration or fabricate game state.
+`XboxEnv_*` ABI. File reading follows the SoH360 `platform.cpp::ReadPath`
+CreateFile/GetFileSize/ReadFile/CloseHandle pattern.
 
 The application must call `XboxEnv_LoadFromFile("game:\\smash360.env")` once
 before PortInit or any worker. `Smash360Startup::Initialize` now performs this
-call on the real application's startup path, verified in Xenia.
+call on the application startup path.
 `XBOX_ENV_ABSENT` is normal: no variables are set. Other errors must be logged
 and surfaced during startup. The file is optional; nothing enables diagnostic
 flags, advances menus, limits frames, or changes game defaults automatically.
@@ -27,6 +25,5 @@ matching getenv's usage contract. Names are case-sensitive. Unknown names
 return NULL. No setenv/putenv consumer is currently part of this adaptation.
 
 `tools/test_environment.ps1` executes the shared parser/lookup through the
-Smash adapter on host Windows and compiles the adapter with XDK. The real XEX
-has consumed diagnostic settings through the pre-extraction path in Xenia;
-the final XEX and physical-console validation remain open.
+Smash adapter on host Windows and compiles the adapter with XDK.
+See [development](../../docs/DEVELOPMENT.md) for integration verification scope.

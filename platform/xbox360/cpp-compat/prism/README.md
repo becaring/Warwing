@@ -14,8 +14,7 @@ Its pinned source checks, resource acquisition, builder, and debug guard remain
 local. It leaves upstream unchanged and emits source-mapped files under
 `scratch/prism-xdk`. Unchanged spans refer to original source lines;
 adapted spans refer to their real generated locations. The pinned Tree-sitter
-wheel requires CPython 3.13 x64 Windows. The former vendored bindings and donor
-range-lowering script are no longer source inputs or alternate projectors.
+wheel requires CPython 3.13 x64 Windows.
 
 Prepare dependencies and validate from the project root:
 
@@ -57,8 +56,7 @@ to the variant overload set. Bounded anonymous SHADER constants 0..14 are cast
 to `int`, their original `std::variant` alternative. General enum conversion
 is outside the value helper's supported surface. Range lowering evaluates the
 range expression, begin, then end once each, retains temporary lifetime and
-reference binding, and preserves break/continue. Original range donor code
-reevaluated end on each iteration; the adapted implementation corrects that.
+reference binding, and preserves break/continue.
 
 Prism's one `SPDLOG_DEBUG` call is disabled at its normal Release active level.
 An explicitly enabled debug/trace build requires real spdlog headers and their
@@ -82,7 +80,7 @@ inputs plus both textures, all clamps, fog and grayscale. Unused packed
 components are zeroed and never read by the generated shader. Equations,
 texture coordinates, thresholds, mask dimensions and sampling remain unchanged.
 
-Verification on 2026-09-20:
+## Verification scope
 
 - All seven production Prism/provider XDK objects and two test objects compile.
 - An unchanged official Prism host build and the generated host build produce
@@ -100,4 +98,4 @@ Verification on 2026-09-20:
 Outputs and full compiler logs stay under `scratch/prism-xdk`. These are host
 differential and compiler checks, not PowerPC execution, an application link,
 GPU interpolation validation, or a game boot. Unsupported desktop/custom HLSL
-still fails explicitly. No reference tree was edited and Xenia was not run.
+still fails explicitly.

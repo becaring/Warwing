@@ -34,36 +34,28 @@ if ($CommandTrace) { $smashProfileEnv += "SMASH360_COMMAND_TRACE=1`r`n" }
 $smashHashes['smash360.env'] = (Get-FileHash -LiteralPath (Join-Path $smashPackage 'smash360.env') -Algorithm SHA256).Hash
 $smashHashes | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $smashPackage 'SHA256.json') -Encoding Ascii
 @'
-Smash360 hardware test package
+Warwing Xbox 360 package
 
 Copy this folder intact. Launch Smash360.xex on your homebrew-capable Xbox 360.
-BattleShip.o2r and f3d.o2r must remain beside the XEX.
-No Xenia settings or PC save data are included. Native boot and gameplay have
-been observed on physical Xbox 360; performance/audio and broader testing remain.
+BattleShip.o2r and f3d.o2r must remain beside the XEX. SHA256.json records the
+package file hashes. No SDK files, Xenia settings, or PC save data are included.
 
 Back/View: enhancements. Right stick: cursor. A: click/drag. B: right-click.
 LT/RT: scroll. R3: switch cursor/D-pad navigation.
 
-Start hardware comparisons at 100% internal resolution and native 1x MSAA.
-Then test resolution and 2x/4x MSAA separately. Audio/pacing issues remain open.
-This build transfers current SoH vertex, lighting, shader/material reuse,
-texture-binding and native XDK optimizations through BattleShip's real runtime.
-Smash near-plane clipping, positional lights, fog/blend alpha, framebuffer UVs,
-resource content verification and the game's scheduler remain authoritative.
-The latest appended hardware run had mixed heavy windows around 56/55 FPS;
-that does not isolate the full Yoshi scene. No speed result is claimed for this
-new package yet. FRAME_WORKLOAD separates frames by command-count bands.
+Check smash360.env for this package's build and diagnostic modes. Full-profiler
+scopes require a build made with build.ps1 -FullProfiling; environment switches
+cannot restore compiled-out scopes. package.ps1 -ProfileDetail requests detailed
+profiling and requires that build option. Command and triangle sampling are
+separate options and add diagnostic overhead.
 
-Full-profiler scopes remain compiled out. FRAME timing and optional command/
-triangle samplers remain available; sampling adds diagnostic overhead.
-This build passes native XDK/link guards and differential contract tests.
-Console performance and visual validation of these new changes are pending.
-Check smash360.env for this package's build and diagnostic modes.
-Repeat the fully populated Yoshi intro test and return the log.
-For full opcode/bounds/reloc attribution first rebuild with build.ps1
--FullProfiling, then package.ps1 -ProfileDetail. Environment switches cannot
-restore compiled-out scopes. Match build and env modes in comparisons.
-Source/build instructions and evidence: D:\Projects\Smash360\BRINGUP.md
+For performance comparisons, keep scene, fighters, camera, resolution, MSAA,
+shader-cache state, and diagnostic settings comparable. Save the package hash
+with the results. Build verification does not establish complete gameplay,
+rendering, audio, or performance validation on the console.
+
+Source and build documentation: README.md and docs/XBOX360_BUILDING.md in the
+Warwing repository. Profiling: platform/xbox360/runtime/PROFILING.md.
 '@ | Set-Content -LiteralPath (Join-Path $smashPackage 'README.txt') -Encoding Ascii
 Write-Output "Hardware package: $smashPackage"
 Write-Output "XEX SHA256: $smashHash"

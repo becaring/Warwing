@@ -4,7 +4,7 @@ This directory supports compilation of the pinned BattleShip C translation
 units with the native Xbox 360 XDK C compiler. It supplies no game functions,
 game globals, scheduler replacement, application entry point, or XEX.
 
-Run from `D:/Projects/Smash360` using Python 3.13:
+Run from the repository root using Python 3.13:
 
 ```powershell
 python -m pip install --target scratch/host-python tree-sitter==0.25.2 tree-sitter-c==0.24.1
@@ -17,9 +17,9 @@ python tools/prepare_crt_xdk.py
 python tools/prepare_game_xdk.py --source-overlay scratch/endian-xdk/source --generated-include scratch/generated/include --generated-include scratch/generated/decomp/src --keep-going --archive
 ```
 
-`XEDK` defaults to `C:/Program Files (x86)/Microsoft Xbox 360 SDK`.
+Set `XEDK` to override the installed Xbox 360 SDK location.
 The host verification fixture uses VS2022 Community's `vcvars64.bat`; override
-its location with `SMASH_HOST_VCVARS`. Root-owned `tools/prepare_assets.py`
+its location with `SMASH_HOST_VCVARS`. `tools/prepare_assets.py`
 generates the reloc and credits inputs. This tool does not generate or replace
 missing resources.
 
@@ -75,7 +75,7 @@ integration and linking.
 
 ## Compatibility boundary
 
-The native sprite failure exposed an XDK packet-layout incompatibility:
+The GBI projection corrects an XDK packet-layout incompatibility:
 `Gpopmtx` mixed `int` and `unsigned char` bitfields, and `Gsetcolor` mixed an
 `int` bitfield with byte fields. XDK expanded each to 12 bytes, making the
 game's `Gfx` union 16 bytes while Fast3D's `F3DGfx` remained 8. Live command
@@ -85,11 +85,8 @@ parameter an `unsigned int` bitfield in its original word and the color opcode
 an ordinary byte, preserving their intended N64 positions. A production PPC
 assertion requires 8-byte Gfx packets. The XDK regression checks structure
 sizes and three independently encoded contiguous texture-rectangle packets;
-host tests retain the original command and cursor semantics. Evidence is in
-`scratch/evidence/user-recording/gbi-*`. All 486 game C translation units
-rebuilt, the XEX/link audits passed, and the user's post-fix recording verifies
-original menu lettering, HUD sprites, stage-clear results and two gameplay
-stages through the real Fast3D/Xenos path.
+host tests retain the original command and cursor semantics. Target rendering
+validation remains separate from these layout and compilation checks.
 
 - Both active game generators import Shipyard's physical
   `python/xbox360_platform/c89_lower.py`. The BattleShip driver retains its

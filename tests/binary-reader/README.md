@@ -1,11 +1,11 @@
 # Actual LUS binary-reader XDK slice
 
-Run from any working directory:
+Run from the repository root:
 
 ```powershell
-python D:\Projects\Smash360\tools\prepare_binary_reader_xdk.py
-python D:\Projects\Smash360\tests\binary-reader\test_generation.py
-python D:\Projects\Smash360\tests\binary-reader\run.py
+python tools/prepare_binary_reader_xdk.py
+python tests/binary-reader/test_generation.py
+python tests/binary-reader/run.py
 ```
 
 The host test needs the local VS2022 14.43.34808 compiler/CRT, Windows SDK

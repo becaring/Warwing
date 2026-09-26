@@ -38,8 +38,8 @@ The narrow library operations are:
   entries; the temporary is then destroyed at the same function exit. This is
   not a general node-transfer replacement.
 
-The viewport rounding expression is the proven donor's
-`D:/Projects/SoH360/platform/xbox360/math_platform.cpp:29`, narrowed to the actual
+The viewport rounding expression derives from SoH360
+`platform/xbox360/math_platform.cpp:29`, narrowed to the actual
 binary32-derived viewport input domain. Donor file SHA-256:
 `4085d75c2b355bb3b2df207d6f6ad3e35c36ec49de03e41ca77c2cb7d31610a5`.
 No donor checkout is needed to generate or build this projection.
@@ -70,8 +70,9 @@ routines, 4,096 actual current combiner mappings and identical diagnostics.
 Platform tests compare 128,004 matrix-rounding cases across all four rounding
 modes, viewport edge cases, reserve capacity and the scalar depth insertion.
 Actual full headers, six tables, math bodies and helper tests also compile for
-XDK. Target execution, physical rendering, complete resource/GUI integration and
-application linking remain integration work; these tests do not claim them.
+XDK. These focused tests do not exercise target execution, physical rendering,
+resource/GUI integration, or the final application link. See the
+[integrated build](../../../../docs/XBOX360_BUILDING.md) for the latter.
 
 Failure-path corrections: Destroy closes its window backend only after that
 backend has been assigned by Init. A failed texture-upload allocation throws
@@ -91,4 +92,3 @@ Normal `delete mRdp` remains the owner; no live shared_ptr is byte-cleared.
 The build verifies this ordering and destination in the actual linked PPC image.
 The actual-header differential test poisons allocation storage and checks all
 RDP fields against upstream defaults, including nested scales and resource owners.
-Evidence and the failing pre-fix binary: `scratch/evidence/rdp-value-init`.
