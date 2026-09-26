@@ -19,7 +19,8 @@ and the selected Release build has compilation, link-ownership, and focused
 regression checks. Development continues on demanding-scene performance, audio
 underruns during slow frames, and broader rendering/gameplay validation. A
 successful build is not a guarantee of complete compatibility or a fixed frame
-rate. The most recent source changes have not all been retested on hardware.
+rate. Changes to platform code or generated runtime code require validation on Xbox
+360 hardware.
 
 The Xbox integration uses Xenos graphics, XInput, XAudio2, and native storage.
 Four controller slots are supported. Native keyboard/text entry and Raphnet USB
