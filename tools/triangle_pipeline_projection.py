@@ -91,4 +91,11 @@ def transform(text):
         'void Interpreter::XboxInvalidateTextureBindings() {\n    mXboxPipelineKey.valid=false;')
     text=once(text,'void Interpreter::InvalidateShaderBindings() {',
         'void Interpreter::InvalidateShaderBindings() {\n    mXboxPipelineKey.valid=false;')
+    # Port code registers framebuffer mirrors outside the native-call set.
+    # A registry change can redirect an identical reload's import, so the
+    # reload restoration may only compare against captures made after it.
+    for anchor in ('    mFbTextures[b] = FbTextureRange{ b + sizeBytes, fbId, u0, v0, u1, v1 };',
+                   '    mFbTextures.erase(reinterpret_cast<uintptr_t>(base));',
+                   '    mFbTextures.clear();'):
+        text=once(text,anchor,'    mXboxPipelineKey.valid=false;\n'+anchor)
     return invalidate_native_calls(text,'mXboxPipelineKey.valid=false',minimum=40)
