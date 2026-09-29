@@ -46,7 +46,21 @@ int main() {
     CHANGE(owner.mXboxClipParameters.invertY,true);
     CHANGE(owner.rdp.viewport_or_scissor_changed,true);
     for(unsigned i=0;i<2;++i) {
-        CHANGE(owner.rdp.textures_changed[i],true);
+        // A byte-identical reload restores (SoH 4.0.5 rule): every import key
+        // and the bound node are unchanged. Any byte of either TMEM entry or
+        // palette identity still reconciles, and Certify clears the used
+        // slot's flag exactly as upstream's import would.
+        owner.rdp.textures_changed[i]=true;
+        Require(key.Matches(owner),"identical reloaded texture not restored");
+        {unsigned char* image=(unsigned char*)&owner.rdp.loaded_texture[0];
+         for(unsigned j=0;j<sizeof(owner.rdp.loaded_texture);++j){
+             image[j]^=1;Require(!key.Matches(owner),"reloaded texture byte absent from key");image[j]^=1;}}
+        for(unsigned half=0;half<2;++half){
+            const uint8_t* saved=owner.rdp.palette_dram_addr[half];
+            owner.rdp.palette_dram_addr[half]=(const uint8_t*)&owner;
+            Require(!key.Matches(owner),"reloaded palette identity absent from key");
+            owner.rdp.palette_dram_addr[half]=saved;}
+        Require(key.Certify(owner)&&!owner.rdp.textures_changed[i],"certified reload kept the used dirty flag");
         CHANGE(owner.rdp.loaded_texture[i].masked,true);
         CHANGE(owner.rdp.loaded_texture[i].blended,true);
         CHANGE(owner.rdp.loaded_texture[i].size_bytes,37u);

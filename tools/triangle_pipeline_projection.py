@@ -61,7 +61,7 @@ def transform(text):
 // XBOX ORIGINAL RECONCILIATION BEGIN
 '''+cold+'// XBOX ORIGINAL RECONCILIATION END\n'+publish
     warm='''    triangleTrace.Mark(SMASH_TRI_STATE);
-    if(!mXboxPipelineKey.Matches(*this)) {
+    if(!mXboxPipelineKey.Certify(*this)) {
         if(!XboxPrepareTrianglePipeline(triangleTrace))return;
     } else {
         // Keep observer phase order on a hit; no native operation is executed.

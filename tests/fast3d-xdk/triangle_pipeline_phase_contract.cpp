@@ -128,10 +128,16 @@ static void CompareResult(const XboxTrianglePipelineResult& a,const XboxTriangle
 static void Step(Original& a,Projected& b){
     ++cases;bool hit=b.mXboxPipelineKey.Matches(b);if(hit)++hits;
     a.api.events.clear();b.api.events.clear();SmashTriangleTrace x,y;
+    const unsigned importsA=a.imports,importsB=b.imports,masksA=a.masks,masksB=b.masks;
     bool original=a.Phase(x),candidate=b.Phase(y);
     Require(original==candidate,"shader failure outcome");
     Require(x.phases==y.phases,"state/combiner/texture/shader observer order");
-    Require(a.imports==b.imports&&a.masks==b.masks,"required texture hash/import dispatch omitted");
+    // A hit may restore a byte-identical reload: the original re-imports the
+    // node it already has bound, which the native state/dirty-flag checks below
+    // must show as a no-op. Cold steps dispatch exactly the same imports.
+    if(!hit)Require(a.imports-importsA==b.imports-importsB&&a.masks-masksA==b.masks-masksB,
+                    "required texture hash/import dispatch omitted");
+    else Require(b.imports==importsB&&b.masks==masksB,"warm reconciliation imported");
     Require(a.rdp.textures_changed[0]==b.rdp.textures_changed[0]&&a.rdp.textures_changed[1]==b.rdp.textures_changed[1],"dirty flag behavior");
     Require(!std::memcmp(&a.api.state,&b.api.state,sizeof(BackendState)),"effective native state differs");
     if(!hit)Require(a.api.events==b.api.events,"cold native call/flush sequence changed");
