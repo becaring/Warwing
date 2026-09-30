@@ -26,6 +26,8 @@ def unsupported_functions(text,names):
     if len(edits)!=len(names):raise ValueError('Raphnet function selection drift')
     return LOWER['apply'](data,edits).decode()
 def platform(relative,text):
+    from xbox360_platform.controller_routes import project as project_routes
+    text=project_routes(relative,text)
     if relative=='src/ship/controller/physicaldevice/ConnectedPhysicalDeviceManager.cpp':
         # XDK 21256 xhash move construction swaps uninitialized bucket metadata
         # into the source. BattleShip reuses that source immediately. Start from

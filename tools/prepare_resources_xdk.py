@@ -8,6 +8,7 @@ OWN=ROOT/'platform/xbox360/cpp-compat/resources'
 OUT=ROOT/'scratch/resources-xdk'
 PLATFORM_BASE=runpy.run_path(str(ROOT/'tools/platform_base.py'))['resolve'](ROOT)
 from xbox360_platform.libzip import public_config
+from xbox360_platform.resource_lookup import synchronous_cache_hit
 CONFIG=runpy.run_path(str(ROOT/'tools/prepare_config_xdk.py'))
 LOWER=CONFIG['LOWER']['lower_ranges']
 MAPPED=CONFIG['PRISM']['mapped']
@@ -123,6 +124,7 @@ def corrections(relative,text):
     """Separately authorized correctness fixes; not disguised as syntax lowering."""
     name=Path(relative).name
     if name=='ResourceManager.cpp':
+        text=synchronous_cache_hit(text)
         text=once(text,'    SPDLOG_INFO("destruct ResourceManager");','    SPDLOG_INFO("destruct ResourceManager");\n    if (mThreadPool) { mThreadPool->wait(); mThreadPool.reset(); }')
         text=once(text,'        mResourceCache[identifier] = ResourceLoadError::NotFound;\n        return nullptr;',
             '        { const xbox_compat::lock_guard<xbox_compat::mutex> lock(mMutex);\n          mResourceCache[identifier] = ResourceLoadError::NotFound; }\n        return nullptr;')
