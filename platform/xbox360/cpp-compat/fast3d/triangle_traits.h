@@ -17,10 +17,9 @@ struct XboxTrianglePipelineTraits {
         const unsigned first = owner.mRdp->first_tile_index;
         return slot == 1 && first >= 2 ? first : first + slot;
     }
-    // A byte-identical reload restores the pipeline (SoH 4.0.5 Xbox rule).
-    // Import keys use palette_dram_addr (palettes[] is the staging copy) and
-    // may fall back to the other TMEM entry, which the shared key compares.
-    // Framebuffer-mirror registration invalidates the key where it changes.
+    // CI import keys use palette_dram_addr rather than the palette staging
+    // pointer. Compare both TMEM entries for fallback imports; framebuffer-
+    // mirror registry changes invalidate the key before reload restoration.
     template<class Owner> static bool RestoresReloadedTextures(const Owner&) {
         return true;
     }

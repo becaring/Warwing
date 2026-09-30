@@ -1,9 +1,9 @@
-"""Conservative SoH-derived reconciliation cache; never bypass dirty imports.
+"""Split state reconciliation from per-triangle geometry.
 
 Apply after material math, tracing, cull/emit, shader metadata and texture
-binding projections. The original state/texture/shader block is extracted
-verbatim into the cold method, apart from its failure return and observer
-entry. Primitive depth, diagnostics, area accounting and packing remain live.
+bindings. Certify permits a dirty-slot hit only for a restored byte-identical
+reload. Other imports use the cold path; primitive depth, diagnostics, area
+accounting and vertex packing remain per triangle.
 """
 from profile_projections import once
 from xbox360_platform.fast3d_triangle_certificate import call_end as _call_end, invalidate_native_calls
