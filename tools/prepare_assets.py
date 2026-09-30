@@ -2,6 +2,7 @@
 
 No game/resource logic is reimplemented here. Original scripts remain unchanged.
 """
+
 from pathlib import Path
 import argparse
 import hashlib
@@ -39,9 +40,13 @@ def main():
     # Keep host dependencies inside the owned tree. Subprocesses run unchanged
     # upstream scripts with this explicit dependency path.
     if HOST_PYTHON.is_dir():
-        os.environ['PYTHONPATH'] = str(HOST_PYTHON) + os.pathsep + os.environ.get('PYTHONPATH', '')
-    for path in (GENERATED / "include", GENERATED / "port/resource",
-                 GENERATED / "decomp/src/credits", ASSETS):
+        os.environ["PYTHONPATH"] = str(HOST_PYTHON) + os.pathsep + os.environ.get("PYTHONPATH", "")
+    for path in (
+        GENERATED / "include",
+        GENERATED / "port/resource",
+        GENERATED / "decomp/src/credits",
+        ASSETS,
+    ):
         path.mkdir(parents=True, exist_ok=True)
 
     symbols = load("generate_reloc_stubs")
@@ -64,13 +69,25 @@ def main():
     table.generate_header(GENERATED / "port/resource/RelocFileTable.us.h")
 
     credit_dir = GENERATED / "decomp/src/credits"
-    for name, flags in (("staff", []), ("titles", []),
-                        ("info", ["-paragraphFont", "-multiline"]),
-                        ("companies", ["-paragraphFont"])):
+    for name, flags in (
+        ("staff", []),
+        ("titles", []),
+        ("info", ["-paragraphFont", "-multiline"]),
+        ("companies", ["-paragraphFont"]),
+    ):
         filename = name + ".credits.us.txt"
         shutil.copyfile(UPSTREAM / "decomp/src/credits" / filename, credit_dir / filename)
-        subprocess.run([sys.executable, "-B", str(UPSTREAM / "tools/creditsTextConverter.py"),
-                       *flags, filename], cwd=credit_dir, check=True)
+        subprocess.run(
+            [
+                sys.executable,
+                "-B",
+                str(UPSTREAM / "tools/creditsTextConverter.py"),
+                *flags,
+                filename,
+            ],
+            cwd=credit_dir,
+            check=True,
+        )
 
     # Exact upstream CMake baked UI asset recipes; redirect every output so the
     # original tree (including its PNG paths) remains untouched. RGBA16 is
@@ -79,24 +96,59 @@ def main():
     css.mkdir(parents=True, exist_ok=True)
     for name, symbol, flags in (("arrow", "arrow", []), ("arrow_left", "arrowLeft", ["--mirror"])):
         png = css / (name + ".png")
-        subprocess.run([sys.executable, "-B", str(UPSTREAM / "tools/generate_arrow_svg.py"),
-                        str(png), "6", "44", *flags], check=True)
-        subprocess.run([sys.executable, "-B", str(UPSTREAM / "tools/png_to_c_array.py"),
-                        str(png), str(css / (name + "_data.h")), symbol], check=True)
-    for stem, title, symbol in (("final_destination", "FINAL DESTINATION", "nameFinalDestination"),
-                                 ("metal_cavern", "METAL CAVERN", "nameMetalCavern"),
-                                 ("battlefield", "BATTLEFIELD", "nameBattlefield")):
+        subprocess.run(
+            [
+                sys.executable,
+                "-B",
+                str(UPSTREAM / "tools/generate_arrow_svg.py"),
+                str(png),
+                "6",
+                "44",
+                *flags,
+            ],
+            check=True,
+        )
+        subprocess.run(
+            [
+                sys.executable,
+                "-B",
+                str(UPSTREAM / "tools/png_to_c_array.py"),
+                str(png),
+                str(css / (name + "_data.h")),
+                symbol,
+            ],
+            check=True,
+        )
+    for stem, title, symbol in (
+        ("final_destination", "FINAL DESTINATION", "nameFinalDestination"),
+        ("metal_cavern", "METAL CAVERN", "nameMetalCavern"),
+        ("battlefield", "BATTLEFIELD", "nameBattlefield"),
+    ):
         png = css / (stem + "_name.png")
-        subprocess.run([sys.executable, "-B", str(UPSTREAM / "tools/render_nameplates.py"), title, str(png)], check=True)
-        subprocess.run([sys.executable, "-B", str(UPSTREAM / "tools/png_to_c_array.py"),
-                        str(png), str(css / (stem + "_name_data.h")), symbol], check=True)
+        subprocess.run(
+            [sys.executable, "-B", str(UPSTREAM / "tools/render_nameplates.py"), title, str(png)],
+            check=True,
+        )
+        subprocess.run(
+            [
+                sys.executable,
+                "-B",
+                str(UPSTREAM / "tools/png_to_c_array.py"),
+                str(png),
+                str(css / (stem + "_name_data.h")),
+                symbol,
+            ],
+            check=True,
+        )
 
     shaders = UPSTREAM / "libultraship/src/fast/shaders"
     with zipfile.ZipFile(ASSETS / "f3d.o2r", "w", zipfile.ZIP_DEFLATED) as archive:
         for path in sorted(shaders.rglob("*")):
             if path.is_file():
                 # Stable metadata, identical original resource paths/payloads.
-                info = zipfile.ZipInfo("shaders/" + path.relative_to(shaders).as_posix(), (1980, 1, 1, 0, 0, 0))
+                info = zipfile.ZipInfo(
+                    "shaders/" + path.relative_to(shaders).as_posix(), (1980, 1, 1, 0, 0, 0)
+                )
                 info.compress_type = zipfile.ZIP_DEFLATED
                 archive.writestr(info, path.read_bytes())
 
@@ -105,8 +157,11 @@ def main():
         if hashlib.sha1(rom.read_bytes()).hexdigest() != "e2929e10fccc0aa84e5776227e798abc07cedabf":
             raise RuntimeError("Wrong US ROM hash; refusing extraction")
         torch = ROOT / "scratch/torch-host/Release/torch.exe"
-        subprocess.run([str(torch), "o2r", str(rom), "-s", str(UPSTREAM), "-d", str(ASSETS)],
-                       cwd=ASSETS, check=True)
+        subprocess.run(
+            [str(torch), "o2r", str(rom), "-s", str(UPSTREAM), "-d", str(ASSETS)],
+            cwd=ASSETS,
+            check=True,
+        )
         with zipfile.ZipFile(ASSETS / "BattleShip.o2r") as archive:
             bad = archive.testzip()
             if bad:
@@ -114,17 +169,33 @@ def main():
             archive_names = set(archive.namelist())
             absent = set(entries.values()) - archive_names
             if absent:
-                raise RuntimeError(f"Archive missing {len(absent)} reloc entries: {sorted(absent)[:8]}")
+                raise RuntimeError(
+                    f"Archive missing {len(absent)} reloc entries: {sorted(absent)[:8]}"
+                )
             print(f"Verified archive CRCs and all {len(entries)} reloc paths")
 
     report = {
-        "generators": {name: digest(UPSTREAM / "tools" / (name + ".py"))
-                       for name in ("generate_reloc_stubs", "generate_reloc_table", "creditsTextConverter",
-                                    "generate_arrow_svg", "png_to_c_array", "render_nameplates")},
-        "reloc_paths": len(entries), "inherited_unresolved_symbols": sorted(extra),
-        "outputs": {str(path.relative_to(ROOT)): digest(path)
-                    for path in sorted(GENERATED.rglob("*")) if path.is_file()},
-        "archives": {str(path.relative_to(ROOT)): digest(path) for path in sorted(ASSETS.glob("*.o2r"))},
+        "generators": {
+            name: digest(UPSTREAM / "tools" / (name + ".py"))
+            for name in (
+                "generate_reloc_stubs",
+                "generate_reloc_table",
+                "creditsTextConverter",
+                "generate_arrow_svg",
+                "png_to_c_array",
+                "render_nameplates",
+            )
+        },
+        "reloc_paths": len(entries),
+        "inherited_unresolved_symbols": sorted(extra),
+        "outputs": {
+            str(path.relative_to(ROOT)): digest(path)
+            for path in sorted(GENERATED.rglob("*"))
+            if path.is_file()
+        },
+        "archives": {
+            str(path.relative_to(ROOT)): digest(path) for path in sorted(ASSETS.glob("*.o2r"))
+        },
     }
     (ROOT / "scratch/audit/asset-generation.json").write_text(json.dumps(report, indent=2) + "\n")
 

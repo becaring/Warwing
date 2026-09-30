@@ -14,6 +14,11 @@ partial index do not prove that a function has no callers. Preserve useful
 
 ## Verify the affected contract
 
+Check projector formatting with `python -B tools/check_projector_style.py`.
+Maintained `prepare*.py` files have a 140-character line limit. Use multiline
+blocks for embedded C++; split exact-match Python strings without changing their
+contents. This check needs no SDK or generated files.
+
 Use the existing focused tests under `tests/`. Relevant suites include
 `fast3d-xdk`, `port-xdk`, `graphics`, `audio`, `endian`, `async-compat`, and the
 configuration/resource compatibility suites. Their fixtures exercise original
