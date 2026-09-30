@@ -97,7 +97,7 @@ class TrianglePipelineTests(unittest.TestCase):
         # before it executes, including operations outside reconciliation.
         for operation in ('StartDrawToFramebuffer','SetColorWriteMask','CopyFramebuffer','UpdateFramebufferParameters'):
             self.assertIn('mXboxPipelineKey.valid=false, mRapi->'+operation+'(',transformed)
-        warm=transformed.split('    if(!mXboxPipelineKey.Matches(*this)) {',1)[1].split('    const XboxTrianglePipelineResult&',1)[0]
+        warm=transformed.split('    if(!mXboxPipelineKey.Certify(*this)) {',1)[1].split('    const XboxTrianglePipelineResult&',1)[0]
         phases=re.findall(r'triangleTrace.Mark\((SMASH_TRI_\w+)\)',warm)
         self.assertEqual(phases,['SMASH_TRI_COMBINER','SMASH_TRI_TEXTURE','SMASH_TRI_SHADER'])
 

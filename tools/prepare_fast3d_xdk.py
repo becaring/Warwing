@@ -33,7 +33,7 @@ import shader_metadata_projection
 import command_work_projection
 import command_trace_projection
 from prepare_prism_xdk import PARSER,walk,field,tx,once,mapped,lower_ranges,enum_wrappers
-from xbox360_platform import fast3d_opcode
+from xbox360_platform import fast3d_opcode, matrix_product
 from xbox360_platform.cpp_syntax import collect_member_defaults
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -174,6 +174,7 @@ def lower(text,name):
     if name=='Texture.cpp':
         text=once(text,'Texture::Texture() : Resource(std::shared_ptr<Ship::ResourceInitData>()) {','Texture::Texture() : Resource(std::shared_ptr<Ship::ResourceInitData>()), Flags(0), HByteScale(1.0), VPixelScale(1.0), ImageData(nullptr) {')
     if name=='interpreter.cpp':
+        text=matrix_product.source(text)
         text=once(text,'''    const std::string name = nameCStr != nullptr ? nameCStr : "";
 
     const bool wantActive = enabled && !name.empty();
@@ -298,6 +299,7 @@ def lower(text,name):
         text=lower_ranges(text.encode()).decode()
         text='#include "prism/compat.h"\n'+text
     if name=='interpreter.h':
+        text=matrix_product.header(text)
         text=shader_metadata_projection.header(text)
         text=shade_cache_projection.header(text)
         text=triangle_constants_projection.header(text)
