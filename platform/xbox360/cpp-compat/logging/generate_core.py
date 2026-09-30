@@ -1,6 +1,6 @@
 """Smash policy adapter for Shipyard's pinned spdlog compiler projector."""
 from pathlib import Path
-import importlib.util,json,sys
+import importlib.util,runpy,sys
 
 ROOT=Path(__file__).resolve().parents[4]
 BASE=Path(__file__).parent
@@ -15,8 +15,7 @@ def module(name,path):
 
 LANG=module('logging_language',ROOT/'platform/xbox360/cpp-compat/config/lowering.py')
 PRISM=module('logging_braces',ROOT/'tools/prepare_prism_xdk.py')
-lock=json.loads((ROOT/'platform-base.lock.json').read_text())
-PLATFORM=(ROOT/lock['base']).resolve()
+PLATFORM=runpy.run_path(str(ROOT/'tools/platform_base.py'))['resolve'](ROOT)
 SHARED=module('shipyard_logging_core',PLATFORM/'python/xbox360_platform/logging_core.py')
 
 def configure():

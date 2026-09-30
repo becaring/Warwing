@@ -8,6 +8,8 @@
 // Diagnostic observer only; this fixture verifies attachment semantics.
 enum { SHIPYARD_PERF_RESTORE };
 struct ShipyardPerfScope { explicit ShipyardPerfScope(int) {} };
+struct { uint64_t framebufferSetupTicks; unsigned framebufferSetupCalls; } timing_counts;
+struct NativeTimingScope { NativeTimingScope(uint64_t&, unsigned&) {} };
 typedef unsigned DWORD;
 enum { TRUE=1, E_INVALIDARG=1, D3DCLEAR_TARGET=1, D3DCLEAR_ZBUFFER=2,
        D3DCLEAR_STENCIL=4, D3DRS_MULTISAMPLEANTIALIAS=0, D3DRS_MULTISAMPLEMASK=1 };
@@ -29,6 +31,8 @@ unsigned restore_draws=0,depth_reads=0;
 int gpu_color[4],gpu_depth[4];
 void InvalidateNativeState() {}
 void SetTileConstants() {}
+void TilingSpaceBegin() {}
+void TilingSpaceSetup() {}
 void Shipyard_Check(int result,const char*) { if(result)std::abort(); }
 void Shipyard_Fatal(const char*,int) { std::abort(); }
 void ClearFramebufferTargets(DWORD flags) {
@@ -47,7 +51,9 @@ struct Device {
         ClearFramebufferTargets(D3DCLEAR_TARGET|D3DCLEAR_ZBUFFER);
     }
 } device,*xenos_device=&device;
-void RestoreQuad(int* color,int* depth,unsigned,unsigned,DWORD mask) {
+bool BeginRestoreQuad(unsigned,unsigned,bool) { return false; }
+void EndRestoreQuad(bool) {}
+void DrawRestoreQuadSample(int* color,int* depth,DWORD mask,const float*,bool) {
     ++restore_draws;
     if(depth)++depth_reads;
     for(unsigned s=0;s<buffers[0].samples;++s)if(mask&(1u<<s)) {

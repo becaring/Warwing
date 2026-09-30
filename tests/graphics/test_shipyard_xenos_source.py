@@ -4,6 +4,9 @@ from pathlib import Path
 import unittest
 
 ROOT=Path(__file__).resolve().parents[2]
+import runpy as _shipyard_runpy
+
+SHIPYARD_BASE = _shipyard_runpy.run_path(str(ROOT / "tools/platform_base.py"))["resolve"](ROOT)
 
 
 class ShipyardXenosSourceTests(unittest.TestCase):
@@ -40,10 +43,10 @@ class ShipyardXenosSourceTests(unittest.TestCase):
         self.assertNotIn('scratch\\graphics-xdk\\gfx_xenos.cpp',project)
         self.assertNotIn('scratch\\graphics-xdk\\shader_cache.cpp',project)
         adapter=(ROOT/'platform/xbox360/graphics/api.cpp').read_text()
-        source=ROOT.parent/'LibUltraShip+Fast3D360/sources/xenos/core.cpp'
+        source=SHIPYARD_BASE / 'sources/xenos/core.cpp'
         self.assertIn('Shipyard::Xenos::LoadShaderCode,Shipyard::Xenos::StoreShaderCode',adapter)
         self.assertIn('ShipyardXenos::SetShaderCache(&cache)',adapter)
-        core_text=source.read_text()
+        core_text=''.join(source.read_text().split())
         self.assertIn('if(shader_cache_ops.load)',core_text)
         self.assertIn('if(shader_cache_ops.store)',core_text)
         window=(ROOT/'platform/xbox360/graphics/window_xenos.cpp').read_text()

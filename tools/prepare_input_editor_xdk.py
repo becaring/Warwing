@@ -5,6 +5,9 @@ import argparse, hashlib, json, re, runpy, subprocess, sys
 
 sys.dont_write_bytecode = True
 ROOT = Path(__file__).resolve().parents[1]
+import runpy as _shipyard_runpy
+
+SHIPYARD_BASE = _shipyard_runpy.run_path(str(ROOT / "tools/platform_base.py"))["resolve"](ROOT)
 UP = ROOT / "upstream/BattleShip"
 LUS = UP / "libultraship"
 BASE = ROOT / "platform/xbox360/cpp-compat/input-editor"
@@ -180,14 +183,14 @@ def compile_xdk():
         tree / "libultraship/src",
         tree / "include",
         ROOT / "platform/xbox360/cpp-compat",
-        ROOT.parent / "LibUltraShip+Fast3D360/sources",
-        ROOT.parent / "LibUltraShip+Fast3D360/sources/json/include",
-        ROOT.parent / "LibUltraShip+Fast3D360/sources/value_types",
+        SHIPYARD_BASE / 'sources',
+        SHIPYARD_BASE / 'sources/json/include',
+        SHIPYARD_BASE / 'sources/value_types',
         ROOT / "scratch/thread-pool-xdk",
         ROOT / "platform/xbox360/cpp-compat/thread-pool",
         ROOT / "platform/xbox360/cpp-compat/async",
-        ROOT.parent / "LibUltraShip+Fast3D360",
-        ROOT.parent / "LibUltraShip+Fast3D360/sources",
+        SHIPYARD_BASE,
+        SHIPYARD_BASE / 'sources',
         ROOT / "scratch/logging-xdk/core-include",
         ROOT / "scratch/logging-xdk/include",
         ROOT / "upstream/dependencies/fmt-xdk",

@@ -4,7 +4,9 @@ $root = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $output = Join-Path $root 'tests\async-compat\out'
 New-Item -ItemType Directory -Force -Path $output | Out-Null
 $include = Join-Path $root 'platform\xbox360\cpp-compat\async'
-$shipyardRoot = Join-Path (Split-Path $root -Parent) 'LibUltraShip+Fast3D360'
+$shipyardRoot = if ($env:XBOX360_PLATFORM_BASE) { $env:XBOX360_PLATFORM_BASE } else {
+    Join-Path $root ((Get-Content -LiteralPath (Join-Path $root 'platform-base.lock.json') -Raw | ConvertFrom-Json).base)
+}
 $shipyard = Join-Path $shipyardRoot 'sources'
 $test = Join-Path $root 'tests\async-compat\async_tests.cpp'
 $native = Join-Path $shipyard 'async\native.cpp'

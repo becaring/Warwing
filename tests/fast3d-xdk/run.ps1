@@ -4,7 +4,10 @@ $out=Join-Path $root 'scratch/fast3d-xdk'
 $hostDir=Join-Path $out 'host'
 New-Item -ItemType Directory -Force -Path $hostDir | Out-Null
 $base=Join-Path $root 'platform/xbox360/cpp-compat'
-$shipyard=Join-Path $root '../LibUltraShip+Fast3D360/sources'
+$shipyardRoot = if ($env:XBOX360_PLATFORM_BASE) { $env:XBOX360_PLATFORM_BASE } else {
+    Join-Path $root ((Get-Content -LiteralPath (Join-Path $root 'platform-base.lock.json') -Raw | ConvertFrom-Json).base)
+}
+$shipyard = Join-Path $shipyardRoot 'sources'
 $source=Join-Path $PSScriptRoot 'views.cpp'
 $xdk='C:/Program Files (x86)/Microsoft Xbox 360 SDK'
 & "$xdk/bin/win32/cl.exe" /nologo /TP /EHsc /MT /D_XBOX /DNOMINMAX "/I$base" "/I$shipyard" "/I$xdk/include/xbox" /c "/Fo$out/views-xdk.obj" $source 2>&1 | Tee-Object -FilePath "$out/views-xdk.log"

@@ -26,7 +26,7 @@ comparisons and native build. Do not lower upstream versions merely to silence
 compiler errors or replace a current interface with an older donor interface.
 
 A consumer can intentionally select an older Shipyard revision. Shared changes
-are integrated into one canonical Shipyard history; consumers adopt a reviewed
+are integrated into one Shipyard history; consumers adopt a reviewed
 revision explicitly. Do not copy a second private platform implementation into
 the consumer to bypass a pin or contract.
 

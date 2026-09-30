@@ -5,12 +5,15 @@ import sys
 import unittest
 from unittest.mock import patch
 ROOT=Path(__file__).resolve().parents[2]
+import runpy as _shipyard_runpy
+
+SHIPYARD_BASE = _shipyard_runpy.run_path(str(ROOT / "tools/platform_base.py"))["resolve"](ROOT)
 sys.path.insert(0,str(ROOT/'tools'))
 import prepare_fast3d_xdk as prepare
 
 class SourceContracts(unittest.TestCase):
     def test_triangle_certificate_resolves_only_from_shipyard(self):
-        shared=ROOT.parent/'LibUltraShip+Fast3D360/sources/fast3d/triangle_pipeline.h'
+        shared=SHIPYARD_BASE / 'sources/fast3d/triangle_pipeline.h'
         self.assertTrue(shared.is_file())
         self.assertFalse((ROOT/'platform/xbox360/cpp-compat/fast3d/triangle_pipeline.h').exists())
         self.assertFalse((ROOT/'scratch/application-xdk/native/source/platform/xbox360/cpp-compat/fast3d/triangle_pipeline.h').exists())

@@ -5,7 +5,10 @@ import runpy
 import unittest
 import uuid
 ROOT=Path(__file__).resolve().parents[2]
-MODULE=runpy.run_path(str(ROOT.parent/'LibUltraShip+Fast3D360/python/xbox360_platform/json/generate_algorithms.py'))
+import runpy as _shipyard_runpy
+
+SHIPYARD_BASE = _shipyard_runpy.run_path(str(ROOT / "tools/platform_base.py"))["resolve"](ROOT)
+MODULE=runpy.run_path(str(SHIPYARD_BASE / 'python/xbox360_platform/json/generate_algorithms.py'))
 class Generation(unittest.TestCase):
     def setUp(self):
         self.folder=ROOT/'scratch/json-xdk/generator-tests'/uuid.uuid4().hex
@@ -13,7 +16,7 @@ class Generation(unittest.TestCase):
         for relative in ('detail/input/lexer.hpp','detail/conversions/to_chars.hpp'):
             target=self.source/'include/nlohmann'/relative
             target.parent.mkdir(parents=True,exist_ok=True)
-            target.write_bytes((ROOT.parent/'LibUltraShip+Fast3D360/third_party/nlohmann-3.12.0/include/nlohmann'/relative).read_bytes())
+            target.write_bytes((SHIPYARD_BASE / 'third_party/nlohmann-3.12.0/include/nlohmann'/relative).read_bytes())
     def test_deterministic_and_mapped(self):
         first=MODULE['generate'](self.source,self.output)
         snapshots={p.name:p.read_bytes() for p in self.output.iterdir()}

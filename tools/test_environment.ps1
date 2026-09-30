@@ -7,7 +7,9 @@ $vs = & $vswhere -latest -products '*' -requires Microsoft.VisualStudio.Componen
 $vcvars = Join-Path $vs 'VC/Auxiliary/Build/vcvars64.bat'
 $inc = Join-Path $root 'platform/xbox360'
 $platformLock = Get-Content -LiteralPath (Join-Path $root 'platform-base.lock.json') -Raw | ConvertFrom-Json
-$platformBase = [IO.Path]::GetFullPath((Join-Path $root $platformLock.base))
+$platformBase = if ($env:XBOX360_PLATFORM_BASE) { $env:XBOX360_PLATFORM_BASE } else {
+    Join-Path $root ((Get-Content -LiteralPath (Join-Path $root 'platform-base.lock.json') -Raw | ConvertFrom-Json).base)
+}
 $sharedInc = Join-Path $platformBase 'sources'
 $source = Join-Path $inc 'environment.cpp'
 $test = Join-Path $root 'tests/environment/environment_tests.cpp'

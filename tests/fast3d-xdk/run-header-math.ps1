@@ -2,12 +2,14 @@ $ErrorActionPreference='Stop'
 $root=[IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
 $out=Join-Path $root 'scratch/fast3d-xdk'
 $cpp=Join-Path $root 'platform/xbox360/cpp-compat'
-$shipyardRoot=[IO.Path]::GetFullPath((Join-Path $root '../LibUltraShip+Fast3D360'))
+$shipyardRoot = if ($env:XBOX360_PLATFORM_BASE) { $env:XBOX360_PLATFORM_BASE } else {
+    Join-Path $root ((Get-Content -LiteralPath (Join-Path $root 'platform-base.lock.json') -Raw | ConvertFrom-Json).base)
+}
 $shipyard=Join-Path $shipyardRoot 'sources'
 $xdk='C:/Program Files (x86)/Microsoft Xbox 360 SDK'
 & python (Join-Path $root 'tools/prepare_fast3d_xdk.py')
 if($LASTEXITCODE -ne 0){throw 'Fast3D source staging failed'}
-$xdkIncludes=@("/I$cpp","/I$shipyardRoot","/I$shipyard","/I$cpp/async","/I$root/scratch/fast3d-xdk/compile-tree/libultraship/include","/I$root/scratch/value-types/include","/I$root/scratch/graphics-xdk/include","/I$xdk/include/xbox")
+$xdkIncludes=@("/I$cpp","/I$shipyardRoot","/I$shipyard","/I$shipyard/value_types","/I$cpp/async","/I$root/scratch/fast3d-xdk/compile-tree/libultraship/include","/I$root/scratch/value-types/include","/I$root/scratch/graphics-xdk/include","/I$xdk/include/xbox")
 foreach($source in @("$PSScriptRoot/header_math.cpp","$out/test_math.cpp","$out/test_opcode_tables.cpp")) {
     $name=[IO.Path]::GetFileNameWithoutExtension($source)
     & "$xdk/bin/win32/cl.exe" /nologo /TP /EHsc /MT /D_XBOX /DNOMINMAX /DSMASH360_TEST_RDP_VALUE_INIT @xdkIncludes /c "/Fo$out/$name-xdk.obj" $source 2>&1 | Tee-Object -FilePath "$out/$name-xdk.log"
@@ -28,7 +30,7 @@ foreach($mode in @('original','adapted')) {
 @echo off
 call "$vcvars" >nul
 if errorlevel 1 exit /b 1
-    cl /nologo /std:c++20 /EHsc /MT /fp:precise /DNOMINMAX $rdpDefine /I"$header" /I"$cpp" /I"$shipyardRoot" /I"$shipyard" /I"$root/scratch/value-types/include" /I"$root/scratch/graphics-xdk/include" "$PSScriptRoot/header_math.cpp" "$implementation" /Fo"$directory\\" /Fe"$directory/test.exe"
+    cl /nologo /std:c++20 /EHsc /MT /fp:precise /DNOMINMAX $rdpDefine /I"$header" /I"$cpp" /I"$cpp/async" /I"$shipyardRoot" /I"$shipyard" /I"$shipyard/value_types" /I"$root/scratch/value-types/include" /I"$root/scratch/graphics-xdk/include" "$PSScriptRoot/header_math.cpp" "$implementation" /Fo"$directory\\" /Fe"$directory/test.exe"
 exit /b %errorlevel%
 "@ | Set-Content -LiteralPath $batch -Encoding Ascii
     & $env:ComSpec /d /c $batch 2>&1 | Tee-Object -FilePath "$directory/compile.log"

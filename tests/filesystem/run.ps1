@@ -7,7 +7,9 @@ $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio/Installer
 $vs = & $vswhere -latest -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
 $vcvars = Join-Path $vs 'VC/Auxiliary/Build/vcvars64.bat'
 $inc = Join-Path $root 'platform/xbox360/cpp-compat/filesystem'
-$shipyardRoot = Join-Path (Split-Path $root -Parent) 'LibUltraShip+Fast3D360'
+$shipyardRoot = if ($env:XBOX360_PLATFORM_BASE) { $env:XBOX360_PLATFORM_BASE } else {
+    Join-Path $root ((Get-Content -LiteralPath (Join-Path $root 'platform-base.lock.json') -Raw | ConvertFrom-Json).base)
+}
 $shipyard = Join-Path $shipyardRoot 'sources'
 $source = Join-Path $shipyard 'filesystem/filesystem.cpp'
 $native = Join-Path $shipyard 'async/native.cpp'

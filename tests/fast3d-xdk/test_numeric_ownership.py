@@ -6,7 +6,10 @@ import unittest
 
 
 ROOT = Path(__file__).resolve().parents[2]
-SHARED = ROOT.parent / 'LibUltraShip+Fast3D360' / 'sources' / 'fast3d' / 'numeric.h'
+import runpy as _shipyard_runpy
+
+SHIPYARD_BASE = _shipyard_runpy.run_path(str(ROOT / "tools/platform_base.py"))["resolve"](ROOT)
+SHARED = SHIPYARD_BASE / 'sources' / 'fast3d' / 'numeric.h'
 LOCAL = ROOT / 'platform' / 'xbox360' / 'cpp-compat' / 'fast3d'
 
 

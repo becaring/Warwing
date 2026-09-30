@@ -27,7 +27,7 @@ call "$vcvars" >nul
 if errorlevel 1 exit /b 1
 cl /nologo /TC /c /MT "$src/prism/utils/invoke.c" /Fo"$hostDir/invoke.obj"
 if errorlevel 1 exit /b 1
-cl /nologo /std:c++17 /EHsc /MT /O2 /DNDEBUG /I"$root/scratch/graphics-xdk/include" /I"$graphics" /c "$shaderProvider" /Fo"$hostDir/shipyard_shader_provider.obj"
+cl /nologo /std:c++17 /EHsc /MT /O2 /DNDEBUG /I"$root/scratch/graphics-xdk/include" /I"$graphics" /I"$platformBase/sources" /c "$shaderProvider" /Fo"$hostDir/shipyard_shader_provider.obj"
 if errorlevel 1 exit /b 1
 cl /nologo /std:c++17 /utf-8 /EHsc /MT /O2 /DNDEBUG /DSPDLOG_ACTIVE_LEVEL=2 /D_CRT_SECURE_NO_WARNINGS $define /I"$src" /I"$base" /I"$out" /I"$platformBase/sources" /I"$platformBase/sources/value_types" /I"$root/scratch/value-types/include" /I"$root/scratch/graphics-xdk/include" /I"$graphics" /I"$root/upstream/dependencies/spdlog/include" "$src/prism/lexer.cpp" "$src/prism/ast.cpp" "$src/prism/processor.cpp" "$src/prism/utils/gv.cpp" "$builder" "$graphics/shader_provider.cpp" "$shaderLower" "$out/test_shader_features.cpp" "$PSScriptRoot/differential.cpp" "$range" "$hostDir/invoke.obj" "$hostDir/shipyard_shader_provider.obj" /Fo"$hostDir\\" /Fe"$hostDir/differential.exe"
 exit /b %errorlevel%

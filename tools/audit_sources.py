@@ -2,6 +2,7 @@
 
 This is a reconstruction tool, not an Xbox build or runtime validation.
 """
+
 from pathlib import Path
 import hashlib
 import json
@@ -24,8 +25,9 @@ REVISIONS = {
 def git(path, *args):
     # Fetch may run as the desktop user and audit as the sandbox user. Trust
     # only this explicit checkout for this invocation; never change global Git.
-    return subprocess.check_output(["git", "-c", "safe.directory=" + path.resolve().as_posix(),
-                                    "-C", str(path), *args], text=True).strip()
+    return subprocess.check_output(
+        ["git", "-c", "safe.directory=" + path.resolve().as_posix(), "-C", str(path), *args], text=True
+    ).strip()
 
 
 def sha256(path):
@@ -42,20 +44,38 @@ def main():
         path = BATTLESHIP / relative
         actual = git(path, "rev-parse", "HEAD")
         status = git(path, "status", "--porcelain")
-        sources.append({"path": path.relative_to(ROOT).as_posix(),
-                        "url": git(path, "remote", "get-url", "origin"),
-                        "expected": expected, "actual": actual,
-                        "matches": actual == expected, "status": status})
+        sources.append(
+            {
+                "path": path.relative_to(ROOT).as_posix(),
+                "url": git(path, "remote", "get-url", "origin"),
+                "expected": expected,
+                "actual": actual,
+                "matches": actual == expected,
+                "status": status,
+            }
+        )
     write("source-revisions.json", sources)
     if any(not item["matches"] or item["status"] for item in sources):
         raise SystemExit("Source revisions differ or checkouts are dirty; inspect source-revisions.json")
 
     # These patterns identify audit candidates, not an exhaustive semantic proof.
     patterns = {
-        "desktop_platform": r"SDL_\w+|<windows\.h>|<dbghelp\.h>|<psapi\.h>|<unistd\.h>|<dlfcn\.h>|\b(?:dlopen|dlsym|popen|fork|execv|CreateProcess|ShellExecute|GetProcAddress|LoadLibrary)\w*\b",
-        "standard_runtime": r"std::(?:filesystem|thread|mutex|recursive_mutex|condition_variable|future|shared_future|promise|async|chrono|atomic|variant|optional|visit)\b|\bthread_local\b",
+        """\
+desktop_platform""": """\
+SDL_\\w+|<windows\\.h>|<dbghelp\\.h>|<psapi\\.h>|<unistd\\.h>|\
+<dlfcn\\.h>|\\b(?:dlopen|dlsym|popen|fork|execv|CreateProcess|\
+ShellExecute|GetProcAddress|LoadLibrary)\\w*\\b""",
+        """\
+standard_runtime""": """\
+std::(?:filesystem|thread|mutex|recursive_mutex|condition_variable|\
+future|shared_future|promise|async|chrono|atomic|variant|optional|\
+visit)\\b|\\bthread_local\\b""",
         "compiler_syntax": r"\b(?:constexpr|consteval|constinit|nullptr|noexcept|override|final)\b|\benum\s+class\b|if\s+constexpr|auto\s*\[",
-        "endian_layout": r"(?:[Bb]yte[Ss]wap|byteswap|bswap|BSWAP|SWAP16|SWAP32|SWAP64|IS_BIG_ENDIAN|IS_BIGENDIAN|__BYTE_ORDER|__BIG_ENDIAN|reinterpret_cast|#pragma\s+pack)",
+        """\
+endian_layout""": """\
+(?:[Bb]yte[Ss]wap|byteswap|bswap|BSWAP|SWAP16|SWAP32|SWAP64|\
+IS_BIG_ENDIAN|IS_BIGENDIAN|__BYTE_ORDER|__BIG_ENDIAN|reinterpret_cast|\
+#pragma\\s+pack)""",
     }
     compiled = {key: re.compile(value) for key, value in patterns.items()}
     candidates = []
@@ -66,19 +86,42 @@ def main():
             for number, line in enumerate(path.read_text(encoding="utf-8", errors="replace").splitlines(), 1):
                 groups = [key for key, regex in compiled.items() if regex.search(line)]
                 if groups:
-                    candidates.append({"path": path.relative_to(BATTLESHIP).as_posix(),
-                                       "line": number, "categories": groups, "text": line.strip()})
-    write("source-candidates.json", {"scope": "Lexical audit candidates; comments and inactive platform branches included. Not a reachability or completeness proof.",
-                                           "patterns": patterns, "matches": candidates})
+                    candidates.append(
+                        {
+                            "path": path.relative_to(BATTLESHIP).as_posix(),
+                            "line": number,
+                            "categories": groups,
+                            "text": line.strip(),
+                        }
+                    )
+    write(
+        "source-candidates.json",
+        {
+            "scope": "Lexical audit candidates; comments and inactive platform branches included. Not a reachability or completeness proof.",
+            "patterns": patterns,
+            "matches": candidates,
+        },
+    )
 
     donor = Path("D:/Projects/SoH360")
     donor_paths = list((donor / "platform/xbox360").rglob("*"))
-    donor_paths += [donor / "tools/c89_lower.py", donor / "tools/prepare_xbox_c.py",
-                    donor / "upstream/libultraship/libultraship/CompilerCompat.h"]
-    write("soh360-donor-hashes.json", {
-        "root": str(donor), "purpose": "Read-only observed donor snapshot; no files imported yet",
-        "files": [{"path": path.relative_to(donor).as_posix(), "sha256": sha256(path)}
-                  for path in sorted(donor_paths) if path.is_file()]})
+    donor_paths += [
+        donor / "tools/c89_lower.py",
+        donor / "tools/prepare_xbox_c.py",
+        donor / "upstream/libultraship/libultraship/CompilerCompat.h",
+    ]
+    write(
+        "soh360-donor-hashes.json",
+        {
+            "root": str(donor),
+            "purpose": "Read-only observed donor snapshot; no files imported yet",
+            "files": [
+                {"path": path.relative_to(donor).as_posix(), "sha256": sha256(path)}
+                for path in sorted(donor_paths)
+                if path.is_file()
+            ],
+        },
+    )
     print(f"Pinned sources verified: {len(sources)} clean checkouts")
     print(f"Source audit candidates: {len(candidates)} in {len({item['path'] for item in candidates})} files")
     print(f"Reports: {OUT}")

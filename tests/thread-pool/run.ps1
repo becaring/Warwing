@@ -12,7 +12,9 @@ $vs = & $vswhere -latest -products '*' -requires Microsoft.VisualStudio.Componen
 if (!$vs) { throw 'Host MSVC required' }
 $vcvars = Join-Path $vs 'VC/Auxiliary/Build/vcvars64.bat'
 $async = Join-Path $root 'platform/xbox360/cpp-compat/async'
-$shipyardRoot = Join-Path (Split-Path $root -Parent) 'LibUltraShip+Fast3D360'
+$shipyardRoot = if ($env:XBOX360_PLATFORM_BASE) { $env:XBOX360_PLATFORM_BASE } else {
+    Join-Path $root ((Get-Content -LiteralPath (Join-Path $root 'platform-base.lock.json') -Raw | ConvertFrom-Json).base)
+}
 $shipyard = Join-Path $shipyardRoot 'sources'
 $support = Join-Path $root 'platform/xbox360/cpp-compat/thread-pool'
 $test = Join-Path $PSScriptRoot 'pool_tests.cpp'

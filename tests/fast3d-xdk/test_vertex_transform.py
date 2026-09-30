@@ -12,11 +12,14 @@ import unittest
 from test_vertex_lighting import extract, accumulation_probe
 
 ROOT = Path(__file__).resolve().parents[2]
+import runpy as _shipyard_runpy
+
+SHIPYARD_BASE = _shipyard_runpy.run_path(str(ROOT / "tools/platform_base.py"))["resolve"](ROOT)
 sys.path.insert(0, str(ROOT / 'tools'))
 HERE = Path(__file__).parent
 OUT = ROOT / 'scratch/fast3d-xdk/transform-tests'
-NATIVE = ROOT.parent / 'LibUltraShip+Fast3D360/sources/fast3d/vertex_transform.cpp'
-SHIPYARD = ROOT.parent / 'LibUltraShip+Fast3D360/sources'
+NATIVE = SHIPYARD_BASE / 'sources/fast3d/vertex_transform.cpp'
+SHIPYARD = SHIPYARD_BASE / 'sources'
 CLIP = SHIPYARD / 'fast3d/clip_quantize.cpp'
 
 
@@ -32,7 +35,7 @@ def host(source, name):
     includes = [HERE / 'vmx_model', SHIPYARD, ROOT / 'platform/xbox360',
                 ROOT / 'platform/xbox360/cpp-compat',
                 ROOT / 'upstream/BattleShip/libultraship/include',
-                ROOT.parent / 'LibUltraShip+Fast3D360/sources/value_types', ROOT / 'scratch/graphics-xdk/include']
+                SHIPYARD_BASE / 'sources/value_types', ROOT / 'scratch/graphics-xdk/include']
     batch = OUT / (name + '.cmd')
     batch.write_text('@echo off\ncall "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Auxiliary/Build/vcvars32.bat" >nul\n'
                      'cl /nologo /std:c++20 /O2 /fp:precise /arch:SSE2 /EHsc /MT /DNOMINMAX ' +
@@ -67,8 +70,12 @@ class TransformTests(unittest.TestCase):
             self.assertTrue(any(op.startswith(needed) for op in ops), needed)
         self.assertFalse(any(op.startswith(('vmadd', 'vnmsub', 'vmsum')) for op in ops),
                          'native vector positions changed scalar rounding/order')
-        self.assertEqual(sum(op.startswith('vmulfp') for op in ops), 3)
-        self.assertEqual(sum(op.startswith('vaddfp') for op in ops), 3)
+        for name in ('TransformPositions', 'TransformPositionsProfiled'):
+            body = re.search(r'(?ms)^\?' + name + r'@.*?(?=^\?|\Z)', assembly)
+            self.assertIsNotNone(body, name)
+            function_ops = re.findall(r'(?m)^\s*[0-9A-Fa-f]+:\s+[0-9A-Fa-f]{8}\s+(\S+)', body[0])
+            self.assertEqual(sum(op.startswith('vmulfp') for op in function_ops), 3, name)
+            self.assertEqual(sum(op.startswith('vaddfp') for op in function_ops), 3, name)
         self.assertEqual(sum(op.startswith('vcfpsxws') for op in ops), 4)
         self.assertGreaterEqual(sum(op.startswith('stvebx') for op in ops), 4,
                          'both clip policies must preserve the adjacent bytes')

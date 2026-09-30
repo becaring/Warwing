@@ -6,7 +6,10 @@ import sys
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
-SHIPYARD = ROOT.parent / 'LibUltraShip+Fast3D360'
+import runpy as _shipyard_runpy
+
+SHIPYARD_BASE = _shipyard_runpy.run_path(str(ROOT / "tools/platform_base.py"))["resolve"](ROOT)
+SHIPYARD = SHIPYARD_BASE
 sys.path.insert(0, str(ROOT / 'tools'))
 
 

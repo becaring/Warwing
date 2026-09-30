@@ -17,7 +17,7 @@ $batch=Join-Path $out 'build-host.cmd'
 @echo off
 call "$vcvars" >nul
 if errorlevel 1 exit /b 1
-cl /nologo /EHsc /W4 /WX /D_CRT_SECURE_NO_WARNINGS /MT /I"$out/include" /I"$base" "$test" "$shaderLower" /Fo"$hostObjects\\" /Fe"$out/shader_contract.exe"
+cl /nologo /EHsc /W4 /WX /D_CRT_SECURE_NO_WARNINGS /MT /I"$out/include" /I"$base" /I"$platformBase/sources" "$test" "$shaderLower" /Fo"$hostObjects\\" /Fe"$out/shader_contract.exe"
 exit /b %errorlevel%
 "@ | Set-Content -LiteralPath $batch -Encoding Ascii
 & $env:ComSpec /d /c $batch 2>&1 | Tee-Object -FilePath (Join-Path $out 'host-compile.log')

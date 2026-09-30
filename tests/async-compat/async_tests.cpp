@@ -5,8 +5,9 @@
 #include <vector>
 
 using namespace xbox_compat;
-static void check(bool condition, const char* message) {
-    if (!condition) throw std::runtime_error(message);
+static void check(bool condition, const char *message) {
+    if (!condition)
+        throw std::runtime_error(message);
 }
 #define CHECK(x) check(!!(x), "CHECK failed: " #x)
 
@@ -15,8 +16,8 @@ struct Reader {
     manual_reset_event entered, done;
     int value;
     Reader() : value(0) {}
-    static void run(void* arg) {
-        Reader* self = static_cast<Reader*>(arg);
+    static void run(void *arg) {
+        Reader *self = static_cast<Reader *>(arg);
         self->entered.set();
         self->result.wait();
         self->value = self->result.get();
@@ -34,7 +35,8 @@ static void multiple_readers_block_and_share() {
         readers[i].result = result;
         workers[i] = joining_thread(&Reader::run, &readers[i]);
     }
-    for (int i = 0; i < 8; ++i) readers[i].entered.wait();
+    for (int i = 0; i < 8; ++i)
+        readers[i].entered.wait();
     bool returnedEarly = readers[0].done.wait_for_ms(30);
     producer.set_value(73);
     for (int i = 0; i < 8; ++i) {
@@ -52,7 +54,11 @@ struct ExpectedFailure : std::runtime_error {
     ExpectedFailure() : std::runtime_error("resource failure"), tag(91) {}
 };
 static std::exception_ptr failure() {
-    try { throw ExpectedFailure(); } catch (...) { return std::current_exception(); }
+    try {
+        throw ExpectedFailure();
+    } catch (...) {
+        return std::current_exception();
+    }
 }
 
 // Catches swallowed/sliced exceptions and get() consuming a shared reader's result.
@@ -62,32 +68,50 @@ static void exceptions_and_invalid_states() {
     producer.set_exception(failure());
     for (int i = 0; i < 2; ++i) {
         bool caught = false;
-        try { (i ? a : b).get(); }
-        catch (const ExpectedFailure& e) { caught = e.tag == 91; }
+        try {
+            (i ? a : b).get();
+        } catch (const ExpectedFailure &e) {
+            caught = e.tag == 91;
+        }
         CHECK(caught);
     }
     bool caught = false;
-    try { producer.set_value(4); }
-    catch (const future_error& e) { caught = e.code() == promise_already_satisfied; }
+    try {
+        producer.set_value(4);
+    } catch (const future_error &e) {
+        caught = e.code() == promise_already_satisfied;
+    }
     CHECK(caught);
     caught = false;
-    try { producer.get_future(); }
-    catch (const future_error& e) { caught = e.code() == future_already_retrieved; }
+    try {
+        producer.get_future();
+    } catch (const future_error &e) {
+        caught = e.code() == future_already_retrieved;
+    }
     CHECK(caught);
     future<int> empty;
     caught = false;
-    try { empty.get(); }
-    catch (const future_error& e) { caught = e.code() == no_state; }
+    try {
+        empty.get();
+    } catch (const future_error &e) {
+        caught = e.code() == no_state;
+    }
     CHECK(caught);
     promise<int> exceptional;
     future<int> consumed = exceptional.get_future();
     exceptional.set_exception(failure());
-    try { consumed.get(); } catch (const ExpectedFailure&) {}
+    try {
+        consumed.get();
+    } catch (const ExpectedFailure &) {
+    }
     CHECK(!consumed.valid());
     promise<int> nullException;
     caught = false;
-    try { nullException.set_exception(std::exception_ptr()); }
-    catch (const std::invalid_argument&) { caught = true; }
+    try {
+        nullException.set_exception(std::exception_ptr());
+    } catch (const std::invalid_argument &) {
+        caught = true;
+    }
     CHECK(caught);
     nullException.set_value(6);
     CHECK(nullException.get_future().get() == 6);
@@ -98,11 +122,14 @@ struct BrokenReader {
     manual_reset_event entered, done;
     bool caught;
     BrokenReader() : caught(false) {}
-    static void run(void* arg) {
-        BrokenReader* self = static_cast<BrokenReader*>(arg);
+    static void run(void *arg) {
+        BrokenReader *self = static_cast<BrokenReader *>(arg);
         self->entered.set();
-        try { self->result.get(); }
-        catch (const future_error& e) { self->caught = e.code() == broken_promise; }
+        try {
+            self->result.get();
+        } catch (const future_error &e) {
+            self->caught = e.code() == broken_promise;
+        }
         self->done.set();
     }
 };
@@ -128,12 +155,18 @@ static void abandonment_and_move_ownership() {
     CHECK(delivered.get() == 28);
     CHECK(!delivered.valid());
     bool caught = false;
-    try { abandoned.get(); }
-    catch (const future_error& e) { caught = e.code() == broken_promise; }
+    try {
+        abandoned.get();
+    } catch (const future_error &e) {
+        caught = e.code() == broken_promise;
+    }
     CHECK(caught);
     caught = false;
-    try { second.set_value(2); }
-    catch (const future_error& e) { caught = e.code() == no_state; }
+    try {
+        second.set_value(2);
+    } catch (const future_error &e) {
+        caught = e.code() == no_state;
+    }
     CHECK(caught);
     promise<int> original;
     future<int> old = original.get_future();
@@ -149,39 +182,39 @@ static void abandonment_and_move_ownership() {
 }
 
 struct Tracked {
-    int* destroyed;
-    explicit Tracked(int* count) : destroyed(count) {}
+    int *destroyed;
+    explicit Tracked(int *count) : destroyed(count) {}
     ~Tracked() { ++*destroyed; }
 };
 
 // Catches early value destruction and shared state reference leaks.
 static void value_lifetime_and_move_only_result() {
     int destroyed = 0;
-    shared_future<std::shared_ptr<Tracked> > survivor;
+    shared_future<std::shared_ptr<Tracked>> survivor;
     {
-        promise<std::shared_ptr<Tracked> > producer;
+        promise<std::shared_ptr<Tracked>> producer;
         survivor = producer.get_future().share();
         producer.set_value(std::shared_ptr<Tracked>(new Tracked(&destroyed)));
     }
     {
-        shared_future<std::shared_ptr<Tracked> > copy = survivor;
-        survivor = shared_future<std::shared_ptr<Tracked> >();
+        shared_future<std::shared_ptr<Tracked>> copy = survivor;
+        survivor = shared_future<std::shared_ptr<Tracked>>();
         CHECK(destroyed == 0);
         CHECK(copy.get()->destroyed == &destroyed);
     }
     CHECK(destroyed == 1);
-    promise<std::unique_ptr<int> > producer;
-    future<std::unique_ptr<int> > result = producer.get_future();
+    promise<std::unique_ptr<int>> producer;
+    future<std::unique_ptr<int>> result = producer.get_future();
     producer.set_value(std::unique_ptr<int>(new int(18)));
     std::unique_ptr<int> value = result.get();
     CHECK(*value == 18 && !result.valid());
 }
 
 struct Incrementer {
-    mutex* gate;
-    int* count;
-    static void run(void* arg) {
-        Incrementer* self = static_cast<Incrementer*>(arg);
+    mutex *gate;
+    int *count;
+    static void run(void *arg) {
+        Incrementer *self = static_cast<Incrementer *>(arg);
         for (int i = 0; i < 20000; ++i) {
             lock_guard<mutex> lock(*self->gate);
             ++*self->count;
@@ -193,7 +226,7 @@ struct Incrementer {
 static void mutual_exclusion_and_joining_shutdown() {
     mutex gate;
     int count = 0;
-    Incrementer work = { &gate, &count };
+    Incrementer work = {&gate, &count};
     {
         joining_thread a(&Incrementer::run, &work);
         joining_thread b(&Incrementer::run, &work);
@@ -214,13 +247,13 @@ static void mutual_exclusion_and_joining_shutdown() {
 
 struct ShutdownOwner {
     manual_reset_event workerEntered, releaseWorker, leavingScope, returned;
-    static void blocked(void* arg) {
-        ShutdownOwner* self = static_cast<ShutdownOwner*>(arg);
+    static void blocked(void *arg) {
+        ShutdownOwner *self = static_cast<ShutdownOwner *>(arg);
         self->workerEntered.set();
         self->releaseWorker.wait();
     }
-    static void run(void* arg) {
-        ShutdownOwner* self = static_cast<ShutdownOwner*>(arg);
+    static void run(void *arg) {
+        ShutdownOwner *self = static_cast<ShutdownOwner *>(arg);
         {
             joining_thread worker(&ShutdownOwner::blocked, self);
             self->workerEntered.wait();
@@ -243,15 +276,20 @@ static void destructor_waits_for_blocked_worker() {
 }
 
 struct RacingProducer {
-    promise<int>* producer;
-    manual_reset_event* start;
+    promise<int> *producer;
+    manual_reset_event *start;
     bool won;
     RacingProducer() : producer(0), start(0), won(false) {}
-    static void run(void* arg) {
-        RacingProducer* self = static_cast<RacingProducer*>(arg);
+    static void run(void *arg) {
+        RacingProducer *self = static_cast<RacingProducer *>(arg);
         self->start->wait();
-        try { self->producer->set_value(55); self->won = true; }
-        catch (const future_error& e) { if (e.code() != promise_already_satisfied) throw; }
+        try {
+            self->producer->set_value(55);
+            self->won = true;
+        } catch (const future_error &e) {
+            if (e.code() != promise_already_satisfied)
+                throw;
+        }
     }
 };
 
@@ -267,17 +305,21 @@ static void competing_producers() {
         start.set();
         future<int> result = producer.get_future();
         CHECK(result.get() == 55);
-        ta.join(); tb.join();
+        ta.join();
+        tb.join();
         CHECK(a.won != b.won);
     }
 }
 
 struct ExceptionalProducer {
-    promise<int>* producer;
-    static void run(void* arg) {
-        ExceptionalProducer* self = static_cast<ExceptionalProducer*>(arg);
-        try { throw ExpectedFailure(); }
-        catch (...) { self->producer->set_exception(std::current_exception()); }
+    promise<int> *producer;
+    static void run(void *arg) {
+        ExceptionalProducer *self = static_cast<ExceptionalProducer *>(arg);
+        try {
+            throw ExpectedFailure();
+        } catch (...) {
+            self->producer->set_exception(std::current_exception());
+        }
     }
 };
 
@@ -287,14 +329,17 @@ static void exception_survives_worker_exit() {
     {
         promise<int> producer;
         result = producer.get_future().share();
-        ExceptionalProducer work = { &producer };
+        ExceptionalProducer work = {&producer};
         joining_thread worker(&ExceptionalProducer::run, &work);
         worker.join();
     }
     for (int i = 0; i < 2; ++i) {
         bool caught = false;
-        try { result.get(); }
-        catch (const ExpectedFailure& e) { caught = e.tag == 91; }
+        try {
+            result.get();
+        } catch (const ExpectedFailure &e) {
+            caught = e.tag == 91;
+        }
         CHECK(caught);
     }
 }
@@ -302,8 +347,9 @@ static void exception_survives_worker_exit() {
 struct ThrowingValue {
     bool fail;
     explicit ThrowingValue(bool shouldFail) : fail(shouldFail) {}
-    ThrowingValue(const ThrowingValue& other) : fail(other.fail) {
-        if (fail) throw ExpectedFailure();
+    ThrowingValue(const ThrowingValue &other) : fail(other.fail) {
+        if (fail)
+            throw ExpectedFailure();
     }
 };
 
@@ -313,14 +359,16 @@ static void failed_construction_can_be_retried() {
     shared_future<ThrowingValue> result = producer.get_future().share();
     ThrowingValue bad(true), good(false);
     bool caught = false;
-    try { producer.set_value(bad); }
-    catch (const ExpectedFailure&) { caught = true; }
+    try {
+        producer.set_value(bad);
+    } catch (const ExpectedFailure &) {
+        caught = true;
+    }
     CHECK(caught);
     producer.set_value(good);
     CHECK(!result.get().fail);
-    promise<std::shared_ptr<std::vector<std::shared_ptr<Tracked> > > > directory;
-    std::shared_ptr<std::vector<std::shared_ptr<Tracked> > > resources(
-        new std::vector<std::shared_ptr<Tracked> >());
+    promise<std::shared_ptr<std::vector<std::shared_ptr<Tracked>>>> directory;
+    std::shared_ptr<std::vector<std::shared_ptr<Tracked>>> resources(new std::vector<std::shared_ptr<Tracked>>());
     directory.set_value(resources);
     CHECK(directory.get_future().share().get() == resources);
 }
@@ -332,10 +380,11 @@ struct ConditionReaders {
     int entered, completed;
     bool ready;
     ConditionReaders() : entered(0), completed(0), ready(false) {}
-    static void run(void* arg) {
-        ConditionReaders* self = static_cast<ConditionReaders*>(arg);
+    static void run(void *arg) {
+        ConditionReaders *self = static_cast<ConditionReaders *>(arg);
         unique_lock<mutex> lock(self->gate);
-        if (++self->entered == 4) self->allEntered.set();
+        if (++self->entered == 4)
+            self->allEntered.set();
         self->changed.wait(lock, [self]() -> bool { return self->ready; });
         ++self->completed;
     }
@@ -345,7 +394,8 @@ struct ConditionReaders {
 static void condition_variable_broadcast() {
     ConditionReaders state;
     joining_thread readers[4];
-    for (int i = 0; i < 4; ++i) readers[i] = joining_thread(&ConditionReaders::run, &state);
+    for (int i = 0; i < 4; ++i)
+        readers[i] = joining_thread(&ConditionReaders::run, &state);
     state.allEntered.wait();
     {
         unique_lock<mutex> lock(state.gate);
@@ -357,7 +407,8 @@ static void condition_variable_broadcast() {
         state.ready = true;
         state.changed.notify_all();
     }
-    for (int i = 0; i < 4; ++i) readers[i].join();
+    for (int i = 0; i < 4; ++i)
+        readers[i].join();
     CHECK(state.completed == 4);
 }
 
@@ -370,15 +421,25 @@ static void void_result_ownership() {
     shared_future<void> second = first;
     promise<void> moved(std::move(original));
     moved.set_value();
-    first.get(); second.get(); first.get();
+    first.get();
+    second.get();
+    first.get();
     promise<void> discarded;
     future<void> broken = discarded.get_future();
     discarded = std::move(moved);
     bool caught = false;
-    try { broken.get(); } catch (const future_error& e) { caught = e.code() == broken_promise; }
+    try {
+        broken.get();
+    } catch (const future_error &e) {
+        caught = e.code() == broken_promise;
+    }
     CHECK(caught && !broken.valid());
     caught = false;
-    try { moved.set_value(); } catch (const future_error& e) { caught = e.code() == no_state; }
+    try {
+        moved.set_value();
+    } catch (const future_error &e) {
+        caught = e.code() == no_state;
+    }
     CHECK(caught);
 }
 
@@ -395,9 +456,10 @@ int main() {
         failed_construction_can_be_retried();
         condition_variable_broadcast();
         void_result_ownership();
-        std::puts("PASS async compatibility: blocking, publication, multi-reader lifetime, exceptions, broken promise, move ownership, mutex, joining shutdown, races");
+        std::puts("PASS async compatibility: blocking, publication, multi-reader lifetime, exceptions, broken promise, "
+                  "move ownership, mutex, joining shutdown, races");
         return 0;
-    } catch (const std::exception& e) {
+    } catch (const std::exception &e) {
         std::fprintf(stderr, "FAIL: %s\n", e.what());
         return 1;
     }

@@ -6,6 +6,9 @@ import sys
 import unittest
 
 ROOT=Path(__file__).resolve().parents[2]
+import runpy as _shipyard_runpy
+
+SHIPYARD_BASE = _shipyard_runpy.run_path(str(ROOT / "tools/platform_base.py"))["resolve"](ROOT)
 sys.path.insert(0,str(ROOT/'tools'))
 
 def function(text,signature):
@@ -73,8 +76,8 @@ class TextureBindings(unittest.TestCase):
         out=ROOT/'scratch/fast3d-xdk/texture-binding-tests';out.mkdir(parents=True,exist_ok=True)
         (out/'contract.cpp').write_text(driver)
         includes=[ROOT/'upstream/BattleShip/libultraship/include',ROOT/'platform/xbox360/cpp-compat',
-                  ROOT.parent/'LibUltraShip+Fast3D360/sources/value_types',
-                  ROOT.parent/'LibUltraShip+Fast3D360/sources',ROOT/'scratch/graphics-xdk/include']
+                  SHIPYARD_BASE / 'sources/value_types',
+                  SHIPYARD_BASE / 'sources',ROOT/'scratch/graphics-xdk/include']
         (out/'build.cmd').write_text('@echo off\ncall "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Auxiliary/Build/vcvars32.bat" >nul\n'
             'cl /nologo /std:c++20 /O2 /EHsc /MT /DNOMINMAX '+
             ' '.join('/I"'+str(p)+'"' for p in includes)+' contract.cpp /Fe:contract.exe\nexit /b %errorlevel%\n')
