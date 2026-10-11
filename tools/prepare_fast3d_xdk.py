@@ -34,7 +34,7 @@ import shader_metadata_projection
 import command_work_projection
 import command_trace_projection
 from prepare_prism_xdk import PARSER, walk, field, tx, once, mapped, lower_ranges, enum_wrappers
-from xbox360_platform import fast3d_opcode, matrix_product
+from xbox360_platform import fast3d_display_list_cull, fast3d_opcode, matrix_product
 from xbox360_platform.cpp_syntax import collect_member_defaults
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -327,6 +327,7 @@ def lower(text, name):
         )
         text = profile_projections.interpreter(text)
         text = dispatch_owner_projection.transform(text)
+        text = fast3d_display_list_cull.transform(text)
         text = cull_projection.transform(text)
         text = vertex_packing_projection.transform(text)
         text = vertex_lighting_projection.transform(text)

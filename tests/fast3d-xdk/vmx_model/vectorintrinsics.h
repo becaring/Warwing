@@ -13,6 +13,8 @@ inline __vector4 __lvx(const void* p,int offset) { __vector4 r;memcpy(&r,(const 
 inline __vector4 __lvlx(const void* p,int offset) { return __lvx(p,offset); }
 inline __vector4 __lvrx(const void*,int) { __vector4 r={{0,0,0,0}};return r; }
 inline void __stvx(__vector4 v,void* p,int offset) { memcpy((char*)p+offset,&v,16); }
+inline void __stvlx(__vector4 v,void* p,int offset) { __stvx(v,p,offset); }
+inline void __stvrx(__vector4,void*,int) {}
 inline void __stvebx(__vector4 v,void* p,int offset) {
     const unsigned selector=(unsigned)((uintptr_t)p+offset)&15;
     *((unsigned char*)p+offset)=(unsigned char)(v.u[selector/4]>>(24-(selector%4)*8));

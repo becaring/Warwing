@@ -17,7 +17,8 @@ class DispatchOwnerTests(unittest.TestCase):
             ROOT / "scratch/application-xdk/native/composed-overlay/libultraship/src/fast/interpreter.cpp"
         ).read_text()
         self.assertEqual(original.count("Interpreter* gfx = mInstance.lock().get();"), 90)
-        self.assertEqual(selected.count("gfx = XboxDispatchInterpreter();"), 90)
+        # The shared display-list cull handler adds one owner borrow.
+        self.assertEqual(selected.count("gfx = XboxDispatchInterpreter();"), 91)
         self.assertEqual(selected.count("mInstance.lock()"), 6)
         self.assertIn("typedef Shipyard::Fast3D::DispatchOwner<Interpreter> XboxDispatchOwner;", selected)
         self.assertRegex(
