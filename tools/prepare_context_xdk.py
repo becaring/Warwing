@@ -44,8 +44,9 @@ def transform(relative, t):
         t = once(
             t,
             "    mControlDeck = nullptr;",
-            "#ifdef _XBOX\n    if (mControlDeck) mControlDeck->StopAllRumble();\n   "
-            " ShipyardInput_StopPhysicalRumble();\n#endif\n    mControlDeck = nullptr;",
+            # PortShutdown already stopped logical rumble while the Context was
+            # alive; mappings reach the deck through the expired singleton here.
+            "#ifdef _XBOX\n    ShipyardInput_StopPhysicalRumble();\n#endif\n    mControlDeck = nullptr;",
         )
     elif relative.endswith("consolevariablebridge.cpp"):
         direct = ["ship/config/ConsoleVariable.h"]
