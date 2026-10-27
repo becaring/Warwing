@@ -71,6 +71,15 @@ int main() {
     for (uintptr_t a = 0x48008; a < 0x49000; a += 8)
         compare(a);
     require(testBoundsScans == scans, "unknown command walk must not lock/scan repeatedly");
+    // A G_DL call and its return alternate between files.
+    compare(0x20000);
+    compare(0x60000);
+    scans = testBoundsScans;
+    for (unsigned i = 0; i < 100; ++i) {
+        compare(0x20008);
+        compare(0x60008);
+    }
+    require(testBoundsScans == scans, "alternating display lists must not lock/scan repeatedly");
     // Exact boundaries, positive precedence over another range's walked-past tail.
     for (uintptr_t a = 0x1fff8; a <= 0x30108; a += 8)
         compare(a);

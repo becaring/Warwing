@@ -33,7 +33,7 @@ def project_plan(name, jobs=8):
     if len(elements) != len(selected):
         raise ValueError('Smash project source count differs from inventory: ' + name)
     records = []
-    for index, (item, element) in enumerate(zip(selected, elements)):
+    for item, element in zip(selected, elements):
         if 'shipyard_source' in item:
             source = PLATFORM_BASE / item['shipyard_source']
             include = '$(ShipyardRoot)\\' + item['shipyard_source'].replace('/', '\\')
@@ -42,7 +42,8 @@ def project_plan(name, jobs=8):
             include = '$(SmashSourceRoot)' + item['staged'].replace('/', '\\')
         if element.attrib['Include'] != include:
             raise ValueError('Smash project source order differs from inventory: ' + item['path'])
-        obj = OUT / 'obj' / name / ('%04d_%s.obj' % (index, Path(item['path']).stem))
+        obj = OUT / 'obj' / name / ('%s_%s.obj' % (Path(item['path']).stem,
+                                          hashlib.sha256(item['path'].encode()).hexdigest()[:16]))
         records.append(dict(include=include, source=str(source), object=str(obj), sha256=item['sha256']))
     return parallel_build.plan(project, records, OUT/'parallel'/name, jobs)
 
@@ -62,8 +63,6 @@ def build_project(name, jobs=8, full_profiling=False, rebuild=False):
             '/p:SmashFullProfiling=' + str(int(full_profiling)),
             '/p:ShipyardRoot=' + str(PLATFORM_BASE), '/nologo', '/verbosity:minimal']
     receipt_path = planned.output/'compile-receipt.json'
-    if receipt_path.exists():
-        receipt_path.unlink()
     try:
         receipt = parallel_build.run(planned, [str(MSBUILD)], arguments=args,
                                      owned_roots=[ROOT, PLATFORM_BASE])

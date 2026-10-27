@@ -3,6 +3,7 @@
 #include "interop.h"
 #include "services.h"
 #include "xenos/shader_cache.h"
+#include "xenos/shader_pack_program.h"
 #include "../runtime/perf_trace.h"
 
 namespace Fast {
@@ -39,9 +40,12 @@ void GfxRenderingAPIXenos::SetScissor(int x,int y,int w,int h){ShipyardXenos::Se
 void GfxRenderingAPIXenos::SetUseAlpha(bool alpha){ShipyardXenos::SetUseAlpha(alpha);}
 void GfxRenderingAPIXenos::DrawTriangles(float v[],size_t count,size_t tris){ShipyardXenos::DrawTriangles(v,count,tris);}
 void GfxRenderingAPIXenos::Init(){
+    // tools/build_shader_pack.py output beside the XEX, each program verified against this build on first use.
+    Shipyard::Xenos::ConfigureShaderPack("game:\\smash360.shaderpack");
     const Shipyard::Xenos::ShaderCacheConfig config={"smashsave:\\smash360-shaders.cache",2,Smash360_QueueShaderCacheWrite};
     if(!Shipyard::Xenos::ConfigureShaderCache(config))Smash360_Fatal("shader cache configuration",E_UNEXPECTED);
-    const ShipyardXenos::ShaderCacheOps cache={Shipyard::Xenos::LoadShaderCode,Shipyard::Xenos::StoreShaderCode};
+    const ShipyardXenos::ShaderCacheOps cache={Shipyard::Xenos::LoadShaderCode,Shipyard::Xenos::StoreShaderCode,
+                                               Shipyard::Xenos::PackedFast3DProgram};
     ShipyardXenos::SetShaderCache(&cache);
     ShipyardXenos::Init();Smash360_InitializeGuiForXenos();
 }
@@ -64,7 +68,9 @@ void* GfxRenderingAPIXenos::GetFramebufferTextureId(int id){return ShipyardXenos
 void GfxRenderingAPIXenos::SelectTextureFb(int id){ShipyardXenos::SelectTextureFb(id);}
 bool GfxRenderingAPIXenos::FbNeedsSampleVFlip(int id){return ShipyardXenos::FbNeedsSampleVFlip(id);}
 void GfxRenderingAPIXenos::DeleteTexture(uint32_t id){ShipyardXenos::DeleteTexture(id);}
-void GfxRenderingAPIXenos::SetTextureFilter(FilteringMode mode){ShipyardXenos::SetTextureFilter(mode);}
+// Like upstream DX11: cached uploads and the bound shader carry the old filter.
+extern "C" void gfx_texture_cache_clear();
+void GfxRenderingAPIXenos::SetTextureFilter(FilteringMode mode){ShipyardXenos::SetTextureFilter(mode);gfx_texture_cache_clear();if(ShipyardXenos::CurrentShader())LoadShader(ShipyardXenos::CurrentShader());}
 FilteringMode GfxRenderingAPIXenos::GetTextureFilter(){return ShipyardXenos::GetTextureFilter();}
 void GfxRenderingAPIXenos::SetSrgbMode(){mSrgbMode=true;}
 ImTextureID GfxRenderingAPIXenos::GetTextureById(int id){return ShipyardXenos::GetTextureById(id);}

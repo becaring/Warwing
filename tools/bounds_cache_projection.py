@@ -8,12 +8,17 @@ from profile_projections import once
 
 def transform(text):
     text = '#include "memory/address_gap.h"\n' + text
-    # This cache belongs exclusively to the calling thread and is not written
-    # during the hit predicate. XDK otherwise copies it through stack memory
-    # for every command (ld/std followed immediately by dependent reloads).
-    text = once(text, '        const HitCache c = sHitCache;',
-                '        const HitCache& c = sHitCache;')
-    text = once(text, 'thread_local HitCache sHitCache;', '''thread_local HitCache sHitCache;
+    # G_DL calls and returns alternate between files, so one entry per recent
+    # range keeps them off the locked scan. Entries are read in place: XDK
+    # otherwise copies each through stack memory (ld/std, dependent reloads).
+    text = once(text, '    {\n        const HitCache c = sHitCache;', '''\
+    for (unsigned i = 0; i < kHitCacheEntries; ++i) {
+        const HitCache& c = sHitCache[i];''')
+    text = once(text, '            sHitCache = HitCache{gen, e.base, e.size};',
+                '            sHitCache[sHitCacheNext++ % kHitCacheEntries] = HitCache{gen, e.base, e.size};')
+    text = once(text, 'thread_local HitCache sHitCache;', '''const unsigned kHitCacheEntries = 8;
+thread_local HitCache sHitCache[kHitCacheEntries];
+thread_local unsigned sHitCacheNext = 0;
 struct UnknownCache {
     uint64_t gen;
     Shipyard::Memory::AddressGap gap;

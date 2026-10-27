@@ -9,7 +9,7 @@
     "include/fast/postprocess/PostProcessPreset.h": "abf08235f6e80accf4427bee731fabb4ca43cbb7fdf61b2895748712a8830402"
   },
   "shared": {
-    "sources/graphics/shader_lower.cpp": "42ce914c07a4a8aaa2db08e2713154d96ec6ecb44743a8f9ae558774639526c2"
+    "sources/graphics/shader_lower.cpp": "dc48c4061d2563f870ae808af5aac585e83d05b0241723caa2dff5203b915cb9"
   },
   "libultraship_commit": "89d9de83a8d09bd7d3b7bc7f8d08554ee2ce8459"
 }

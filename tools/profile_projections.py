@@ -53,13 +53,16 @@ def interpreter(text):
         ("LookupOrCreateShaderProgram", "SHADER_LOOKUP"),
     ):
         text = scope(text, "Interpreter::" + name, section)
+    text = scope(text, "PortTextureContentHash", "TEXTURE_HASH")
     for name, section in (
-        ("PortTextureContentHash", "TEXTURE_HASH"),
         ("portNormalizeDisplayListPointer", "DL_NORMALIZE"),
         ("gfxPointerHasReadableBytes", "POINTER_CHECK"),
         ("gfx_step", "DL_STEP"),
     ):
-        text = scope(text, name, section)
+        # Per-command and per-pointer scopes: two time-base reads each would
+        # tax every command. SMASH360_PROFILE_DETAIL=1 or the sampled command
+        # trace (SMASH360_COMMAND_TRACE=1) measures them.
+        text = detail_scope(text, name, section)
     text = enter(text, "Interpreter::GfxSpVertex", "Smash360_PerfCount(SMASH_COUNT_VERTICES, (unsigned)n_vertices);")
     text = enter(text, "Interpreter::GfxSpTri1", "Smash360_PerfCount(SMASH_COUNT_TRIANGLES);")
     text = enter(text, "gfx_step", "Smash360_PerfCount(SMASH_COUNT_COMMANDS);")
@@ -68,7 +71,7 @@ def interpreter(text):
         "    {\n        if (sDLBoundsCheck && sDLBoundsCheck((uintptr_t)cmd) == kDLBoundsWalkedPast) {",
         """\
     {
-        Smash360PerfScope boundsScope(SMASH_PERF_DL_BOUNDS);
+        Smash360PerfScope boundsScope(SMASH_PERF_DL_BOUNDS, smash360_perf_detail);
         if (sDLBoundsCheck && sDLBoundsCheck((uintptr_t)cmd) == \
 kDLBoundsWalkedPast) {""",
     )

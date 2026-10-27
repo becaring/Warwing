@@ -14,6 +14,7 @@ import subprocess
 import sys
 from game_source_manifest import ROOT, UPSTREAM, manifest, sha256
 from platform_base import resolve as resolve_platform_base
+import overlap_projection
 
 COMPAT = ROOT / "platform/xbox360/game-compat"
 PLATFORM_BASE = resolve_platform_base(ROOT)
@@ -311,6 +312,10 @@ def main():
             if b"_Bool" in corrected:
                 corrected, boolean_lowering = lower_booleans(corrected, c89_lower.PARSER)
             narrow = None
+            if source["path"] == "decomp/src/sys/taskman.c":
+                corrected = overlap_projection.taskman(corrected)
+            if source["path"] == "decomp/src/ft/ftmain.c":
+                corrected = overlap_projection.figatree(corrected)
             if source["path"] == "decomp/src/sc/scmanager.c":
                 if (
                     source["sha256"]

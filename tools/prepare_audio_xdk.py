@@ -140,6 +140,12 @@ def lower(path, text):
         text = replace(text, "double mAllPassBaseRate = 1.0;", "double mAllPassBaseRate;")
         text = text.replace("constexpr", "const")
     elif path.endswith("SoundMatrixDecoder.cpp"):
+        from platform_base import resolve as resolve_platform_base
+
+        resolve_platform_base(ROOT)
+        from xbox360_platform.audio_cpu import matrix as matrix_coefficients
+
+        text = matrix_coefficients(text)
         text = text.replace("constexpr", "const")
         text = replace(
             text,

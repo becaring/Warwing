@@ -8,6 +8,7 @@ from pathlib import Path
 import argparse, hashlib, json, re, runpy, subprocess
 import texture_binding_projection
 import profile_projections
+import overlap_projection
 
 ROOT = Path(__file__).resolve().parents[1]
 from platform_base import resolve as resolve_platform_base
@@ -77,6 +78,7 @@ def transform(relative, text):
             "#ifdef _XBOX\nstruct SDL_Renderer; // Opaque pointer in the existing Metal union"
             " member.\n#else\n#include <SDL2/SDL.h>\n#endif",
         )
+        text = overlap_projection.gui_header(text)
         # The public class stores pointers to these actual classes. Include their
         # definitions in Gui.cpp, avoiding unrelated implementation dependencies.
         for name in (
@@ -155,7 +157,9 @@ def transform(relative, text):
                 " Smash360_ImGuiPlatformNewFrame(window->GetWidth(), window->GetHeight(),"
                 " GetMenuOrMenubarVisible());"
             ),
-            "void Gui::ImGuiRenderDrawData(ImDrawData* data)": "    Shipyard_ImGuiRender(data);",
+            "void Gui::ImGuiRenderDrawData(ImDrawData* data)": (
+                "    if (!Shipyard_ImGuiCaptureDrawData(data)) Shipyard_ImGuiRender(data);"
+            ),
             "void Gui::HandleWindowEvents(WindowEvent event)": (
                 "    // Xbox physical input is polled by the real platform frame and ControlDeck.\n"
                 "    (void)event;"
@@ -403,8 +407,15 @@ def transform(relative, text):
     text = re.sub(r"\b0b([01]+)\b", lambda m: hex(int(m[1], 2)), text)
     text = LOWER["lower_ranges"](text.encode()).decode()
     if relative == "src/ship/window/gui/Gui.cpp":
+        text = overlap_projection.gui(text)
         text = profile_projections.gui(text)
         text = texture_binding_projection.gui(text)
+        from xbox360_platform.lus_gui import cache_interpreter_locks
+        text = cache_interpreter_locks(text, {
+            "Gui::ApplyResolutionChanges": 7, "Gui::GetIntegerScaleFactor": 20,
+            "Gui::CalculateGameViewport": 16, "Gui::DrawGame": 8, "Gui::XboxDrawPassiveGame": 8,
+            "Gui::ImGuiRenderDrawData": 2,
+        })
     return '#include "config/compiler.h"\n' + text
 
 

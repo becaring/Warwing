@@ -60,13 +60,18 @@ def mapped(path, text, line=1):
     block_comment = False
     quote = None
     continued = False
+    depth = 0
     last_file = None
     last_line = 0
     for index, current in enumerate(changed):
         filename = path if index in origins else generated_path
-        number = origins.get(index, len(output) + 2)
-        safe = not block_comment and quote is None and not continued
+        # Generated lines map to themselves: this line, or the one after a directive.
+        number = origins.get(index, len(output) + 1)
+        # No directive inside an open call; a macro's arguments cannot hold one.
+        safe = not block_comment and quote is None and not continued and depth == 0
         if safe and (filename != last_file or number != last_line + 1):
+            if index not in origins:
+                number += 1
             output.append('#line %d "%s"\n' % (number, filename))
             last_file = filename
             last_line = number - 1
@@ -95,6 +100,10 @@ def mapped(path, text, line=1):
                 continue
             elif char in ('"', "'"):
                 quote = char
+            elif char == "(":
+                depth += 1
+            elif char == ")":
+                depth = max(depth - 1, 0)
             cursor += 1
         continued = current.rstrip("\r\n").endswith("\\")
     result = "".join(output)
@@ -265,11 +274,14 @@ def compile_xdk():
         "/I" + str(BASE),
         "/I" + str(ROOT / "platform/xbox360"),
     ]
+    from xbox360_platform import xenos_capabilities
+    flags += xenos_capabilities.compiler_options(3, shader_pack=True)
     sources = [
         PLATFORM_BASE / "sources/xenos/core.cpp",
         BASE / "api.cpp",
         BASE / "shipyard_services.cpp",
         PLATFORM_BASE / "sources/xenos/shader_cache.cpp",
+        PLATFORM_BASE / "sources/xenos/shader_pack_program.cpp",
         BASE / "shader_cache_adapter.cpp",
         PLATFORM_BASE / "sources/graphics/shader_lower.cpp",
         PLATFORM_BASE / "sources/presentation/xenos_surface.cpp",

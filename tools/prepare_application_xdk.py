@@ -14,6 +14,7 @@ from platform_base import resolve as resolve_platform_base
 
 PLATFORM_BASE = resolve_platform_base(ROOT)
 from xbox360_platform.build_policy import CXX_MSBUILD
+from xbox360_platform import xenos_capabilities
 
 UP = ROOT / "upstream/BattleShip"
 OUT = ROOT / "scratch/application-xdk/native"
@@ -515,16 +516,20 @@ def project(name, items, game=()):
     else:
         node(node(defs, "Lib"), "OutputFile", "$(OutDir)Libultraship360.lib")
     group = node(root, "ItemGroup")
-    for index, item in enumerate(items):
+    for item in items:
         include = (
             "$(ShipyardRoot)\\" + item["shipyard_source"].replace("/", "\\")
             if "shipyard_source" in item
             else "$(SmashSourceRoot)" + item["staged"].replace("/", "\\")
         )
         unit = node(group, "ClCompile", Include=include)
-        node(unit, "ObjectFileName", "$(IntDir)%04d_%s.obj" % (index, Path(item["path"]).stem))
+        # Path-derived names keep objects stable when sources are added or removed.
+        node(unit, "ObjectFileName", "$(IntDir)%s_%s.obj" % (
+            Path(item["path"]).stem, hashlib.sha256(item["path"].encode()).hexdigest()[:16]))
         if item["path"].endswith(".c"):
             node(unit, "CompileAs", "CompileAsC")
+        if "options" in item:
+            node(unit, "AdditionalOptions", " ".join(item["options"]) + " %(AdditionalOptions)")
         # Bounded real SDK project smoke compilation, without touching or
         # excluding any production source in the normal build.
         node(
@@ -806,6 +811,7 @@ def prepare():
             "provider": "Shipyard direct source",
             "input": "platform_base:" + xenos,
             "sha256": digest(PLATFORM_BASE / xenos),
+            "options": xenos_capabilities.compiler_options(3, shader_pack=True),
         }
     )
     presentation = "sources/presentation/xenos_surface.cpp"
@@ -826,6 +832,17 @@ def prepare():
             "provider": "Shipyard direct source",
             "input": "platform_base:" + shader_cache,
             "sha256": digest(PLATFORM_BASE / shader_cache),
+        }
+    )
+    shader_pack = "sources/xenos/shader_pack_program.cpp"
+    app_items.append(
+        {
+            "path": "shipyard/" + shader_pack,
+            "shipyard_source": shader_pack,
+            "provider": "Shipyard direct source",
+            "input": "platform_base:" + shader_pack,
+            "sha256": digest(PLATFORM_BASE / shader_pack),
+            "options": xenos_capabilities.compiler_options(3, shader_pack=True),
         }
     )
     shader_worker = "sources/io/shader_worker.cpp"
@@ -866,6 +883,17 @@ def prepare():
             "provider": "Shipyard direct source",
             "input": "platform_base:" + platform_frame,
             "sha256": digest(PLATFORM_BASE / platform_frame),
+        }
+    )
+    # The overlap runtime replays one passive GUI capture per tick.
+    gui_capture = "sources/imgui/gui_capture.cpp"
+    app_items.append(
+        {
+            "path": "shipyard/" + gui_capture,
+            "shipyard_source": gui_capture,
+            "provider": "Shipyard direct source",
+            "input": "platform_base:" + gui_capture,
+            "sha256": digest(PLATFORM_BASE / gui_capture),
         }
     )
     for input_source in ("sources/input/physical.cpp", "sources/input/xinput.cpp"):

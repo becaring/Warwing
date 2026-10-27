@@ -96,17 +96,23 @@ def mapped(source_path, text, output):
     comment = False
     quote = None
     continuation = False
+    depth = 0
     last_file = None
     last_line = 0
     for index, current in enumerate(changed):
         filename = source_path if index in origins else destination
-        number = origins.get(index, len(result) + 2)
+        # Generated lines map to themselves: this line, or the one after a directive.
+        number = origins.get(index, len(result) + 1)
+        # No directive inside an open call; a macro's arguments cannot hold one.
         if (
             not comment
             and not quote
             and not continuation
+            and depth == 0
             and (filename != last_file or number != last_line + 1)
         ):
+            if index not in origins:
+                number += 1
             result.append('#line %d "%s"\n' % (number, filename))
             last_file = filename
             last_line = number - 1
@@ -135,6 +141,10 @@ def mapped(source_path, text, output):
                 continue
             elif char in ('"', "'"):
                 quote = char
+            elif char == "(":
+                depth += 1
+            elif char == ")":
+                depth = max(depth - 1, 0)
             cursor += 1
         continuation = current.rstrip("\r\n").endswith("\\")
     if guard:

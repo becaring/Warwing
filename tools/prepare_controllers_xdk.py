@@ -9,7 +9,9 @@ BASE = ROOT / "platform/xbox360/cpp-compat/controllers"
 OUT = ROOT / "scratch/controllers-xdk"
 INPUT = ROOT / "scratch/input-xdk/source/libultraship"
 MAP = runpy.run_path(str(ROOT / "tools/prepare_prism_xdk.py"))["mapped"]
-LOWER = runpy.run_path(str(BASE / "lowering.py"))
+runpy.run_path(str(ROOT / "tools/platform_base.py"))["resolve"](ROOT)
+from xbox360_platform import lus_input, overlap_lus
+LOWER =runpy.run_path(str(BASE / "lowering.py"))
 INITIALIZERS = runpy.run_path(str(BASE / "initializers.py"))
 CONSTRUCTORS = runpy.run_path(str(BASE / "constructors.py"))
 
@@ -46,7 +48,9 @@ def unsupported_functions(text, names):
 def platform(relative, text):
     from xbox360_platform.controller_routes import project as project_routes
 
-    text = project_routes(relative, text)
+    text = lus_input.borrow_polling(relative, project_routes(relative, text))
+    if relative == "src/ship/controller/controldeck/ControlDeck.cpp":
+        text = lus_input.gamepad_modal(text)
     if relative == "src/ship/controller/physicaldevice/ConnectedPhysicalDeviceManager.cpp":
         # XDK 21256 xhash move construction swaps uninitialized bucket metadata
         # into the source. BattleShip reuses that source immediately. Start from
@@ -184,6 +188,7 @@ def platform(relative, text):
             "std::unordered_map<CONTROLLERBUTTONS_T, std::string> buttonNames) :"
             " mControllerBits(nullptr) {",
         )
+        text = overlap_lus.control_deck(text)
     if relative.endswith(".cpp") and "->GetGui()->" in text:
         text = '#include "ship/window/gui/Gui.h"\n' + text
     for name, member in [

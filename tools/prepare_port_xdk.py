@@ -12,6 +12,7 @@ import sys
 import profile_projections
 import bounds_cache_projection
 import command_work_projection
+import overlap_projection
 from prepare_prism_xdk import PARSER, walk
 from xbox360_platform.cpp_syntax import lower_if_initializers
 
@@ -116,9 +117,14 @@ def transform(relative, text):
             .replace("uintptr_t base = 0;", "uintptr_t base;")
             .replace("size_t size = 0;", "size_t size;")
         )
+        # Zeroed entries never match: their size is 0.
         text = text.replace(
-            "thread_local HitCache sHitCache;",
-            "__declspec(thread) HitCache sHitCache = {~0ull, 0, 0};",
+            "thread_local HitCache sHitCache[kHitCacheEntries];",
+            "__declspec(thread) HitCache sHitCache[kHitCacheEntries];",
+        )
+        text = text.replace(
+            "thread_local unsigned sHitCacheNext = 0;",
+            "__declspec(thread) unsigned sHitCacheNext = 0;",
         )
         text = text.replace(
             "thread_local UnknownCache sUnknownCache = {0, {0, 0}, false};",
@@ -129,8 +135,9 @@ def transform(relative, text):
             "Entry insertedEntry = {b, size, label}; sRanges.push_back(insertedEntry);",
         )
         text = text.replace(
-            "sHitCache = HitCache{gen, e.base, e.size};",
-            "HitCache updatedCache = {gen, e.base, e.size}; sHitCache = updatedCache;",
+            "sHitCache[sHitCacheNext++ % kHitCacheEntries] = HitCache{gen, e.base, e.size};",
+            "HitCache updatedCache = {gen, e.base, e.size};"
+            " sHitCache[sHitCacheNext++ % kHitCacheEntries] = updatedCache;",
         )
         text = text.replace("constexpr ", "const ")
     if relative.startswith("port/enhancements/") or relative in (
@@ -306,6 +313,33 @@ def transform(relative, text):
             old, "static __declspec(thread) PortCoroutine *sCurrentCoroutine = NULL;"
         )
         text = text.replace("#include <windows.h>", "#include <xtl.h>")
+    if relative == "port/enhancements/volume.cpp":
+        # Every audio CVar read routes through these getters; n_alAudioFrame
+        # freezes them once per synthesis call (endian overlay of sys/audio.c).
+        from xbox360_platform import audio_cpu
+
+        controls = tuple(
+            (name, "float", 'CVarGetFloat("gSettings.Audio.%sVolume", 1.0f)' % name)
+            for name in ("Master", "Music", "SFX", "Voice")
+        )
+        for name, _, expression in controls:
+            text = audio_cpu.read(text, expression, name)
+        text = audio_cpu.once(text, 'extern "C" {\n', 'extern "C" {\n' + audio_cpu.definitions(controls))
+    if relative == "port/audio/mixer.c":
+        # Subtract mixes and interleave use exact VMX lanes on aligned buffers.
+        for old, new in (
+            ("#define BUF_U8(a)", '#include "audio/mixer_vmx.h"\n#define BUF_U8(a)'),
+            ("\tuint8_t  buf[DMEM_SIZE];", "\t__declspec(align(16)) uint8_t  buf[DMEM_SIZE];"),
+            ("\tif (gain == -0x8000) {\n\t\t/* Special case: subtract only */\n",
+             "\tif (gain == -0x8000) {\n\t\t/* Special case: subtract only */\n"
+             "\t\tif (ShipyardAudio_SaturatedMix(out, in, nbytes, 1)) return;\n"),
+            ("\td = BUF_S16(rspa.out);\n\n\tfor (i = 0; i < count; i++) {",
+             "\td = BUF_S16(rspa.out);\n\tif (ShipyardAudio_Interleave(d, l, r, count * 2)) return;\n\n"
+             "\tfor (i = 0; i < count; i++) {"),
+        ):
+            if text.count(old) != 1:
+                raise ValueError("Mixer VMX anchor drift: " + old[:40])
+            text = text.replace(old, new)
     if relative == "port/audio/audio_playback.cpp":
         if text.count("constexpr ") != 8:
             raise ValueError("Audio constants changed")
@@ -413,6 +447,7 @@ def transform(relative, text):
             "std::this_thread::sleep_for", "Shipyard::Clock::SleepFor"
         )
         text = text.replace("OSMesg m{};", "OSMesg m = {};")
+        text = overlap_projection.gameloop(text)
     if relative in (
         "port/bridge/particle_bank_bridge.cpp",
         "port/bridge/lbreloc_bridge.cpp",
@@ -457,7 +492,7 @@ def transform(relative, text):
         }
     }""",
         )
-    return text
+    return overlap_projection.port(relative, text)
 
 
 def prepare():

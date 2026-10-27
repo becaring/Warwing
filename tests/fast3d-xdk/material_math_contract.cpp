@@ -1,5 +1,7 @@
 #include "fast/interpreter.h"
 #include "fast3d/material_value_cache.h"
+#include "fast3d/projection_cache.h"
+#include "fast3d/material_memo.h"
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>

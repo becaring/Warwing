@@ -83,18 +83,28 @@ GEOMETRY_BODY
 };
 template<class Tile,class Loaded>
 const XboxTextureGeometryValue& XboxGeometry(
-    Shipyard::Fast3D::MaterialValueCache<XboxTextureGeometryKey,XboxTextureGeometryValue>& cache,
+    Shipyard::Fast3D::MaterialMemo<XboxTextureGeometryKey,XboxTextureGeometryValue,256>& cache,
     const Tile& tile,const Loaded& loaded) {
     XboxTextureGeometryKey key={tile.line_size_bytes,loaded.line_size_bytes,
         loaded.size_bytes,loaded.full_image_line_size_bytes,loaded.orig_size_bytes,
-        _controlfp(0,0)&_MCW_RC,
+        Shipyard::Fast3D::ProjectionRoundingMode(),
         tile.uls,tile.ult,tile.lrs,tile.lrt,tile.fmt,tile.siz,tile.cms,tile.cmt,tile.masks,tile.maskt};
     XboxTextureGeometryBuilder<Tile,Loaded> builder={tile,loaded};
-    return cache.Load(key,builder);
+    unsigned bounds[4];
+    memcpy(bounds,&key.uls,sizeof(bounds));
+    const unsigned hash=Shipyard::Fast3D::HashMaterialKey(key.tileLine^(key.loadedSize*33U)^bounds[0]^
+        (bounds[1]*17U)^(bounds[2]*31U)^(bounds[3]*47U)^(unsigned(key.siz)<<12)^(unsigned(key.cms)<<16)^
+        (unsigned(key.cmt)<<20)^(unsigned(key.masks)<<24)^(unsigned(key.maskt)<<28)^key.rounding);
+    return cache.Load(key,hash,builder);
 }
 static __declspec(thread) Shipyard::Fast3D::MaterialValueCache<XboxDrawOptionsKey,XboxDrawOptionsValue> sXboxDrawOptions;
-static __declspec(thread) Shipyard::Fast3D::MaterialValueCache<XboxTextureGeometryKey,XboxTextureGeometryValue> sXboxTextureGeometry0;
-static __declspec(thread) Shipyard::Fast3D::MaterialValueCache<XboxTextureGeometryKey,XboxTextureGeometryValue> sXboxTextureGeometry1;
+// Alternating materials keep their geometry; storage is outside Xenon's TLS section.
+static __declspec(thread) Shipyard::Fast3D::MaterialMemo<XboxTextureGeometryKey,XboxTextureGeometryValue,256> sXboxTextureGeometry0;
+static __declspec(thread) Shipyard::Fast3D::MaterialMemo<XboxTextureGeometryKey,XboxTextureGeometryValue,256> sXboxTextureGeometry1;
+static void XboxReleaseTextureGeometry() {
+    sXboxTextureGeometry0.Release();
+    sXboxTextureGeometry1.Release();
+}
 // XBOX MATERIAL MATH END
 
 '''.replace('OPTION_BODY', option_body).replace('GEOMETRY_BODY', geometry_body)
@@ -132,4 +142,7 @@ static __declspec(thread) Shipyard::Fast3D::MaterialValueCache<XboxTextureGeomet
         if text.count(old)!=count:raise ValueError('Re-audit texture float operand '+old)
         text=text.replace(old,new)
     text = once(text, 'void Interpreter::GfxSpTri1(', helpers+'void Interpreter::GfxSpTri1(')
-    return '#include <float.h>\n#include "fast3d/material_value_cache.h"\n' + text
+    text = once(text, 'Interpreter::~Interpreter() {',
+                'static void XboxReleaseTextureGeometry();\nInterpreter::~Interpreter() {\n    XboxReleaseTextureGeometry();')
+    return ('#include <float.h>\n#include "fast3d/material_value_cache.h"\n#include "fast3d/material_memo.h"\n'
+            '#include "fast3d/projection_cache.h"\n' + text)

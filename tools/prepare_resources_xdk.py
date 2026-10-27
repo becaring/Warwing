@@ -9,7 +9,9 @@ OWN = ROOT / "platform/xbox360/cpp-compat/resources"
 OUT = ROOT / "scratch/resources-xdk"
 PLATFORM_BASE = runpy.run_path(str(ROOT / "tools/platform_base.py"))["resolve"](ROOT)
 from xbox360_platform.libzip import public_config
-from xbox360_platform.resource_lookup import synchronous_cache_hit
+from xbox360_platform.resource_lookup import synchronous_cache_hit, synchronous_misses, recorded_misses
+from xbox360_platform.lus_resources import concurrent_cache, archive_find, archive_rehash, o2r_zip_mutex
+from xbox360_platform import overlap_lus
 
 CONFIG = runpy.run_path(str(ROOT / "tools/prepare_config_xdk.py"))
 LOWER = CONFIG["LOWER"]["lower_ranges"]
@@ -306,46 +308,18 @@ def corrections(relative, text):
     name = Path(relative).name
     if name == "ResourceManager.cpp":
         text = synchronous_cache_hit(text)
+        # Misses load on the calling thread; the O2R zip mutex makes that safe on
+        # render and the game worker, and a pooled batch's LoadResource no longer
+        # waits on a lone worker's own queue.
+        text = synchronous_misses(text)
+        text = recorded_misses(text)
         text = once(
             text,
             '    SPDLOG_INFO("destruct ResourceManager");',
             '    SPDLOG_INFO("destruct ResourceManager");\n    if (mThreadPool) {'
             " mThreadPool->wait(); mThreadPool.reset(); }",
         )
-        text = once(
-            text,
-            "        mResourceCache[identifier] = ResourceLoadError::NotFound;\n        return"
-            " nullptr;",
-            "        { const xbox_compat::lock_guard<xbox_compat::mutex> lock(mMutex);\n         "
-            " mResourceCache[identifier] = ResourceLoadError::NotFound; }\n        return nullptr;",
-        )
-        text = once(
-            text,
-            "        auto resource = LoadResource(ResourceIdentifier(fileName, filter.Owner,"
-            " filter.Parent));",
-            "        const ResourceIdentifier identifier(fileName, filter.Owner, filter.Parent);\n "
-            "       auto resource = mThreadPool->get_thread_count() == 1\n            ?"
-            " LoadResourceProcess(identifier, false) : LoadResource(identifier);",
-        )
-        start = text.index(
-            "    // We can only erase the resource if we have any resources for that owner."
-        )
-        end = text.index("    return ret;", start)
-        text = (
-            text[:start]
-            + """    {
-        const xbox_compat::lock_guard<xbox_compat::mutex> lock(mMutex);
-        auto cached = mResourceCache.find(identifier);
-        if (cached != mResourceCache.end()) {
-            value = std::move(cached->second);
-            mResourceCache.erase(cached);
-            ret = 1;
-        }
-    }
-
-"""
-            + text[end:]
-        )
+        text = concurrent_cache(text)
     elif name == "O2rArchive.cpp":
         text = once(
             text,
@@ -406,6 +380,9 @@ def corrections(relative, text):
             "        zip_discard(mZipArchive); // Close zip and discard changes\n       "
             " mZipArchive = nullptr;",
         )
+        # One shared zip_t: resource workers, render and the game worker read it.
+        # The exact-size read and EOF CRC check above already reject short reads.
+        text = o2r_zip_mutex(text)
     elif name == "FolderArchive.cpp":
         text = once(
             text,
@@ -414,18 +391,7 @@ def corrections(relative, text):
             ' "/";',
         )
     elif name == "ArchiveManager.cpp":
-        text = once(
-            text,
-            "    auto archive = mFileToArchive[hash];",
-            "    const auto entry = mFileToArchive.find(hash);\n    auto archive = entry =="
-            " mFileToArchive.end() ? std::shared_ptr<Archive>() : entry->second;",
-        )
-        text = once(
-            text,
-            "    return mFileToArchive[CRC64(filePath.c_str())];",
-            "    const auto entry = mFileToArchive.find(CRC64(filePath.c_str()));\n    return entry"
-            " == mFileToArchive.end() ? std::shared_ptr<Archive>() : entry->second;",
-        )
+        text = archive_rehash(archive_find(text))
     return text
 
 
@@ -439,6 +405,8 @@ def prepare():
         text = corrections(
             relative, transform(relative, raw.decode("utf-8-sig").replace("\r\n", "\n"))
         )
+        if relative.endswith("/ResourceManager.cpp"):
+            text = overlap_lus.resource_manager(text)
         target = OUT / "generated" / relative
         MAPPED("upstream/BattleShip/libultraship/" + relative, text, StableOutput(target))
         hashes[relative] = hashlib.sha256(target.read_bytes()).hexdigest()
@@ -459,14 +427,16 @@ def prepare():
         ),
         "authorized_corrections": [
             (
-                "ResourceManager missing-cache write lock and atomic lookup/erase with resource"
-                " destruction after unlock"
+                "ResourceManager missing-cache write lock, first published instance wins, and"
+                " atomic lookup/erase with resource destruction after unlock"
             ),
             "Drain and reset pool before mutex/cache member destruction",
             (
-                "Single-worker queued batch calls same LoadResourceProcess on worker to avoid"
-                " nested-task deadlock"
+                "Synchronous misses load on the calling thread (no nested-task deadlock on a"
+                " single worker); recorded NotFound returns before the archive probe"
             ),
+            "O2r single zip handle serialized by one mutex across all loading threads",
+            "ArchiveManager indices sized once per added archive",
             (
                 "O2r handle initialization, bounded allocation, exact read/close validation and"
                 " RAII entry closure"

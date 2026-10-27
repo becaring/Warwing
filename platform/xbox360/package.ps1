@@ -24,6 +24,16 @@ foreach ($smashFile in $smashFiles) {
     if ($smashFileHash -ne (Get-FileHash -LiteralPath $smashSource -Algorithm SHA256).Hash) { throw "Package copy mismatch: $smashFile" }
     $smashHashes[$smashFile] = $smashFileHash
 }
+# tools/build_shader_pack.py output; the XEX verifies each program and compiles at runtime without it.
+$smashPack = Join-Path $smashRoot 'scratch/shader-pack/smash360.shaderpack'
+$smashPackDestination = Join-Path $smashPackage 'smash360.shaderpack'
+if (Test-Path -LiteralPath $smashPack -PathType Leaf) {
+    Copy-Item -LiteralPath $smashPack -Destination $smashPackDestination -Force
+    $smashHashes['smash360.shaderpack'] = (Get-FileHash -LiteralPath $smashPackDestination -Algorithm SHA256).Hash
+} else {
+    Remove-Item -LiteralPath $smashPackDestination -Force -ErrorAction SilentlyContinue
+    Write-Output 'No shader pack packaged: run python tools/build_shader_pack.py first'
+}
 # Keep diagnostic overrides out of the hardware package, including on reruns.
 $smashProfileEnv = "# Full profiler compiled in: $($smashOptions.fullProfiling). Requires build.ps1 -FullProfiling to enable.`r`n# SMASH360_PROFILE=0 runtime-disables compiled-in scopes; triangle sampling is independent.`r`n"
 if ($ProfileDetail) { $smashProfileEnv += "SMASH360_PROFILE_DETAIL=1`r`n" }

@@ -1,6 +1,7 @@
 #include "services.h"
 #include "xenos_backend.h"
 #include "native_display.h"
+#include "xenos/core.h"
 #include "../runtime/perf_trace.h"
 #include "../runtime/triangle_trace.h"
 #include "../runtime/command_trace.h"
@@ -99,8 +100,7 @@ bool GfxWindowBackendXenos::IsMouseCaptured() {
 }
 
 void GfxWindowBackendXenos::GetDimensions(uint32_t* w, uint32_t* h, int32_t* x, int32_t* y) {
-    *w = 1280;
-    *h = 720;
+    ShipyardXenos::GetDisplaySize(w, h);
     *x = *y = 0;
 }
 

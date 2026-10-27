@@ -17,10 +17,9 @@ def main():
     items = json.loads((BUILD.parent / 'project-items.json').read_text())['Smash360']
     for symbol, source in [('port_coroutine_create', 'port/coroutine_win32.cpp'),
                            ('PortGameInit', 'port/gameloop.cpp')]:
-        indices = [i for i, item in enumerate(items) if item['path'] == source]
-        if len(indices) != 1:
+        if sum(item['path'] == source for item in items) != 1:
             raise RuntimeError('Missing production source: ' + source)
-        expected[symbol] = '%04d_%s.obj' % (indices[0], Path(source).stem)
+        expected[symbol] = '%s_%s.obj' % (Path(source).stem, hashlib.sha256(source.encode()).hexdigest()[:16])
     symbols = {}
     for symbol, owner in expected.items():
         matches = re.findall(r'^\s*\w+:\w+\s+' + re.escape(symbol) +

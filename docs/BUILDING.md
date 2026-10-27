@@ -38,6 +38,11 @@ The executable is `scratch/application-xdk/native/build/Smash360.xex`.
 Omit these flags when the corresponding inputs are unchanged. Logs and build
 records stay under `scratch/application-xdk/native`.
 
+Before `platform/xbox360/package.ps1`, `python -B tools/build_shader_pack.py --jobs 8`
+can build the prebuilt shader pack from the regenerated projections with the XDK's
+`fxc.exe`; packaging copies it beside the XEX. The XEX verifies each packed program
+against its own shader generator on first use and compiles any mismatch itself.
+
 `build.ps1 -PrepareOnly` stages without compiling. `-CompileOnly` accepts a
 production source path from `project-items.json`. A port source can also be
 audited with `python -B tools/prepare_port_xdk.py --source port/port_dl_ranges.cpp`

@@ -67,6 +67,13 @@ def transform(relative, source, mapping_path=None):
             "                        if (!SMASH360_HOST_BIG_ENDIAN) {\n                           "
             " u32 *hdr = (u32 *)sSYAudioBGMSequenceDatas[port_i];",
         )
+        # Not endian: Shipyard audio_cpu freezes the port volume CVars (volume.cpp)
+        # for exactly the PORT loop's synthesis call, on the audio thread.
+        for statement, function in (
+            ("acmd_trace_begin_task();", "ShipyardAudioControls_Begin"),
+            ("acmd_trace_end_task();", "ShipyardAudioControls_End"),
+        ):
+            replace(statement, "{ extern void %s(void); %s(); } %s" % (function, function, statement))
     elif relative == "port/bridge/lbreloc_byteswap.cpp":
         # Every use in this translation unit repairs this same LE pass-one.
         calls = list(re.finditer(r"\bBSWAP32\(", text))

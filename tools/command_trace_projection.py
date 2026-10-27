@@ -44,8 +44,8 @@ static void gfx_step(SmashCommandTrace& commandTrace) {
     )
     text = once(
         text,
-        "        Smash360PerfScope boundsScope(SMASH_PERF_DL_BOUNDS);",
-        "        if (TraceCommand) commandTrace.Mark(SMASH_CMD_BOUNDS);\n        Smash360PerfScope boundsScope(SMASH_PERF_DL_BOUNDS);",
+        "        Smash360PerfScope boundsScope(SMASH_PERF_DL_BOUNDS, smash360_perf_detail);",
+        "        if (TraceCommand) commandTrace.Mark(SMASH_CMD_BOUNDS);\n        Smash360PerfScope boundsScope(SMASH_PERF_DL_BOUNDS, smash360_perf_detail);",
     )
     text = once(
         text,

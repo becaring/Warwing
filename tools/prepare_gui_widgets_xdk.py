@@ -5,6 +5,7 @@ import argparse, hashlib, json, re, subprocess
 from prepare_prism_xdk import mapped, once, enum_wrappers, lower_ranges, PARSER, walk, field, tx
 from prepare_fast3d_xdk import remove_class_defaults, data_struct_constructors
 from xbox360_platform.cpp_syntax import lower_if_initializers
+from xbox360_platform import overlap_lus
 
 ROOT = Path(__file__).resolve().parents[1]
 BASE = ROOT / "platform/xbox360/cpp-compat/gui-widgets"
@@ -84,6 +85,13 @@ def lower_header(text, name):
         text, initializers, arrays = remove_class_defaults(text, "GameOverlay")
         if arrays or initializers != ['mCurrentFont("Default")', "mNeedsCleanup(false)"]:
             raise ValueError("Changed GameOverlay defaults")
+    # Passive overlap GUI: the stats overlay replays from the capture.
+    if name == "GuiWindow.h":
+        text = overlap_lus.gui_window_header(text)
+    if name == "StatsWindow.h":
+        text = overlap_lus.overlap_drawable(text, "StatsWindow")
+    if name == "GameOverlay.h":
+        text = overlap_lus.game_overlay_header(text)
     if name == "Console.h":
         text = data_struct_constructors(text)
     if name in ("Font.h", "GuiTexture.h"):
@@ -254,6 +262,7 @@ def lower_source(text, name):
             "ImFontConfig fontConf = {};", "ImFontConfig fontConf = ImFontConfig();"
         )
         text = once(text, "switch (var->Type)", "switch (var->Type.GetValue())")
+        text = overlap_lus.game_overlay_source(text)
     if name == "Font.cpp":
         text = once(
             text,

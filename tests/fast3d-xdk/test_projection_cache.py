@@ -26,6 +26,10 @@ class ProjectionTests(unittest.TestCase):
                 "    // PORT: on the RDP,", 1
             )[0]
             cull = "    if ((mRsp->geometry_mode & cull_both) != 0) {" + cull
+            # The projection reads the rounding mode once, ahead of the cull.
+            rounding = "    const uint32_t projectionRounding = Shipyard::Fast3D::ProjectionRoundingMode();\n"
+            if rounding in tri.split("    if ((mRsp->geometry_mode & cull_both) != 0) {", 1)[0]:
+                cull = rounding + cull
             cull = cull.replace("return;", "return true;")
             area = tri.split("        float sx[3], sy[3];", 1)[1].split(
                 "    for (int i = 0; i < 3; i++) {\n        float z", 1

@@ -7,6 +7,8 @@ ROOT = Path(__file__).resolve().parents[1]
 LUS = ROOT / "upstream/BattleShip/libultraship"
 OUT = ROOT / "scratch/config-xdk"
 BASE = ROOT / "platform/xbox360/cpp-compat/config"
+runpy.run_path(str(ROOT / "tools/platform_base.py"))["resolve"](ROOT)
+from xbox360_platform import console_variable_lookup, lus_config, overlap_lus
 CVARS_SHA256 = "6702cf2eb377ea9d87f49731e1eca514ae0894799a643f6f67b4a3248668648f"
 LOCKS = {
     "include/ship/config/Config.h": (
@@ -143,6 +145,14 @@ def transform(relative, text):
             ' SetString("Window.Backend.Name", "Xenos");\n            break;\n        case'
             " WindowBackend::FAST3D_DXGI_DX11:",
         )
+        # Only ConsoleVariable::Load reads GetNestedJson, at startup after Reload and
+        # before any Save, so the writer thread also takes the unflatten.
+        start = text.index("void Config::Save() {")
+        save = text[start:text.index("\n}\n", start) + 2]
+        if "mFlattenedJson.unflatten()" not in save or "file << serialized;" not in save:
+            raise ValueError("Config save anchor changed")
+        text = lus_config.background_save(text, nested=False, save=save,
+                                          path="fs::absolute(mPath).string()")
     elif relative.endswith("/ConsoleVariable.h"):
         text = once(
             text,
@@ -164,8 +174,13 @@ def transform(relative, text):
             "return xbox_compat::hash_string_view(sv);",
         )
         text = text.replace(" const noexcept", " const")
+        # Getters borrow names instead of building a std::string per lookup.
+        text = console_variable_lookup.header(text)
+        text = overlap_lus.console_variable_header(text)
     elif relative.endswith("/ConsoleVariable.cpp"):
         text = once(text, "switch (variableTo->Type) {", "switch (variableTo->Type.GetValue()) {")
+        text = console_variable_lookup.transform(text)
+        text = overlap_lus.console_variable_source(text)
     elif relative.endswith("/Audio.h"):
         text = once(
             text,

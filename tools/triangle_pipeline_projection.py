@@ -7,6 +7,7 @@ accounting and vertex packing remain per triangle.
 """
 from profile_projections import once
 from xbox360_platform.fast3d_triangle_certificate import call_end as _call_end, invalidate_native_calls
+from xbox360_platform import fast3d_pipeline_stamps, fast3d_triangle_run
 
 BEGIN='    // PORT: on the RDP, depth *comparison*'
 END='    triangleTrace.Mark(SMASH_TRI_DIAGNOSTIC);'
@@ -19,6 +20,7 @@ def header(text):
     return once(text,'    void XboxInvalidateTextureBindings();','''    void XboxInvalidateTextureBindings();
     bool XboxPrepareTrianglePipeline(SmashTriangleTrace& triangleTrace);
     XboxTrianglePipelineKey mXboxPipelineKey;
+    unsigned mXboxPipelineCertified;
     XboxTrianglePipelineResult mXboxPipelineResult;''')
 
 
@@ -52,6 +54,7 @@ def transform(text):
     // Capture the final node sampler values after both slots reconcile: two
     // slots can alias one cache node and update each other's sampler fields.
     mXboxPipelineKey.Capture(*this,p);
+    mXboxPipelineCertified=sXboxPipelineMutation;
     return true;
 }
 
@@ -61,7 +64,7 @@ def transform(text):
 // XBOX ORIGINAL RECONCILIATION BEGIN
 '''+cold+'// XBOX ORIGINAL RECONCILIATION END\n'+publish
     warm='''    triangleTrace.Mark(SMASH_TRI_STATE);
-    if(!mXboxPipelineKey.Certify(*this)) {
+    if(!XboxPipelineCurrent(*this)) {
         if(!XboxPrepareTrianglePipeline(triangleTrace))return;
     } else {
         // Keep observer phase order on a hit; no native operation is executed.
@@ -98,4 +101,15 @@ def transform(text):
                    '    mFbTextures.erase(reinterpret_cast<uintptr_t>(base));',
                    '    mFbTextures.clear();'):
         text=once(text,anchor,'    mXboxPipelineKey.valid=false;\n'+anchor)
-    return invalidate_native_calls(text,'mXboxPipelineKey.valid=false',minimum=40)
+    text=invalidate_native_calls(text,'mXboxPipelineKey.valid=false',minimum=40)
+    # BattleShip's extra key inputs (color-image redirect, shader stack) are
+    # written only by non-neutral handlers; clip parameters are cached at Init.
+    text=fast3d_pipeline_stamps.install(text)
+    # Sampled command traces and GBI traces keep one TRI2 per dispatch. Walk
+    # bounds are checked before each continuation reads the next command.
+    text=once(text,'        if (commandTrace.active) gfx_step<true>(commandTrace);',
+        '        if (commandTrace.active) { sXboxTracedDispatch=true; gfx_step<true>(commandTrace); sXboxTracedDispatch=false; }')
+    text=once(text,fast3d_triangle_run.HANDLER,'static bool sXboxTracedDispatch=false;'+chr(10)+fast3d_triangle_run.HANDLER)
+    return fast3d_triangle_run.install(text,enable='!sXboxTracedDispatch && !sGbiTraceCallback',
+        stop='(sDLBoundsCheck && sDLBoundsCheck((uintptr_t)(cmd + 1)) == kDLBoundsWalkedPast)',
+        advance=('Smash360_PerfCount(SMASH_COUNT_COMMANDS);',))

@@ -26,15 +26,18 @@ import triangle_constants_projection
 import combiner_lookup_projection
 import texture_binding_projection
 import triangle_pipeline_projection
+import triangle_path_projection
 import material_math_projection
 import triangle_trace_projection
 import triangle_split_projection
+import overlap_projection
+import fast3d_material_projection
 import import_diag_projection
 import shader_metadata_projection
 import command_work_projection
 import command_trace_projection
 from prepare_prism_xdk import PARSER, walk, field, tx, once, mapped, lower_ranges, enum_wrappers
-from xbox360_platform import fast3d_display_list_cull, fast3d_opcode, matrix_product
+from xbox360_platform import fast3d_dispatch, fast3d_display_list_cull, fast3d_opcode, matrix_product, overlap_lus
 from xbox360_platform.cpp_syntax import collect_member_defaults
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -119,7 +122,8 @@ def data_struct_constructors(text):
 
 
 def opcode_tables(text):
-    return fast3d_opcode.lower(text, PARSER, walk, fast3d_opcode.FAST3D_TABLES)[0]
+    text = fast3d_opcode.lower(text, PARSER, walk, fast3d_opcode.FAST3D_TABLES, composed_dispatch=True)[0]
+    return fast3d_dispatch.debugger_snapshot(text)
 
 
 def lower_aggregate_expressions(text):
@@ -348,6 +352,10 @@ def lower(text, name):
         text = combiner_lookup_projection.transform(text)
         text = texture_binding_projection.transform(text)
         text = triangle_pipeline_projection.transform(text)
+        text = triangle_path_projection.transform(text)
+        text = overlap_lus.texture_cache_clear(text)
+        text = overlap_projection.interpreter(text)
+        text = fast3d_material_projection.transform(text)
         # The UV min/max loop exists only to prepare a diagnostic log payload.
         # The callee already returns immediately when this same flag is off.
         # Keep the real later vertex UV packing and scheduler area calculations.
@@ -505,7 +513,6 @@ def lower(text, name):
                 "std::array<const uint32_t (*)[7], 6>",
                 "std::array<const char*, 16>",
                 "std::array<const char*, 8>",
-                "std::array<const UcodeHandler*, 6>",
             ]
         ):
             match = re.search(r"constexpr std::array (\w+) = \{(.*?)\n\s*\};", text, re.S)
@@ -559,8 +566,10 @@ def lower(text, name):
         text = combiner_lookup_projection.header(text)
         text = texture_binding_projection.header(text)
         text = triangle_pipeline_projection.header(text)
+        text = triangle_path_projection.header(text)
         text = triangle_split_projection.header(text)
         text = command_work_projection.header(text)
+        text = fast3d_material_projection.header(text)
         text, INTERPRETER_INITIALIZERS, INTERPRETER_ARRAY_INITIALIZERS = remove_class_defaults(
             text, "Interpreter"
         )
