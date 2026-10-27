@@ -71,6 +71,13 @@ exit /b %errorlevel%
         (out / "result.log").write_text(run.stdout + run.stderr)
         print(run.stdout.strip())
 
+    def test_skipped_stubs_do_nothing(self):
+        # Skipping is only sound while the stub handler has no effect.
+        text = (ROOT / "scratch/fast3d-xdk/overlay/libultraship/src/fast/interpreter.cpp").read_text(
+            encoding="utf-8-sig")
+        self.assertIn("bool gfx_stubbed_command_handler(F3DGfx** cmd0) {\n    return false;\n}\n", text)
+        self.assertEqual(text.count("== gfx_stubbed_command_handler) {"), 1)
+
 
 if __name__ == "__main__":
     unittest.main()

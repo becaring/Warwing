@@ -32,3 +32,25 @@ def interpreter(text):
             if (segBase != 0 && (xboxN64Offset & 7u) == 0u &&
                 (uintptr_t)subGFX != xboxStridedAddress) {
                 uintptr_t segFileBase = 0;''')
+
+# Syncs are ~12% of SSB64's intro commands and their handler does nothing; each
+# still paid a full Run iteration. Step over a run of them where it starts,
+# bounds-checking each before reading it, only when the handler left this
+# list on top. Traced, GBI-traced and debugger walks keep one step per command.
+STUB_SKIP = '''    ++cmd;
+    if (!TraceCommand && sXboxTriangleRunEnabled && !sXboxGbiTrace && &cmd == &g_exec_stack.currCmd() &&
+        ucode_handler_index < ucode_handlers.size()) {
+        const UcodeHandler& xboxHandlers = *ucode_handlers[ucode_handler_index];
+        while (!(sDLBoundsCheck && XboxWalkedPast((uintptr_t)cmd)) &&
+               xboxHandlers.at((int8_t)(cmd->words.w0 >> 24)).second == gfx_stubbed_command_handler) {
+            Smash360_PerfCount(SMASH_COUNT_COMMANDS);
+            ++cmd;
+        }
+    }
+}
+
+void Interpreter::SpReset() {'''
+
+def skip_stubs(text):
+    """Apply after rcp_cost_projection, which owns sXboxGbiTrace."""
+    return once(text, '    ++cmd;\n}\n\nvoid Interpreter::SpReset() {', STUB_SKIP)

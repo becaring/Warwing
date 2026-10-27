@@ -116,6 +116,10 @@ def transform(text):
     text = rows.cull(text, first='    ' + ROUNDING)
 
     def emit(body):
+        # The int-to-float conversion and divide run only for G_ZS_PRIM; a
+        # redirect assigns both values itself.
+        body = once(body, '    float prim_depth_ndc = (float)mRdp->prim_depth_z / 65535.0f;',
+                    '    float prim_depth_ndc = use_prim_depth ? (float)mRdp->prim_depth_z / 65535.0f : 0.0f;')
         body = once(body, OLD_AXES, NEW_AXES)
         body = once(body, OLD_CLAMP_T, NEW_CLAMP_T)
         # Area accounting reads the run's x/w, y/w that the cull just loaded.

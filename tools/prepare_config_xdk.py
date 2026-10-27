@@ -63,6 +63,47 @@ def once(text, a, b, count=1):
     return text.replace(a, b)
 
 
+CVAR_MUTATORS = ("SetInteger", "SetFloat", "SetString", "SetColor", "SetColor24", "RegisterInteger",
+                 "RegisterFloat", "RegisterString", "RegisterColor", "RegisterColor24", "ClearVariable",
+                 "ClearBlock", "CopyVariable", "Load", "LoadFromPath", "LoadLegacy")
+
+
+def snapshot_generation(text):
+    """Skip the per-handoff CVar snapshot while no mutator has run since the last capture.
+
+    Every map and value write is one of CVAR_MUTATORS (Get() results are only read), so an
+    unchanged generation means the captured snapshot still equals the live map.
+    ponytail: Smash-side until Shipyard's overlap_lus adopts it for every consumer.
+    """
+    from profile_projections import enter
+    writers = set(re.findall(r"\bConsoleVariable::(\w+)\s*\([^;{}]*\)\s*\{", text))
+    readers = {"Get", "GetInteger", "GetFloat", "GetString", "GetColor", "GetColor24", "Save",
+               "ConsoleVariable", "~ConsoleVariable"}
+    if writers - readers != set(CVAR_MUTATORS):
+        raise ValueError("Re-audit CVar mutators: " + str(sorted(writers - readers)))
+    for name in CVAR_MUTATORS:
+        text = enter(text, "ConsoleVariable::" + name, "++sXboxCVarMutations;")
+    signature = "void ConsoleVariable::CaptureSnapshot(Snapshot& snapshot) const {\n"
+    text = once(text, signature, """\
+static volatile unsigned sXboxCVarMutations = 1;
+static const void* sXboxCapturedSnapshot = nullptr;
+static unsigned sXboxCapturedGeneration = 0;
+static size_t sXboxCapturedSize = 0;
+""" + signature + """\
+    // Read first: a write during the copy leaves the next capture stale.
+    const unsigned generation = sXboxCVarMutations;
+    if (sXboxCapturedSnapshot == &snapshot && sXboxCapturedGeneration == generation &&
+        sXboxCapturedSize == snapshot.size() && !snapshot.empty()) return;
+""")
+    tail = "            case ConsoleVariableType::Color24: copy->Color24 = original.Color24; break;\n        }\n    }\n}\n"
+    return once(text, tail, tail[:-2] + """\
+    sXboxCapturedSnapshot = &snapshot;
+    sXboxCapturedGeneration = generation;
+    sXboxCapturedSize = snapshot.size();
+}
+""")
+
+
 def enum_type(name, values):
     return (
         "struct "
@@ -180,7 +221,7 @@ def transform(relative, text):
     elif relative.endswith("/ConsoleVariable.cpp"):
         text = once(text, "switch (variableTo->Type) {", "switch (variableTo->Type.GetValue()) {")
         text = console_variable_lookup.transform(text)
-        text = overlap_lus.console_variable_source(text)
+        text = snapshot_generation(overlap_lus.console_variable_source(text))
     elif relative.endswith("/Audio.h"):
         text = once(
             text,

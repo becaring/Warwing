@@ -360,6 +360,7 @@ def lower(text, name):
         text = overlap_projection.interpreter(text)
         text = fast3d_material_projection.transform(text)
         text = rcp_cost_projection.interpreter(text)
+        text = command_work_projection.skip_stubs(text)
         text = bounds_cache_projection.interpreter(text)
         text = reloc_lookup_projection.interpreter(text)
         # The UV min/max loop exists only to prepare a diagnostic log payload.

@@ -19,6 +19,12 @@ class Lowering(unittest.TestCase):
         self.assertEqual(result.count('Smash360Config::End('),1)
         self.assertIn('auto&& _configRange',result)
         self.assertIn('const auto& item = *',result)
+    def test_snapshot_generation_counts_every_mutator(self):
+        text=(ROOT/'scratch/config-xdk/generated/src/ship/config/ConsoleVariable.cpp').read_text()
+        self.assertEqual(text.count('++sXboxCVarMutations;'),len(GEN['CVAR_MUTATORS']))
+        self.assertIn('sXboxCapturedGeneration == generation',text)
+        with self.assertRaisesRegex(ValueError,'Re-audit CVar mutators'):
+            GEN['snapshot_generation']('void ConsoleVariable::SetBool(int x) {\n}\n')
     def test_mapping_and_determinism(self):
         first=GEN['prepare']();second=GEN['prepare']()
         self.assertEqual(first['output_hashes'],second['output_hashes'])

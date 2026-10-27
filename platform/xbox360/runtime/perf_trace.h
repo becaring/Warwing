@@ -27,6 +27,7 @@
     X(SHADER, shader_create) X(SHADER_BUILD, shader_build) X(SHADER_LOWER, shader_lower) \
     X(SHADER_CODE, shader_code) X(SHADER_COMPILE, shader_compile) \
     X(GUI_START, gui_start) X(GUI_END, gui_end) X(GUI_RENDER, gui_native_render) \
+    X(OVERLAP_VARIABLES, overlap_cvar_snapshot) X(OVERLAP_GUI, overlap_passive_gui) \
     X(NATIVE_END, native_end) X(NATIVE_FINISH, native_finish) \
     X(INSTANCE_ACQUIRE, interpreter_owner) X(RELOC_RANGE, reloc_range_lookup) \
     X(RELOC_ID, reloc_id_lookup) X(RELOC_VERTEX, reloc_vertex_fixup) \

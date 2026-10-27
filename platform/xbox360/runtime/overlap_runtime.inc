@@ -4,6 +4,7 @@
 // which builds one passive GUI and permits the next tick; every presentation redraws
 // that capture. SP/DP completions keep their sequential order: tick N+1 draws into the
 // other task context, and scene teardown or file loads wait for the replay with a fence.
+#include "runtime/perf_trace.h"
 #include "overlap/frame_worker.h"
 #include "overlap/gui_frame_cache.h"
 #include "overlap/runtime.h"
@@ -110,12 +111,14 @@ struct Session : Shipyard::Overlap::Runtime<Session, FramePacket, GuiCapture> {
 
     void CaptureInput() { input.Capture(*Ship::Context::GetInstance()->GetControlDeck()); }
     void CaptureVariables() {
+        Smash360PerfScope profileScope(SMASH_PERF_OVERLAP_VARIABLES);
         std::shared_ptr<Ship::ConsoleVariable> variables = Ship::Context::GetInstance()->GetConsoleVariables();
         variables->CaptureSnapshot(frozenVariables);
         variables->UseSnapshot(&frozenVariables);
     }
     void ReleaseVariables() { Ship::Context::GetInstance()->GetConsoleVariables()->UseSnapshot(NULL); }
     bool DrawPassiveGui() {
+        Smash360PerfScope profileScope(SMASH_PERF_OVERLAP_GUI);
         std::shared_ptr<Ship::Gui> gui = CurrentGui();
         const bool passive = gui->XboxBeginOverlapDraw();
         gui->XboxFinishPassiveDraw();
