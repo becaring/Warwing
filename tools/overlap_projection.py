@@ -62,7 +62,7 @@ RELOC_FUNCTIONS = {
     'port/bridge/lbreloc_bridge.cpp': (
         ['portRelocLoadFileFromBytes', 'portRelocLoadFileFromBytesPrivate',
          'port_taskman_evict_arena_caches', 'lbRelocInitSetup'],
-        ['portRelocFindContainingFile', 'portRelocFindFileIdAndBase', 'portRelocEvictFileRangesInRange']),
+        ['portRelocScanContainingFile', 'portRelocFindFileIdAndBase', 'portRelocEvictFileRangesInRange']),
     'port/bridge/particle_bank_bridge.cpp': (['portParticleLoadBank'], []),
 }
 BYTESWAP = re.compile(r'(?m)^extern "C" [^;{]*?\b((?:portFixup|portReloc)\w*)\s*\([^;{}]*\)\s*\{')

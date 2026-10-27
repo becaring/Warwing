@@ -35,6 +35,9 @@ import fast3d_material_projection
 import import_diag_projection
 import shader_metadata_projection
 import command_work_projection
+import rcp_cost_projection
+import bounds_cache_projection
+import reloc_lookup_projection
 import command_trace_projection
 from prepare_prism_xdk import PARSER, walk, field, tx, once, mapped, lower_ranges, enum_wrappers
 from xbox360_platform import fast3d_dispatch, fast3d_display_list_cull, fast3d_opcode, matrix_product, overlap_lus
@@ -356,6 +359,9 @@ def lower(text, name):
         text = overlap_lus.texture_cache_clear(text)
         text = overlap_projection.interpreter(text)
         text = fast3d_material_projection.transform(text)
+        text = rcp_cost_projection.interpreter(text)
+        text = bounds_cache_projection.interpreter(text)
+        text = reloc_lookup_projection.interpreter(text)
         # The UV min/max loop exists only to prepare a diagnostic log payload.
         # The callee already returns immediately when this same flag is off.
         # Keep the real later vertex UV packing and scheduler area calculations.

@@ -12,6 +12,8 @@ import sys
 import profile_projections
 import bounds_cache_projection
 import command_work_projection
+import reloc_lookup_projection
+import rcp_cost_projection
 import overlap_projection
 from prepare_prism_xdk import PARSER, walk
 from xbox360_platform.cpp_syntax import lower_if_initializers
@@ -98,7 +100,7 @@ def transform(relative, text):
         text = re.sub(r"(Shipyard::Atomic::atomic<\w+>\s+\w+)\{([^{}]+)\};", r"\1(\2);", text)
         text = text.replace("constexpr ", "const ")
     if relative == "port/port_dl_ranges.cpp":
-        text = bounds_cache_projection.transform(text)
+        text = bounds_cache_projection.span(bounds_cache_projection.transform(text))
         text = text.replace(
             "#include <atomic>", '#include "atomic/atomic.h"\n#include "crt/snprintf.h"'
         )
@@ -389,7 +391,10 @@ def transform(relative, text):
             "auto insertion = cache.insert(std::make_pair(std::string(archive_path),"
             " std::move(data)));\n    auto ins_it = insertion.first;",
         )
+    if relative == "port/resource/RelocPointerTable.cpp":
+        text = reloc_lookup_projection.pointer_table(text)
     if relative == "port/bridge/lbreloc_bridge.cpp":
+        text = reloc_lookup_projection.transform(text)
         text = text.replace(
             "[begin, end](const PortRelocFileRange &range) {",
             "[begin, end](const PortRelocFileRange &range) -> bool {",
@@ -432,6 +437,7 @@ def transform(relative, text):
         )
     if relative == "port/gameloop.cpp":
         text = command_work_projection.port(text)
+        text = rcp_cost_projection.port(text)
         text = text.replace(
             "#include <libultraship/libultraship.h>",
             "#include <libultraship/libultra.h>\n#include <ship/Context.h>\n#include"

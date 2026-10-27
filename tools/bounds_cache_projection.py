@@ -3,6 +3,7 @@
 Compose after profiling, before XDK syntax lowering. The original locked scan,
 positive cache and synchronization remain authoritative. Every anchor is exact.
 """
+import re
 from profile_projections import once
 
 
@@ -65,3 +66,75 @@ thread_local UnknownCache sUnknownCache = {0, {0, 0}, false};''')
     helper = 'static __declspec(noinline) int XboxCheckDLBoundsMiss(uintptr_t addr, uint64_t gen) {\n' + cold_body + '\n}\n\n'
     text = once(text, signature, helper + signature)
     return text
+
+
+SPAN = '''
+// A span [base, end) around addr whose every address shares its answer until
+// the registry changes, for walkers that advance inside one display list: a
+// current-generation ring entry that holds addr (IN_RANGE), or the proven
+// unknown gap holding it (UNKNOWN). Walked-past answers report no span.
+extern "C" int port_dl_check_addr_span(uintptr_t addr, uintptr_t* base, uintptr_t* end) {
+    const int result = port_dl_check_addr(addr);
+    *base = *end = 0;
+    const uint64_t gen = sRangesGen.load(std::memory_order_acquire);
+    if (result == PORT_DL_UNKNOWN) {
+        const UnknownCache& u = sUnknownCache;
+        if (u.valid && u.gen == gen && addr >= u.gap.lo && addr <= u.gap.hi) {
+            *base = u.gap.lo;
+            // An inclusive gap ending at the top of memory loses only that byte.
+            *end = u.gap.hi == ~uintptr_t(0) ? u.gap.hi : u.gap.hi + 1;
+        }
+        return result;
+    }
+    if (result != PORT_DL_IN_RANGE) return result;
+    for (unsigned i = 0; i < kHitCacheEntries; ++i) {
+        const HitCache& c = sHitCache[i];
+        if (c.gen == gen && c.size != 0 && addr - c.base < c.size) {
+            *base = c.base;
+            *end = c.base + c.size;
+            break;
+        }
+    }
+    return result;
+}
+'''
+
+
+def span(text):
+    """Append the span query after the checker; compose after transform()."""
+    return text.rstrip('\n') + '\n' + SPAN
+
+
+WALKED_PAST = '''// Commands advance inside one display list, so most never need the checker:
+// the span of its last answer covers them and holds no walked-past address.
+// G_DL checks its target, then runs its translated copy and returns to its
+// caller: a few recent spans keep all of those off the checker. Each Run
+// starts empty; a registry change during a Run is already a use-after-free
+// race.
+extern "C" int port_dl_check_addr_span(uintptr_t addr, uintptr_t* base, uintptr_t* end);
+static uintptr_t sXboxWalkSpans[4][2] = { { 0, 0 } };
+static __declspec(noinline) bool XboxWalkedPastMiss(uintptr_t addr) {
+    memmove(sXboxWalkSpans[1], sXboxWalkSpans[0], 3 * sizeof(sXboxWalkSpans[0]));
+    return port_dl_check_addr_span(addr, &sXboxWalkSpans[0][0], &sXboxWalkSpans[0][1]) == kDLBoundsWalkedPast;
+}
+static __forceinline bool XboxWalkedPast(uintptr_t addr) {
+    for (unsigned i = 0; i < 4; ++i)
+        if (addr - sXboxWalkSpans[i][0] < sXboxWalkSpans[i][1] - sXboxWalkSpans[i][0]) return false;
+    return XboxWalkedPastMiss(addr);
+}
+'''
+
+
+def interpreter(text):
+    """Route the walk and G_DL target checks through the span cache above."""
+    walked = re.compile(r'static (?:constexpr|const) int kDLBoundsWalkedPast = 2;\n')
+    if len(walked.findall(text)) != 1:
+        raise ValueError('Walked-past constant anchor changed')
+    text = walked.sub(lambda m: m.group(0) + WALKED_PAST, text, 1)
+    for address in ('(uintptr_t)cmd', '(uintptr_t)(cmd + 1)', 'subAddr'):
+        text = once(text, 'sDLBoundsCheck && sDLBoundsCheck(%s) == kDLBoundsWalkedPast' % address,
+                    'sDLBoundsCheck && XboxWalkedPast(%s)' % address)
+    run = re.compile(r'\n    sXboxTriangleRunEnabled = [^\n]*;\n')
+    if len(run.findall(text)) != 1:
+        raise ValueError('Triangle run start anchor changed')
+    return run.sub(lambda m: m.group(0) + '    memset(sXboxWalkSpans, 0, sizeof(sXboxWalkSpans));\n', text, 1)

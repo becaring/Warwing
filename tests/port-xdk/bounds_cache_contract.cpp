@@ -9,6 +9,7 @@
 extern "C" void original_register(const void *, size_t, const char *);
 extern "C" void original_unregister(const void *);
 extern "C" int original_check(uintptr_t);
+extern "C" int port_dl_check_addr_span(uintptr_t, uintptr_t *, uintptr_t *);
 extern thread_local unsigned testBoundsScans;
 extern thread_local unsigned testBoundsExcludes;
 static const uintptr_t maxAddress = ~uintptr_t(0);
@@ -63,6 +64,33 @@ int main() {
     remove(0x60000);
     remove(0xa0000);
     puts("PASS gap exclusions: first positive 2->0, first tail across 3 ranges 6->0, unknown 6->6, later overlap 8->0");
+    // Every address of a reported span classifies IN_RANGE, including overlaps.
+    add(0x30000, 0x200);
+    add(0x30100, 0x400);
+    add(0x40000, 0x40);
+    unsigned unknownSpans = 0;
+    for (uintptr_t a = 0x2ff00; a < 0x40100 || a - 0x80000000u < 0x100; a = a == 0x40100 - 8 ? 0x80000000u : a + 8) {
+        uintptr_t base = 1, end = 1;
+        const int got = port_dl_check_addr_span(a, &base, &end);
+        require(got == original_check(a), "span classification differs from pinned checker");
+        if (got == PORT_DL_WALKED_PAST) {
+            require(base == 0 && end == 0, "walked-past answers report no span");
+            continue;
+        }
+        if (base == 0 && end == 0) continue;
+        require(base <= a && a < end, "span must contain the queried address");
+        // Unknown gaps can be large: sample them, and walk in-range spans fully.
+        const uintptr_t step = got == PORT_DL_IN_RANGE ? 8 : (end - base) / 4096 + 1;
+        for (uintptr_t b = base; b >= base && b < end; b += step)
+            require(original_check(b) == got, "span holds an address with a different answer");
+        require(original_check(end - 1) == got, "span end differs");
+        unknownSpans += got == PORT_DL_UNKNOWN;
+    }
+    require(unknownSpans > 32, "unknown gaps must report spans");
+    remove(0x30000);
+    remove(0x30100);
+    remove(0x40000);
+    puts("PASS walk spans: every in-range and unknown span shares its answer at the current generation");
     // Consecutive unknown commands must reuse a proved gap, not rescan all ranges.
     add(0x20000, 0x100);
     add(0x60000, 0x100);

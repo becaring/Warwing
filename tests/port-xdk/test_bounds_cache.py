@@ -19,7 +19,7 @@ class BoundsCacheTest(unittest.TestCase):
         upstream = ROOT / "upstream/BattleShip/port"
         text = (upstream / "port_dl_ranges.cpp").read_text()
         candidate = profile_projections.port("port/port_dl_ranges.cpp", text)
-        candidate = bounds_cache_projection.transform(candidate)
+        candidate = bounds_cache_projection.span(bounds_cache_projection.transform(candidate))
         # Count only the generated candidate's gap operations; production stays uninstrumented.
         instrumented = "extern thread_local unsigned testBoundsExcludes;\n" + candidate.replace(
             "unknownGap.Exclude(", "++testBoundsExcludes; unknownGap.Exclude("
