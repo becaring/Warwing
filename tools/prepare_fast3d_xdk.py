@@ -23,6 +23,7 @@ import shade_cache_projection
 import vertex_publication_projection
 import triangle_pack_projection
 import triangle_constants_projection
+import combiner_alias_projection
 import combiner_lookup_projection
 import texture_binding_projection
 import triangle_pipeline_projection
@@ -352,6 +353,7 @@ def lower(text, name):
         text = shader_metadata_projection.transform(text)
         text = triangle_pack_projection.transform(text)
         text = triangle_constants_projection.transform(text)
+        text = combiner_alias_projection.transform(text)
         text = combiner_lookup_projection.transform(text)
         text = texture_binding_projection.transform(text)
         text = triangle_pipeline_projection.transform(text)
