@@ -1,4 +1,4 @@
-param([switch]$ProfileDetail, [switch]$ProfileDisabled, [switch]$TriangleTrace, [switch]$CommandTrace, [Parameter(Mandatory)][string]$Destination)
+param([switch]$ProfileDetail, [switch]$ProfileDisabled, [switch]$TriangleTrace, [switch]$CommandTrace, [switch]$Zip, [Parameter(Mandatory)][string]$Destination)
 $ErrorActionPreference = 'Stop'
 if ($ProfileDetail -and $ProfileDisabled) { throw 'Choose detailed profiling or disabled profiling, not both' }
 $smashRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
@@ -12,6 +12,7 @@ if ($smashOptions.sha256 -ne $smashHash) { throw 'Build options do not match thi
 if ($ProfileDetail -and !$smashOptions.fullProfiling) { throw 'Rebuild with build.ps1 -FullProfiling before requesting detailed profiling' }
 # The game folder holds only what the console loads; README.txt and SHA256SUMS.txt sit beside it.
 if (Test-Path -LiteralPath $smashPackage) { throw "Package folder exists: $smashPackage" }
+if ($Zip -and (Test-Path -LiteralPath "$smashPackage.zip")) { throw "Package zip exists: $smashPackage.zip" }
 # A binary release must carry the license text of every component compiled into it.
 $shipyardRoot = & python -B -X utf8 (Join-Path $smashRoot 'tools\platform_base.py')
 if ($LASTEXITCODE -ne 0) { throw 'Shipyard checkout not found' }
@@ -76,4 +77,9 @@ The licenses folder holds the licenses of Warwing, Shipyard and the components
 they include.
 '@ | Set-Content -LiteralPath (Join-Path $smashPackage 'README.txt') -Encoding Ascii
 Write-Output "Hardware package: $smashPackage"
+# Python's zipfile writes forward-slash entry names; Windows PowerShell's Compress-Archive writes backslashes.
+if ($Zip) {
+    & python -B -c 'import shutil, sys; print(shutil.make_archive(sys.argv[1], ''zip'', sys.argv[1]))' $smashPackage
+    if ($LASTEXITCODE -ne 0) { throw 'Package zip failed' }
+}
 Write-Output "XEX SHA256: $smashHash"

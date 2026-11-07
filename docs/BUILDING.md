@@ -41,7 +41,8 @@ stay under `scratch/application-xdk/native`.
 
 `platform/xbox360/package.ps1 -Destination dist/<name>` writes a new folder:
 `Warwing/` holds the XEX, `f3d.o2r`, `warwing.env` and `shaders/`, with
-`README.txt` and `SHA256SUMS.txt` beside it. Before packaging, you can run
+`README.txt`, `SHA256SUMS.txt` and `licenses/` beside it. `-Zip` also writes
+`dist/<name>.zip` with that content. Before packaging, you can run
 `python -B tools/build_shader_pack.py --jobs 8` to build the prebuilt shader pack
 from the regenerated sources with the XDK's `fxc.exe`. Packaging copies the
 pack to `shaders/warwing.shaderpack`. On first use the XEX checks each packed program against its
