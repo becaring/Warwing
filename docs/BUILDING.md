@@ -39,10 +39,12 @@ The executable is `scratch/application-xdk/native/build/Smash360.xex`.
 Leave these flags off when the inputs have not changed. Logs and build records
 stay under `scratch/application-xdk/native`.
 
-Before `platform/xbox360/package.ps1`, you can run
+`platform/xbox360/package.ps1 -Destination dist/<name>` writes a new folder:
+`Smash360/` holds the XEX, `f3d.o2r`, `smash360.env` and `shaders/`, with
+`README.txt` and `SHA256SUMS.txt` beside it. Before packaging, you can run
 `python -B tools/build_shader_pack.py --jobs 8` to build the prebuilt shader pack
 from the regenerated projections with the XDK's `fxc.exe`. Packaging copies the
-pack beside the XEX. On first use the XEX checks each packed program against its
+pack to `shaders/smash360.shaderpack`. On first use the XEX checks each packed program against its
 own shader generator and compiles any mismatch itself. Programs compiled at run
 time are cached in `smashsave:\smash360-shaders.cache`.
 

@@ -40,8 +40,8 @@ void GfxRenderingAPIXenos::SetScissor(int x,int y,int w,int h){ShipyardXenos::Se
 void GfxRenderingAPIXenos::SetUseAlpha(bool alpha){ShipyardXenos::SetUseAlpha(alpha);}
 void GfxRenderingAPIXenos::DrawTriangles(float v[],size_t count,size_t tris){ShipyardXenos::DrawTriangles(v,count,tris);}
 void GfxRenderingAPIXenos::Init(){
-    // tools/build_shader_pack.py output beside the XEX, each program verified against this build on first use.
-    Shipyard::Xenos::ConfigureShaderPack("game:\\smash360.shaderpack");
+    // tools/build_shader_pack.py output, each program verified against this build on first use.
+    Shipyard::Xenos::ConfigureShaderPack("game:\\shaders\\smash360.shaderpack");
     const Shipyard::Xenos::ShaderCacheConfig config={"smashsave:\\smash360-shaders.cache",2,Smash360_QueueShaderCacheWrite};
     if(!Shipyard::Xenos::ConfigureShaderCache(config))Smash360_Fatal("shader cache configuration",E_UNEXPECTED);
     const ShipyardXenos::ShaderCacheOps cache={Shipyard::Xenos::LoadShaderCode,Shipyard::Xenos::StoreShaderCode,
@@ -55,22 +55,33 @@ void GfxRenderingAPIXenos::EndFrame(){ShipyardXenos::EndFrame();}
 void GfxRenderingAPIXenos::FinishRender(){ShipyardXenos::FinishRender();}
 int GfxRenderingAPIXenos::CreateFramebuffer(){return ShipyardXenos::CreateFramebuffer();}
 void GfxRenderingAPIXenos::DestroyFramebuffer(int id){ShipyardXenos::DestroyFramebuffer(id);}
-void GfxRenderingAPIXenos::UpdateFramebufferParameters(int id,uint32_t w,uint32_t h,uint32_t msaa,bool flip,bool target,bool depth,bool read){ShipyardXenos::UpdateFramebuffer(id,w,h,msaa,flip,target,depth,read);}
+void GfxRenderingAPIXenos::UpdateFramebufferParameters(int id,uint32_t w,uint32_t h,uint32_t msaa,
+                                                       bool flip,bool target,bool depth,bool read){
+    ShipyardXenos::UpdateFramebuffer(id,w,h,msaa,flip,target,depth,read);
+}
 void GfxRenderingAPIXenos::StartDrawToFramebuffer(int id,float noise){ShipyardXenos::StartDrawToFramebuffer(id,noise);}
-void GfxRenderingAPIXenos::CopyFramebuffer(int dst,int src,int sx0,int sy0,int sx1,int sy1,int dx0,int dy0,int dx1,int dy1){ShipyardXenos::CopyFramebuffer(dst,src,sx0,sy0,sx1,sy1,dx0,dy0,dx1,dy1);}
+void GfxRenderingAPIXenos::CopyFramebuffer(int dst,int src,int sx0,int sy0,int sx1,int sy1,int dx0,int dy0,int dx1,int dy1){
+    ShipyardXenos::CopyFramebuffer(dst,src,sx0,sy0,sx1,sy1,dx0,dy0,dx1,dy1);
+}
 void GfxRenderingAPIXenos::ClearFramebuffer(bool color,bool depth){ShipyardXenos::ClearFramebuffer(color,depth);}
 void GfxRenderingAPIXenos::SetColorWriteMask(bool enabled){ShipyardXenos::SetColorWriteMask(enabled);}
 void GfxRenderingAPIXenos::ClearColorRegion(float x0,float y0,float x1,float y1){ShipyardXenos::ClearColorRegion(x0,y0,x1,y1);}
 void GfxRenderingAPIXenos::ReadFramebufferToCPU(int id,uint32_t w,uint32_t h,uint16_t* p){ShipyardXenos::ReadFramebufferToCPU(id,w,h,p);}
 void GfxRenderingAPIXenos::ResolveMSAAColorBuffer(int dst,int src){ShipyardXenos::ResolveMSAAColorBuffer(dst,src);}
-std::unordered_map<std::pair<float,float>,uint16_t,hash_pair_ff> GfxRenderingAPIXenos::GetPixelDepth(int id,const std::set<std::pair<float,float> >& xy){return ShipyardXenos::GetPixelDepth(id,xy);}
+std::unordered_map<std::pair<float,float>,uint16_t,hash_pair_ff>
+GfxRenderingAPIXenos::GetPixelDepth(int id,const std::set<std::pair<float,float> >& xy){
+    return ShipyardXenos::GetPixelDepth(id,xy);
+}
 void* GfxRenderingAPIXenos::GetFramebufferTextureId(int id){return ShipyardXenos::GetFramebufferTextureId(id);}
 void GfxRenderingAPIXenos::SelectTextureFb(int id){ShipyardXenos::SelectTextureFb(id);}
 bool GfxRenderingAPIXenos::FbNeedsSampleVFlip(int id){return ShipyardXenos::FbNeedsSampleVFlip(id);}
 void GfxRenderingAPIXenos::DeleteTexture(uint32_t id){ShipyardXenos::DeleteTexture(id);}
 // Like upstream DX11: cached uploads and the bound shader carry the old filter.
 extern "C" void gfx_texture_cache_clear();
-void GfxRenderingAPIXenos::SetTextureFilter(FilteringMode mode){ShipyardXenos::SetTextureFilter(mode);gfx_texture_cache_clear();if(ShipyardXenos::CurrentShader())LoadShader(ShipyardXenos::CurrentShader());}
+void GfxRenderingAPIXenos::SetTextureFilter(FilteringMode mode){
+    ShipyardXenos::SetTextureFilter(mode);gfx_texture_cache_clear();
+    if(ShipyardXenos::CurrentShader())LoadShader(ShipyardXenos::CurrentShader());
+}
 FilteringMode GfxRenderingAPIXenos::GetTextureFilter(){return ShipyardXenos::GetTextureFilter();}
 void GfxRenderingAPIXenos::SetSrgbMode(){mSrgbMode=true;}
 ImTextureID GfxRenderingAPIXenos::GetTextureById(int id){return ShipyardXenos::GetTextureById(id);}

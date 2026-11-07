@@ -7,7 +7,7 @@ scratch/graphics-xdk) and prepare_assets.py. Harvests draw states from the nativ
 display lists inside BattleShip.o2r's relocatable files and the decomp's constant
 gDP calls, derives keys with the projected GenerateCC and the pinned option block,
 generates and lowers each program (ABI 3) on the host, compiles it with the XDK's
-fxc and writes scratch/shader-pack/smash360.shaderpack. package.ps1 copies it beside
+fxc and writes scratch/shader-pack/smash360.shaderpack. package.ps1 copies it into shaders/ beside
 the XEX; the XEX verifies every program it uses and compiles any mismatch itself.
 """
 
