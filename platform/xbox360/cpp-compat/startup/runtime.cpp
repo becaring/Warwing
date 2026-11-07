@@ -37,11 +37,12 @@ bool RequireArchive(const std::string& path) {
     // Only the game archive comes from the ROM; f3d.o2r ships with the build.
     const std::string name = SSB64_O2R_NAME;
     if (path.size() >= name.size() && path.compare(path.size() - name.size(), name.size(), name) == 0) {
-        const std::string directory = path.substr(0, path.size() - name.size());
+        // FindFirstFile and fopen take device paths, not the "./" that PortLocateFile returns on a miss.
+        const std::string target = "game:\\" + name;
         const double start = Smash360_Time();
         std::string failure;
-        if (ExtractArchive(directory, path, failure)) {
-            Smash360_Log("extracted %s from ROM in %.1f s", path.c_str(), Smash360_Time() - start);
+        if (ExtractArchive("game:\\", target, failure)) {
+            Smash360_Log("extracted %s from ROM in %.1f s", target.c_str(), Smash360_Time() - start);
             return true;
         }
         Smash360_Log("ROM extraction failed: %s", failure.c_str());
