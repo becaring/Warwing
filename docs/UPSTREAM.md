@@ -1,7 +1,7 @@
 # Upstream and provenance
 
-Warwing integrates [BattleShip](https://github.com/JRickey/BattleShip), including
-its selected [ssb-decomp-re](https://github.com/JRickey/ssb-decomp-re),
+Warwing integrates [BattleShip](https://github.com/JRickey/BattleShip) with its
+selected [ssb-decomp-re](https://github.com/JRickey/ssb-decomp-re),
 [libultraship/Fast3D](https://github.com/JRickey/libultraship), and
 [Torch](https://github.com/JRickey/Torch) submodules. BattleShip's source and
 asset-extraction pipeline remain authoritative for Smash behavior and data.
@@ -19,25 +19,26 @@ platform ancestry from SoH360 and Shipwright.
 | Imported platform material | Source copyright notices, source locks, and donor provenance records |
 | Emitted compiler inputs | Generated manifests, hashes, and source-line mappings |
 
-The fetched upstream trees live under `upstream/` and are not maintained by
-editing the generated build tree. A source update requires reviewing changed
-contracts, updating exact locks, regenerating, and rerunning the affected
-comparisons and native build. Do not lower upstream versions merely to silence
-compiler errors or replace a current interface with an older donor interface.
+The fetched upstream trees live under `upstream/`. Do not maintain them by
+editing the generated build tree. A source update means reviewing the changed
+contracts, updating the exact locks, regenerating, and rerunning the affected
+comparisons and native build. Do not lower upstream versions just to silence
+compiler errors, and do not swap a current interface for an older donor
+interface.
 
-A consumer can intentionally select an older Shipyard revision. Shared changes
-are integrated into one Shipyard history; consumers adopt a reviewed
-revision explicitly. Do not copy a second private platform implementation into
-the consumer to bypass a pin or contract.
+A consumer can choose an older Shipyard revision on purpose. Shared changes go
+into one Shipyard history, and consumers adopt a reviewed revision explicitly.
+Do not copy a second private platform implementation into the consumer to get
+around a pin or contract.
 
 ## Licenses and credits
 
-Preserve all applicable copyright notices, license texts, attribution, and
-source provenance when adapting code. The dependency repositories and selected
-revisions define their own license terms; this document does not assign a new
-license to their code. In particular, retain the nlohmann JSON MIT notice at
+When you adapt code, keep all applicable copyright notices, license texts,
+attribution, and source provenance. The dependency repositories and selected
+revisions define their own license terms; this document does not give their code
+a new license. Keep the nlohmann JSON MIT notice at
 `platform/xbox360/cpp-compat/json/LICENSE.nlohmann.MIT` and the donor provenance
-at `platform/xbox360/game-compat/donor/provenance.json`, together with all source
+at `platform/xbox360/game-compat/donor/provenance.json`, along with all source
 locks and notices embedded in maintained files.
 
 Thanks to the BattleShip, ssb-decomp-re, libultraship/Fast3D, Torch, Shipwright,
