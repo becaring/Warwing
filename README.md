@@ -1,3 +1,8 @@
+<picture>
+  <source media="(prefers-color-scheme: light)" srcset="media/Warwing-on-light.svg">
+  <img src="media/Warwing.svg" alt="Warwing" width="520">
+</picture>
+
 # Warwing
 
 **Super Smash Bros. 64 on Xbox 360, powered by Shipyard.**
