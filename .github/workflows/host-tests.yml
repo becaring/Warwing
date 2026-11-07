@@ -20,4 +20,11 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.13'
+      # The ROM entry test reads BattleShip's Torch YAMLs at the revision fetch-sources.ps1 pins.
+      - name: Fetch pinned BattleShip YAMLs
+        run: |
+          revision=$(sed -n "s/^\$revision = '\([0-9a-f]*\)'$/\1/p" tools/fetch-sources.ps1)
+          git clone --quiet --filter=blob:none --no-checkout https://github.com/JRickey/BattleShip.git upstream/BattleShip
+          git -C upstream/BattleShip sparse-checkout set yamls/us
+          git -C upstream/BattleShip checkout --quiet --detach "$revision"
       - run: python -B tools/test_host_ci.py
