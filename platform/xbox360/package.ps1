@@ -1,9 +1,9 @@
-param([switch]$ProfileDetail, [switch]$ProfileDisabled, [switch]$TriangleTrace, [switch]$CommandTrace)
+param([switch]$ProfileDetail, [switch]$ProfileDisabled, [switch]$TriangleTrace, [switch]$CommandTrace, [string]$Destination = "dist/Smash360")
 $ErrorActionPreference = 'Stop'
 if ($ProfileDetail -and $ProfileDisabled) { throw 'Choose detailed profiling or disabled profiling, not both' }
 $smashRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
 $smashBuild = Join-Path $smashRoot 'scratch/application-xdk/native/build'
-$smashPackage = Join-Path $smashRoot 'dist/Smash360'
+$smashPackage = Join-Path $smashRoot $Destination
 $smashReceipt = Get-Content -LiteralPath (Join-Path $smashBuild 'native-link-verification.json') -Raw | ConvertFrom-Json
 $smashHash = (Get-FileHash -LiteralPath (Join-Path $smashBuild 'Smash360.xex') -Algorithm SHA256).Hash
 if ($smashHash -ne $smashReceipt.sha256) { throw 'Current XEX does not match the production link audit' }
