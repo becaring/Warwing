@@ -32,6 +32,7 @@ The game uses Super Smash Bros.' own controls, and you can remap them in the por
 
 ### Known Limitations
 
+- Tested on an RGH console. It should work on ABadAvatar, BadUpdate and PeerPressure consoles, but those haven't been tested.
 - Singleplayer has been played through on hardware. A match with two controllers worked, each with its own inputs, but multiplayer hasn't had longer playtesting yet.
 
 ## Logs
