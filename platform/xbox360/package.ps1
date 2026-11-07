@@ -12,6 +12,18 @@ if ($smashOptions.sha256 -ne $smashHash) { throw 'Build options do not match thi
 if ($ProfileDetail -and !$smashOptions.fullProfiling) { throw 'Rebuild with build.ps1 -FullProfiling before requesting detailed profiling' }
 # The game folder holds only what the console loads; README.txt and SHA256SUMS.txt sit beside it.
 if (Test-Path -LiteralPath $smashPackage) { throw "Package folder exists: $smashPackage" }
+# A binary release must carry the license text of every component compiled into it.
+$shipyardRoot = & python -B -X utf8 (Join-Path $smashRoot 'tools\platform_base.py')
+if ($LASTEXITCODE -ne 0) { throw 'Shipyard checkout not found' }
+$smashLicenseList = Get-Content -LiteralPath (Join-Path $smashRoot 'release-licenses.json') -Raw | ConvertFrom-Json
+$smashLicenses = @()
+foreach ($smashSet in @(@($smashLicenseList.repository, $smashRoot), @($smashLicenseList.platform, $shipyardRoot))) {
+    foreach ($smashEntry in $smashSet[0].PSObject.Properties) {
+        $smashSource = Join-Path $smashSet[1] $smashEntry.Value
+        if (!(Test-Path -LiteralPath $smashSource -PathType Leaf)) { throw "Missing license file: $smashSource" }
+        $smashLicenses += ,@($smashEntry.Name, $smashSource)
+    }
+}
 $smashGame = Join-Path $smashPackage 'Warwing'
 New-Item -ItemType Directory -Path (Join-Path $smashGame 'shaders') -Force | Out-Null
 foreach ($smashFile in @('Warwing.xex','f3d.o2r')) {
@@ -32,36 +44,36 @@ if ($ProfileDisabled) { $smashProfileEnv += "WARWING_PROFILE=0`r`nWARWING_PROFIL
 if ($TriangleTrace) { $smashProfileEnv += "WARWING_TRIANGLE_TRACE=1`r`n" }
 if ($CommandTrace) { $smashProfileEnv += "WARWING_COMMAND_TRACE=1`r`n" }
 [IO.File]::WriteAllText((Join-Path $smashGame 'warwing.env'), $smashProfileEnv)
-$smashSums = foreach ($smashItem in Get-ChildItem -LiteralPath $smashGame -Recurse -File | Sort-Object FullName) {
+$smashLicenseFolder = Join-Path $smashPackage 'licenses'
+New-Item -ItemType Directory -Path $smashLicenseFolder | Out-Null
+foreach ($smashLicense in $smashLicenses) { Copy-Item -LiteralPath $smashLicense[1] -Destination (Join-Path $smashLicenseFolder $smashLicense[0]) }
+$smashPackaged = @(Get-ChildItem -LiteralPath $smashGame -Recurse -File) + @(Get-ChildItem -LiteralPath $smashLicenseFolder -File)
+$smashSums = foreach ($smashItem in $smashPackaged | Sort-Object FullName) {
     $smashRelative = $smashItem.FullName.Substring($smashPackage.Length + 1).Replace('\', '/')
     (Get-FileHash -LiteralPath $smashItem.FullName -Algorithm SHA256).Hash.ToLower() + '  ' + $smashRelative
 }
 [IO.File]::WriteAllText((Join-Path $smashPackage 'SHA256SUMS.txt'), (($smashSums -join "`n") + "`n"))
 @'
-Warwing Xbox 360 package
+Warwing for Xbox 360
 
-Copy Warwing/ to the console and put your own US v1.0 Super Smash Bros. ROM
-(.z64, .n64 or .v64) beside Warwing.xex. The first launch builds BattleShip.o2r
-from the ROM; later launches reuse it. SHA256SUMS.txt records the game folder's
-file hashes. No ROM data, SDK files, Xenia settings, or PC save data are
-included.
+Copy the Warwing folder to your console and put your own US v1.0 Super Smash
+Bros. ROM (.z64, .n64 or .v64) beside Warwing.xex. The first launch builds the
+game data from your ROM, and later launches reuse it. The package contains no
+ROM data. SHA256SUMS.txt lists the hashes of the files in the Warwing folder.
 
-Back/View: enhancements. Right stick: cursor. A: click/drag. B: right-click.
-LT/RT: scroll. R3: switch cursor/D-pad navigation.
+Back opens or closes the menu. The right stick moves the cursor, A clicks or
+drags, B right-clicks, LT and RT scroll, and R3 switches between the cursor and
+D-pad navigation.
 
-Check warwing.env for this package's build and diagnostic modes. Full-profiler
-scopes require a build made with build.ps1 -FullProfiling; environment switches
-cannot restore compiled-out scopes. package.ps1 -ProfileDetail requests detailed
-profiling and requires that build option. Command and triangle sampling are
-separate options and add diagnostic overhead.
+To report a problem, open a bug report at
+https://github.com/becaring/Warwing/issues and attach warwing.log from the
+Warwing folder.
 
-For performance comparisons, keep scene, fighters, camera, resolution, MSAA,
-shader-cache state, and diagnostic settings comparable. Save the package hash
-with the results. Build verification does not establish complete gameplay,
-rendering, audio, or performance validation on the console.
+warwing.env holds diagnostic settings. docs/BUILDING.md in the repository
+explains them.
 
-Source and build documentation: README.md and docs/XBOX360_BUILDING.md in the
-Warwing repository. Profiling: platform/xbox360/runtime/PROFILING.md.
+The licenses folder holds the licenses of Warwing, Shipyard and the components
+they include.
 '@ | Set-Content -LiteralPath (Join-Path $smashPackage 'README.txt') -Encoding Ascii
 Write-Output "Hardware package: $smashPackage"
 Write-Output "XEX SHA256: $smashHash"

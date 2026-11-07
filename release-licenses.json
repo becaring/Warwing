@@ -1,0 +1,27 @@
+{
+  "repository": {
+    "Warwing-LICENSE.txt": "LICENSE",
+    "BattleShip-LICENSE.txt": "upstream/BattleShip/LICENSE",
+    "libultraship-LICENSE.txt": "upstream/BattleShip/libultraship/LICENSE",
+    "fast3d-LICENSE.txt": "upstream/BattleShip/libultraship/src/fast/LICENSE.txt",
+    "Torch-LICENSE.txt": "upstream/BattleShip/torch/LICENSE",
+    "fmt-LICENSE.txt": "upstream/dependencies/fmt-xdk/LICENSE.rst",
+    "imgui-LICENSE.txt": "upstream/dependencies/imgui/LICENSE.txt",
+    "nlohmann-json-LICENSE.txt": "upstream/dependencies/json/LICENSE.MIT",
+    "libzip-LICENSE.txt": "upstream/dependencies/libzip/LICENSE",
+    "prism-LICENSE.txt": "upstream/dependencies/prism/LICENSE",
+    "SDL-LICENSE.txt": "upstream/dependencies/SDL/LICENSE.txt",
+    "spdlog-LICENSE.txt": "upstream/dependencies/spdlog/LICENSE",
+    "stb-LICENSE.txt": "upstream/dependencies/stb/LICENSE",
+    "thread-pool-LICENSE.txt": "upstream/dependencies/thread-pool/LICENSE.txt",
+    "tinyxml2-LICENSE.txt": "upstream/dependencies/tinyxml2/LICENSE.txt",
+    "zlib-LICENSE.txt": "upstream/dependencies/zlib/LICENSE"
+  },
+  "platform": {
+    "Shipyard-LICENSE.txt": "LICENSE",
+    "Shipyard-NOTICE.txt": "NOTICE.md",
+    "Shipyard-Re60-Legacy-Xenos-Renderer-LICENSE.txt": "provenance/becaring-Re60-Legacy-Xenos-Renderer-23eb15e6-LICENSE.txt",
+    "Shipyard-fast3d-LICENSE.txt": "provenance/fast3d-official-881eb68-LICENSE.txt",
+    "Shipyard-nlohmann-json-LICENSE.txt": "third_party/nlohmann-3.12.0/LICENSE.MIT"
+  }
+}
