@@ -1,4 +1,4 @@
-"""Build the prebuilt Xenos shader pack for Smash360 offline, without running the game.
+"""Build the prebuilt Xenos shader pack for Warwing offline, without running the game.
 
     python tools/build_shader_pack.py [--jobs N]
 

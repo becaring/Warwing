@@ -13,7 +13,7 @@ Warwing brings [BattleShip](https://github.com/JRickey/BattleShip), the native p
 
 - An Xbox 360 that runs homebrew, with Aurora, FSD or XeXMenu to launch XEX files.
 - Your own **US v1.0** Super Smash Bros. ROM (`.z64`, `.n64` or `.v64`). Other regions and revisions won't work.
-- A controller and a storage device for saves. Keyboards and Raphnet adapters aren't supported.
+- A controller and a storage device for saves.
 
 ## Install
 
