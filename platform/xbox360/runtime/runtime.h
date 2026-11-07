@@ -10,7 +10,6 @@ void Smash360_Log(const char* format, ...);
 void Smash360_LogLevel(int level, const char* format, ...);
 __declspec(noreturn) void Smash360_Fatal(const char* operation, HRESULT result);
 void Smash360_FlushLogs();
-void Smash360_DrainConsoleLogs(void (*append)(int, const char*));
 void Smash360_QueueDiagnostic(Smash360DiagnosticFormat format, const void* snapshot, size_t size, uint32_t captureStart);
 void Smash360_ShutdownDiagnostics();
 double Smash360_Time();

@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <errno.h>
-#include <deque>
+#include <string.h>
 #include <new>
 #include <stdlib.h>
 
@@ -18,10 +18,6 @@ using Shipyard::Diagnostics::Stats;
 
 const size_t LOG_QUEUE_LIMIT = 1024 * 1024;
 const unsigned LOG_LINE_LIMIT = 8192;
-struct ConsoleLine { int level; std::string text; };
-CRITICAL_SECTION consoleMutex;
-volatile LONG consoleState;
-std::deque<ConsoleLine>* pendingConsole;
 CRITICAL_SECTION fileMutex;
 volatile LONG fileState;
 FILE* diagnosticLog;
@@ -33,13 +29,6 @@ void InitSection(CRITICAL_SECTION& section, volatile LONG& state) {
         InitializeCriticalSection(&section);
         InterlockedExchange(&state, 2);
     } else while (InterlockedCompareExchange(&state, 2, 2) != 2) Sleep(0);
-}
-void InitConsole() {
-    if (InterlockedCompareExchange(&consoleState, 1, 0) == 0) {
-        InitializeCriticalSection(&consoleMutex);
-        pendingConsole = new std::deque<ConsoleLine>();
-        InterlockedExchange(&consoleState, 2);
-    } else while (InterlockedCompareExchange(&consoleState, 2, 2) != 2) Sleep(0);
 }
 void FileError(const char* operation) {
     int error = errno;
@@ -75,11 +64,6 @@ void WriteFileLine(const char* text) {
 void EmitLine(int level, const char* text) {
     DbgPrint("SMASH360 %s\n", text);
     WriteFileLine(text);
-    ConsoleLine line = {level, text};
-    InitConsole();
-    EnterCriticalSection(&consoleMutex);
-    pendingConsole->push_back(line);
-    LeaveCriticalSection(&consoleMutex);
 }
 void EmitReport(const char* format, ...) {
     char text[2048];
@@ -171,6 +155,13 @@ void Smash360_LogLevel(int level, const char* format, ...) {
     va_list args; va_start(args, format); LogMessage(level, format, args); va_end(args);
 }
 void Smash360_FlushLogs() { GetQueue().flush(); }
+// BattleShip's port_log is C and ends its lines with newlines; the file writer adds its own.
+extern "C" void Smash360_PortLog(const char* text) {
+    size_t length = strlen(text);
+    while (length && (text[length - 1] == '\n' || text[length - 1] == '\r')) --length;
+    Record record; record.level = 2; record.bytes.assign(text, length);
+    QueueOrFail(record, 0);
+}
 void Smash360_ShutdownDiagnostics() {
     Queue& queue = GetQueue();
     queue.shutdown();
@@ -184,17 +175,6 @@ void Smash360_ShutdownDiagnostics() {
         CloseFile();
         DbgPrint("SMASH360 %s\n", summary);
     }
-}
-void Smash360_DrainConsoleLogs(void (*append)(int, const char*)) {
-    std::deque<ConsoleLine> lines;
-    InitConsole();
-    EnterCriticalSection(&consoleMutex);
-    for (unsigned i = 0; i < 8 && !pendingConsole->empty(); ++i) {
-        lines.push_back(pendingConsole->front()); pendingConsole->pop_front();
-    }
-    LeaveCriticalSection(&consoleMutex);
-    for (size_t i = 0; i < lines.size(); ++i)
-        append(lines[i].level, lines[i].text.c_str());
 }
 void Smash360_Fatal(const char* operation, HRESULT result) {
     Smash360_LogLevel(5, "FAIL %s hr=%08lx", operation, result);

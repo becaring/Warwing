@@ -473,41 +473,37 @@ def transform(relative, text):
     ):
         text = '#include "config/compiler.h"\n' + CPP_LOWER(text.encode()).decode()
     if relative == "port/port_log.c":
-        # Match SoH360's diagnostic fallback when game: is read-only (disc or
-        # Xenia's executable mount). Preserve BattleShip's complete log bytes.
-        text = text.replace(
-            'sLogFile = fopen(path, "w");',
-            'sLogFile = fopen(path, "w");\n#ifdef _XBOX\n    if (sLogFile == NULL) sLogFile ='
-            ' fopen("cache:\\\\ssb64.log", "w");\n#endif',
-        )
-        text = text.replace(
-            "#if defined(BATTLESHIP_UWP)", "#if defined(BATTLESHIP_UWP) || defined(_XBOX)"
-        )
-        if text.count("vfprintf(sLogFile, fmt, ap);") != 1:
-            raise ValueError("Port logging body changed")
-        declaration = "\tif (sLogFile == NULL) return;\n\tva_list ap;"
-        if text.count(declaration) != 1:
-            raise ValueError("Port logger declaration order changed")
-        text = text.replace(
-            declaration, "\tva_list ap;\n\tint required;\n\tif (sLogFile == NULL) return;"
-        )
-        text = text.replace(
-            "#include <stdarg.h>",
-            '#include <stdarg.h>\n#include <stdlib.h>\n#include "crt/snprintf.h"',
-        )
-        text = text.replace(
-            "vfprintf(sLogFile, fmt, ap);",
-            """required = Smash360_Vsnprintf(NULL, 0, fmt, ap);
-    if (required >= 0) {
-        char *complete = (char *)malloc((size_t)required + 1);
-        if (complete != NULL) {
-            if (Smash360_Vsnprintf(complete, (size_t)required + 1, fmt, ap) == required)
-                fwrite(complete, 1, (size_t)required, sLogFile);
-            free(complete);
-        }
-    }""",
-        )
+        # One console log: port_log lines join game:\smash360.log through the platform queue.
+        header = '#include "port_log.h"\n'
+        if text.count(header) != 1 or text.count("void port_log(const char *fmt, ...)") != 1:
+            raise ValueError("Port logging source changed")
+        text = text.replace(header, header + PORT_LOG_XBOX, 1) + "#endif\n"
     return overlap_projection.port(relative, text)
+
+
+PORT_LOG_XBOX = """
+#ifdef _XBOX
+#include <stdarg.h>
+#include "crt/snprintf.h"
+
+void Smash360_PortLog(const char *text);
+
+void port_log_init(const char *path) { (void)path; }
+void port_log_close(void) {}
+int port_log_get_fd(void) { return -1; }
+
+void port_log(const char *fmt, ...)
+{
+    char text[2048];
+    va_list ap;
+    va_start(ap, fmt);
+    Smash360_Vsnprintf(text, sizeof(text), fmt, ap);
+    va_end(ap);
+    text[sizeof(text) - 1] = 0;
+    Smash360_PortLog(text);
+}
+#else
+"""
 
 
 def prepare():

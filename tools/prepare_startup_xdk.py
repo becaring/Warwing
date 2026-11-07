@@ -69,8 +69,7 @@ def transform(relative, text):
         text = once(
             text,
             "\t\tstd::string logPath;",
-            "\t\tstd::string logPath;\n#ifdef _XBOX\n        logPath ="
-            ' "game:\\\\ssb64.log";\n#else',
+            "\t\tstd::string logPath;\n#ifdef _XBOX\n        // port_log joins game:\\\\smash360.log on Xbox.\n#else",
         )
         text = once(
             text,
@@ -220,6 +219,18 @@ def transform(relative, text):
             "#if !defined(_XBOX) && ((!defined(_WIN32)) || defined(_DEBUG))",
         )
         text = guard(text, "#include <spdlog/sinks/stdout_color_sinks.h>")
+        text = once(
+            text,
+            "#include <spdlog/sinks/rotating_file_sink.h>",
+            '#include <spdlog/sinks/rotating_file_sink.h>\n#ifdef _XBOX\n#include "runtime/log_sink.h"\n#endif',
+        )
+        text = once(
+            text,
+            '        auto logPath = GetPathRelativeToAppDirectory(("logs/" + GetName() + ".log"));',
+            "#ifdef _XBOX\n        sinks.push_back(std::make_shared<Smash360LogSink>());\n#else\n"
+            '        auto logPath = GetPathRelativeToAppDirectory(("logs/" + GetName() + ".log"));',
+        )
+        text = once(text, "        sinks.push_back(fileSink);\n", "        sinks.push_back(fileSink);\n#endif\n")
         text = once(
             text,
             "    GetWindow()->SaveWindowToConfig();",

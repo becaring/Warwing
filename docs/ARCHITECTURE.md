@@ -89,7 +89,7 @@ Shared changes belong in Shipyard and are adopted through a pin update and regen
 | Game and endian | The game units compile as C. Install the endian overlay before preprocessing; serialized and native representations have separate rules. |
 | Graphics and ImGui | Keep the full shader key, six texture slots, and ImGui 1.91.9b with the shared renderer. |
 | Input | Keep raw stick values; invert Y with saturation at -32768. Triggers map to 0..32767. Do not apply the deadzone twice. |
-| Storage | Initialize the display before the selector. The `smashsave:` container (user 0, 1 MiB, `platform/xbox360/runtime/storage_adapter.cpp`) holds only the save file `ssb64_save.bin` and the shader cache `smash360-shaders.cache`. Config, logs (`ssb64.log`, `smash360.log`), and mods live in `game:\`. Keep overlapped-operation storage alive until completion. |
+| Storage | Initialize the display before the selector. The `smashsave:` container (user 0, 1 MiB, `platform/xbox360/runtime/storage_adapter.cpp`) holds only the save file `ssb64_save.bin` and the shader cache `smash360-shaders.cache`. Config, the log `smash360.log`, and mods live in `game:\`; BattleShip's `port_log` and libultraship's spdlog lines join that log. Keep overlapped-operation storage alive until completion. |
 
 ## Environment lookup
 
