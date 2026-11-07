@@ -1,0 +1,54 @@
+name: Bug report
+description: Something broke or looks wrong. A log is required.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Every report needs your log file and a description of what happened. A report missing
+        either one closes automatically, and it reopens when you edit it to add them.
+  - type: input
+    attributes:
+      label: Release
+      description: The release ZIP you installed.
+      placeholder: Warwing-1.0.0.zip
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: Problem
+      options:
+        - Crash or console shutdown
+        - Won't start
+        - Graphics
+        - Audio
+        - Controls
+        - Performance
+        - Saves
+        - Something else
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what happened instead. Name the mode, stage and fighters if they matter.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Log
+      description: |
+        `warwing.log` is in the Warwing folder on your console, beside `Warwing.xex`. Copy it to your PC
+        (FTP from Aurora, FSD or XeXMenu, or a USB drive) and drag the file into this box.
+        The log keeps every launch, so copy it after the problem happens.
+      placeholder: Drag warwing.log here
+    validations:
+      required: true
+  - type: checkboxes
+    attributes:
+      label: Checks
+      options:
+        - label: I'm using an unmodified release and my own US v1.0 Super Smash Bros. ROM.
+          required: true
+        - label: I searched the existing issues for this problem.
+          required: true
