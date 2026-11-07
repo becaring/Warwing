@@ -70,7 +70,7 @@ def transform(relative, text):
             text,
             "\t\tstd::string logPath;",
             "\t\tstd::string logPath;\n#ifdef _XBOX\n        logPath ="
-            ' "smashsave:\\\\ssb64.log";\n#else',
+            ' "game:\\\\ssb64.log";\n#else',
         )
         text = once(
             text,
@@ -235,8 +235,9 @@ def transform(relative, text):
         text = once(
             text,
             "std::string Context::GetAppDirectoryPath(std::string appName) {",
+            # Config, logs and mods stay in the game folder; only saves go to the profile container.
             "#endif\nstd::string Context::GetAppDirectoryPath(std::string appName) {\n#ifdef"
-            ' _XBOX\n    return "smashsave:\\\\";\n#else',
+            ' _XBOX\n    return "game:\\\\";\n#else',
         )
         # Close each conditional within its function, never outside its brace.
         text = once(

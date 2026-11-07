@@ -278,6 +278,15 @@ def transform(relative, text):
             "std::once_flag gPathOnce;",
             "xbox_compat::mutex gPathMutex;\nbool gPathResolved = false;",
         )
+        # Saves are per profile, in the container the storage popup mounts; config stays in game:.
+        relative_save = '        gSavePath = Ship::Context::GetPathRelativeToAppDirectory("ssb64_save.bin");'
+        if text.count(relative_save) != 1:
+            raise ValueError("save path drift")
+        text = text.replace(
+            relative_save,
+            '#ifdef _XBOX\n        gSavePath = "smashsave:\\\\ssb64_save.bin";\n#else\n'
+            + relative_save + "\n#endif",
+        )
         start = text.index("    if (char *p = SDL_GetPrefPath")
         end = text.index('    gSavePath = "ssb64_save.bin";', start)
         text = text[:start] + "#if !defined(_XBOX)\n" + text[start:end] + "#endif\n" + text[end:]

@@ -39,8 +39,8 @@ def source_contracts():
     context = m["transform"]("libultraship/src/ship/Context.cpp", read("libultraship/src/ship/Context.cpp"))
     assert "if (GetWindow()) GetWindow()->SaveWindowToConfig();" in context
     assert "if (GetConfig()) GetConfig()->Save();" in context
-    assert context.count('return "game:\\\\";') == 1
-    assert context.count('return "smashsave:\\\\";') == 1
+    assert context.count('return "game:\\\\";') == 2
+    assert 'smashsave' not in context
     try:
         m["transform"](
             "port/port.cpp", read("port/port.cpp").replace("int main(int argc, char* argv[]) {", "int renamed() {")
@@ -59,6 +59,8 @@ def native_compile():
         ROOT / "scratch/logging-xdk/core-include",
         ROOT / "scratch/logging-xdk/include",
         ROOT / "scratch/audio-xdk/generated/include",
+        SHIPYARD_BASE,
+        SHIPYARD_BASE / 'sources',
         SHIPYARD_BASE / 'sources/json/include',
         ROOT / "platform/xbox360/cpp-compat",
         ROOT / "platform/xbox360",
