@@ -1,4 +1,4 @@
-"""Current post-process algorithms with upstream transpiler-OFF configuration."""
+"""Post-process algorithms with the upstream transpiler-OFF configuration."""
 
 from pathlib import Path
 import argparse, hashlib, json, re, subprocess

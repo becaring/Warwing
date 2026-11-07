@@ -1,7 +1,7 @@
 """Deterministic C translation-unit selection from the pinned BattleShip CMake.
 
-This is a compiler audit input, not a replacement game build. The exact CMake
-revision is guarded: upstream selection changes require a fresh review.
+This feeds the compiler audit; it does not replace the game build. The CMake
+revision is checked: a change in upstream selection needs a fresh review.
 """
 from pathlib import Path
 import argparse
@@ -32,7 +32,7 @@ def manifest(version='us'):
         entries[relative] = {'path': relative, 'sha256': sha256(path),
                              'selection': group, 'upstream_target': target}
 
-    # Only the directory globs actually referenced by SSB64_DECOMP_SOURCES.
+    # Only the directory globs referenced by SSB64_DECOMP_SOURCES.
     block = re.search(r'set\(SSB64_DECOMP_SOURCES\s+(.*?)\n\)', text, re.S)[1]
     for var in re.findall(r'\$\{(SSB64_SRC_\w+)\}', block):
         glob = re.search(r'file\(GLOB_RECURSE\s+' + var + r'\s+([^\n]+)\)', text)[1]

@@ -4,7 +4,7 @@
 #include <vector>
 namespace Fast {
 extern IDirect3DDevice9* xenos_device;
-// Same interop points the proven donor uses around native ImGui draws.
+// Same interop points the donor uses around native ImGui draws.
 // Preserve/resume framebuffer contents and invalidate cached Xenos state.
 void BeginNativeGuiDraw();
 void InvalidateNativeGuiState();

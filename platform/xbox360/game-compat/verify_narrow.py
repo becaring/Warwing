@@ -1,4 +1,4 @@
-"""Verify actual stage table lowering and XDK return-address intrinsic."""
+"""Verify the stage table lowering and the XDK return-address intrinsic."""
 from pathlib import Path
 import json
 import os

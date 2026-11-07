@@ -3,8 +3,8 @@
 #define STB_IMAGE_WRITE_STATIC
 #include "fast/backends/stb_image_write.h"
 
-// Preserve BattleShip's existing optional capture contract: a genuine current
-// backbuffer PNG, 1 on success, 0 on failure, and no escaping C++ exceptions.
+// Keeps BattleShip's optional capture contract: a PNG of the current backbuffer,
+// 1 on success, 0 on failure, and no C++ exception escapes.
 extern "C" int portFastCaptureBackbufferPNG(const char* path) {
     if (!path) return 0;
     try {

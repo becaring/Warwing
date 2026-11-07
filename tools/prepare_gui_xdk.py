@@ -1,7 +1,7 @@
-"""Stage the real LUS GUI/presentation with SoH-derived Xbox backend dispatch.
+"""Stage the LUS GUI/presentation with SoH-derived Xbox backend dispatch.
 
-The current Gui DrawGame, viewport, resource and frame flow remain authoritative.
-This generator is deliberately fail-closed on source drift and unknown syntax.
+The Gui DrawGame, viewport, resource and frame flow stay as upstream has them.
+This generator fails on source drift and on unknown syntax instead of guessing.
 """
 
 from pathlib import Path
@@ -79,7 +79,7 @@ def transform(relative, text):
             " member.\n#else\n#include <SDL2/SDL.h>\n#endif",
         )
         text = overlap_projection.gui_header(text)
-        # The public class stores pointers to these actual classes. Include their
+        # The public class stores pointers to these classes. Include their
         # definitions in Gui.cpp, avoiding unrelated implementation dependencies.
         for name in (
             "ConsoleWindow",
@@ -103,7 +103,7 @@ def transform(relative, text):
             text, '#include "fast/resource/type/Texture.h"', "namespace Fast { class Texture; }"
         )
     elif relative == "src/ship/window/gui/Gui.cpp":
-        # Boundary diagnostics for the real startup path, with no alternate
+        # Boundary diagnostics for the startup path, with no alternate
         # initialization or skipped GUI/resource operation.
         text = '#include "runtime/runtime.h"\n' + text
         for anchor, label in (
@@ -255,7 +255,7 @@ def transform(relative, text):
             "          break;\n#endif",
         )
         # The native surface dimensions, not a desktop window preference, govern
-        # the initial presentation framebuffer. The real game viewport stays LUS.
+        # the initial presentation framebuffer. The game viewport stays LUS.
         text = once(
             text,
             "    mInterpreter->Init(mWindowManagerApi,",

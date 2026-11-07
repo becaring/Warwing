@@ -34,7 +34,7 @@ def replace_once(text, old, new):
 def mapped(path, text, line=1):
     path = path.replace("\\", "/")
     # Keep exact upstream line origins for unchanged lines. Adapted spans name
-    # the generated file and their actual physical line; never attribute an
+    # the generated file and their physical line; never attribute an
     # inserted block to a made-up upstream line number.
     source = ROOT / path
     original = source.read_text(encoding="utf-8-sig").splitlines(keepends=True)

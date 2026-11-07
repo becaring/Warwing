@@ -1,8 +1,8 @@
-"""Pin/inventory JSON 3.12.0 and generate XDK algorithms for the reached API.
+"""Pin and list JSON 3.12.0, and generate XDK algorithms for the API the port reaches.
 
-The complete generic basic_json template is not downleveled. The separate
-compiler-library backend retains pinned lexical/numeric algorithms and exposes
-the audited runtime contracts beneath unchanged production LUS consumers.
+The full generic basic_json template is not downleveled. The separate
+compiler-library backend keeps the pinned lexical and numeric algorithms and
+exposes the reviewed runtime interfaces under the unchanged LUS consumers.
 """
 
 import hashlib

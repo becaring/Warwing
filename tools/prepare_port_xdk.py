@@ -1,4 +1,4 @@
-"""Compile real selected BattleShip port sources through owned composed overlays."""
+"""Compile the selected BattleShip port sources through their overlays."""
 
 from pathlib import Path
 import argparse
@@ -368,7 +368,7 @@ def transform(relative, text):
             + '    const char* capture = XboxEnv_Get("SSB64_AUDIO_WAV_DUMP");\n'
             "    if (capture == nullptr || capture[0] != '1') return;\n",
         )
-        # Existing bounded PCM diagnostic: Xbox has no /tmp mount. Its native
+        # Bounded PCM diagnostic: Xbox has no /tmp mount. Its native
         # header/sample writes are BE, which is RIFX, not little-endian RIFF.
         # This changes only the diagnostic file, never the submitted audio.
         if text.count("/tmp/ssb64_dump.wav") != 3:
@@ -523,7 +523,7 @@ def prepare():
     overlay = OUT / "composed-overlay"
     overlay.mkdir(parents=True, exist_ok=True)
     files = {}
-    # Keep source owners' canonical paths. Conflicts stop rather than choosing
+    # Keep the source owners' paths. Conflicts stop rather than choosing
     # an include-order winner; each owner can compose its own transforms.
     mappings = [
         ("scratch/endian-xdk/source", ""),
@@ -567,14 +567,14 @@ def prepare():
                         + " and "
                         + str(path)
                     )
-                # Root explicitly supplies these as canonical current GUI
-                # headers, superseding the earlier Fast3D declaration overlay.
+                # Supplied explicitly as the GUI headers, replacing the
+                # earlier Fast3D declaration overlay.
             files[relative] = {
                 "input": str(path),
                 "content": content,
                 "chain": chain + [{"input": str(path.relative_to(ROOT)), "sha256": sha(path)}],
             }
-    # Actual generated asset table, not the placeholder source under upstream.
+    # Use the generated asset table instead of the placeholder source under upstream.
     for item in transformed:
         original = ROOT / item["input"]
         if sha(original) != item["sha256"]:

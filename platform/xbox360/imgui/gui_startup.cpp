@@ -1,4 +1,4 @@
-// Same production GUI initialization contract as current DX11 backend Init().
+// Same GUI initialization contract as the DX11 backend Init().
 #include "ship/Context.h"
 #include "ship/window/Window.h"
 #include "ship/window/gui/Gui.h"

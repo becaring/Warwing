@@ -1,4 +1,4 @@
-"""Narrow Xbox adaptations to the existing command walk and cost callback."""
+"""Narrow Xbox adaptations to the command walk and cost callback."""
 import re
 from profile_projections import once
 
@@ -25,7 +25,7 @@ def interpreter(text):
     # SoH uses native Gfx directly. BattleShip additionally handles widened
     # desktop lists, whose stride correction may already equal SegAddr's
     # result on Xenon. Do not scan reloc files when that correction cannot
-    # change the result. Keep all real corrections/token precedence intact.
+    # change the result. Keep all corrections and token precedence intact.
     return once(text, '''            if (segBase != 0) {
                 uintptr_t segFileBase = 0;''', '''            const uint32_t xboxN64Offset = (uint32_t)(cmd->words.w1 & 0x00FFFFFF);
             const uintptr_t xboxStridedAddress = segBase + (xboxN64Offset / PORT_PACKED_GFX_SIZE) * sizeof(F3DGfx);

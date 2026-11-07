@@ -6,9 +6,9 @@
 #include <stdint.h>
 
 namespace Smash360Fast {
-// Current SoH gfx_pc.cpp caches exact RGB floats at light writes. BattleShip's
-// RSP is externally visible, so validate all current value-owned RGB keys at
-// the command boundary as well. Zero-initialization correctly represents black.
+// SoH's gfx_pc.cpp caches RGB floats when a light is written. BattleShip's RSP
+// state can be read from outside, so also check every RGB key against its value
+// at the command boundary. Zero-initialization represents black.
 struct LightColorFloats {
     Shipyard::Fast3D::LightColorValueCache<33> cache;
     template<class Light> const float (*Prepare(const Light* lights,unsigned count))[3] {

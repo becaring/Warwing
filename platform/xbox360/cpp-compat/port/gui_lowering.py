@@ -1,4 +1,4 @@
-"""Closed, typed lowering of actual port GUI records and container literals.
+"""Typed lowering of a closed set of port GUI records and container literals.
 
 Unknown initializer contexts stay visible as native compiler errors. No GUI
 record, callback, field, variant alternative, or default value is substituted.
@@ -473,7 +473,7 @@ def menu_class(text):
     text = (data[: node.start_byte] + b"const SidebarEntry searchSidebarEntry;" + data[node.end_byte :]).decode()
     text = text.replace("bool allowPopout = true;", "bool allowPopout;")
     # Constructor overload with exactly (string,string) resolves to Menu's own
-    # existing constructor with defaulted last arguments, as in the original.
+    # constructor with defaulted last arguments, as in the original.
     signatures = [
         ("", ""),
         ("const std::string& c,bool v,const std::string& n,ImVec2 s,uint32_t f", "c,v,n,s,f"),

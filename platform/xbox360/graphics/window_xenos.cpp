@@ -11,7 +11,7 @@ extern IDirect3DDevice9* xenos_device;
 namespace {
 Smash360WindowInput input = {};
 // Same logic/render/present split used by SoH's profile window, observed at
-// BattleShip's existing window boundaries without changing its scheduler.
+// BattleShip's window boundaries without changing its scheduler.
 double frameReadyAt = 0, lastPresentAt = 0, profileStart = 0;
 double profileLogic = 0, profileRender = 0, profilePresent = 0;
 unsigned profileFrames = 0;

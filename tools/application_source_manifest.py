@@ -1,8 +1,8 @@
 """Evaluate pinned CMake source discovery without configuring desktop dependencies.
 
 Every Xbox exclusion is a reviewed platform capability or a replaced backend.
-Compilation failures never remove entries. This is source selection, not proof
-that all selected files compile or that platform registrations are complete.
+Compilation failures never remove entries. This selects sources only; it says
+nothing about whether they compile or whether platform registrations are complete.
 """
 
 from pathlib import Path
@@ -39,7 +39,7 @@ def main():
         "set(SSB64_VERSION us)",
         f'set(CMAKE_CURRENT_SOURCE_DIR "{SOURCE.as_posix()}")',
         f'file(WRITE "{collection.as_posix()}" "")',
-        # No target compilation occurs in script mode; collect its real inputs.
+        # No target compilation occurs in script mode; collect its inputs.
         "function(source_group)\nendfunction()",
         "function(target_sources target visibility)",
         "  foreach(item IN LISTS ARGN)",

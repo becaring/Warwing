@@ -1,4 +1,4 @@
-"""Pinned C syntax adaptations with no changed declared data representation."""
+"""Pinned C syntax adaptations that leave declared data representations unchanged."""
 import re
 
 

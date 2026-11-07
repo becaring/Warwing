@@ -1,4 +1,4 @@
-"""Pinned real InputEditorWindow source and platform capability projection."""
+"""Pinned InputEditorWindow source and platform capability projection."""
 
 from pathlib import Path
 import argparse, hashlib, json, re, runpy, subprocess, sys
@@ -100,7 +100,7 @@ def transform(relative, t):
             " static_cast<uint8_t>(color.z * 255.0) };\n                   "
             " mapping->SetSavedColor(savedColor);",
         )
-        # With no native mouse, use the existing ImGui automatic popup placement.
+        # With no native mouse, use ImGui's automatic popup placement.
         # Explicit desktop mouse position would be invalid during gamepad-only UI.
         start = t.index("    const float HORIZONTAL_OFFSET = 10.0f;")
         end = t.index("\n}", start)
@@ -139,7 +139,7 @@ def prepare():
                 "generated_sha256": hashlib.sha256(target.read_bytes()).hexdigest(),
             }
         )
-    # Compose the authoritative header owners into one compiler mirror so quoted
+    # Compose the header owners into one compiler mirror so quoted
     # sibling includes cannot bypass the generated controller/gui declarations.
     layers = [
         ("scratch/gui-xdk/compile-tree", ""),

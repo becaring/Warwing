@@ -21,7 +21,7 @@ def transform(relative, text):
     if relative.endswith("/NullAudioPlayer.h"):
         text = once(text, '#include "AudioPlayer.h"', '#include "ship/audio/AudioPlayer.h"')
     if '#include "libultraship/libultraship.h"' in text:
-        # Real declarations needed by these small C ABI modules, avoiding the
+        # Declarations needed by these small C ABI modules, avoiding the
         # umbrella classes.h desktop GUI/audio dependency aggregation.
         text = once(
             text,

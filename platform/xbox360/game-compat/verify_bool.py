@@ -1,4 +1,4 @@
-"""Execute original C11 versus closed boolean lowering; inspect native PPC ABI."""
+"""Run the original C11 and the lowered boolean code side by side; inspect the native PPC ABI."""
 
 import json
 import os
@@ -92,7 +92,7 @@ int main(void) {
         "/I" + str(UPSTREAM / "port"),
         "/I" + str(xdk / "include/xbox"),
     ]
-    # Same actual header and functions are compiled in C11-lowered C and native
+    # The same header and functions are compiled as C11-lowered C and as native
     # C++. Assembly and COFF are retained, including the unresolved C ABI call.
     code = """\
 #include <stddef.h>
@@ -123,7 +123,7 @@ sizeof(WindowFocusEvent), offsetof(WindowFocusEvent, Focused)};
     pp = run(flags + ["/TC", "/E", str(source)]).stdout
     # offsetof itself takes a synthetic null-based field address. It is an ABI
     # assertion, not game code or a bool store; keep outside the conservative
-    # escape audit, then compile against the transformed actual declarations.
+    # escape audit, then compile against the transformed declarations.
     body, layout = pp.split(b"unsigned int layout[]", 1)
     converted, abi_stats = lower_booleans(body, c89_lower.PARSER)
     converted += b"unsigned int layout[]" + layout
@@ -139,7 +139,7 @@ sizeof(WindowFocusEvent), offsetof(WindowFocusEvent, Focused)};
         assert coff[:2] == b"\xf2\x01"
         assert symbol_data(coff, "layout", 28).hex() == "000000010000000c0000000000000004000000080000000200000001"
     # Byte-identical machine code proves return canonicalization, r3 low-byte
-    # caller interpretation, and actual event byte load/store for these pairs.
+    # caller interpretation, and the event byte load/store for these pairs.
     asm_c, asm_cpp = [(OUT / (mode + ".asm")).read_text() for mode in ("c", "cpp")]
     import re
 

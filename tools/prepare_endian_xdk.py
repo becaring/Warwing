@@ -20,7 +20,7 @@ def sha(data):
 
 
 def transform(relative, source, mapping_path=None):
-    """Transform only audited cases; preserve line counts or emit an explicit reset."""
+    """Transform only reviewed cases; preserve line counts or emit an explicit reset."""
     text = source
     edits = []
 

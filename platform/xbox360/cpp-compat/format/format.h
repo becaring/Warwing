@@ -1,6 +1,7 @@
 #pragma once
-// Explicit compiler dependency: official fmt 4.1.0, not a printf emulation.
-// See README.md for the temporary diagnostic floating-format deviation.
+// Uses official fmt 4.1.0 as is; it is not a printf emulation.
+// fmt 4.1.0 can format floats and exponents differently from fmt 12. That is acceptable in diagnostic
+// messages only; game state, file names and anything parsed back keep their own formatting paths.
 #ifdef _XBOX
 #include <ppcintrinsics.h>
 namespace xbox_compat {

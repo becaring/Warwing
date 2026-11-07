@@ -1,7 +1,7 @@
 #pragma once
 // Group measured presented frames by command count, independent of scene or
 // character identity. This separates a short busy scene from its transition
-// inside the existing five-second report, without adding per-command work.
+// inside the five-second report, without adding per-command work.
 struct SmashFrameWorkload {
     enum { Count = 32, Width = 1024 };
     struct Band {

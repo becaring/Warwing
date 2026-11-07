@@ -1,8 +1,8 @@
 #ifndef SMASH360_ENDIAN_H
 #define SMASH360_ENDIAN_H
 
-/* Actual host ordering, independent of PORT and compiler brand. Keep this
- * predicate synchronized with the generated LUS endianness.h detection. */
+/* Host byte order, independent of PORT and compiler brand. Keep this
+ * predicate in sync with the generated LUS endianness.h detection. */
 #if (defined(_XBOX) && defined(_M_PPC)) || \
     (defined(__BYTE_ORDER__) && (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)) || defined(__BIG_ENDIAN__)
 #define SMASH360_HOST_BIG_ENDIAN 1

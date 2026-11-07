@@ -1,4 +1,4 @@
-"""Apply the reviewed real Audio/Config patch with exact source context checks."""
+"""Apply the reviewed Audio/Config patch, checking the source context exactly."""
 from pathlib import Path
 import hashlib, re
 

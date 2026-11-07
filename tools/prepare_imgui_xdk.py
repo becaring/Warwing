@@ -1,4 +1,4 @@
-"""Compile the pinned real ImGui library and donor native GUI renderer."""
+"""Compile the pinned ImGui library and the donor native GUI renderer."""
 
 from pathlib import Path
 import argparse
@@ -94,7 +94,7 @@ def default_members(text):
 
 
 def callback_lambdas(text):
-    # XDK lambdas cannot convert to function pointers. These actual no-capture
+    # XDK lambdas cannot convert to function pointers. These no-capture
     # callbacks become local static member functions, retaining their bodies.
     data = text.encode()
     edits, insertions = [], {}
@@ -148,7 +148,7 @@ def callback_lambdas(text):
 
 def enum_definitions_before_use(text):
     # MSVC16 supports enum underlying types, but not opaque declarations.
-    # Move the actual definition intact; do not replace enum types with ints.
+    # Move the definition intact; do not replace enum types with ints.
     for forward in list(re.finditer(r"^enum (\w+)\s*:\s*(\w+)\s*;", text, re.M)):
         name, base = forward.groups()
         pattern = r"^enum " + name + r"\s*:\s*" + base + r"\s*\{.*?^\};"

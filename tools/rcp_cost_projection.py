@@ -3,8 +3,8 @@
 gameloop installs gbi_trace_callback unconditionally so the cost counters see
 every command. That puts an indirect call on every command, and the callback's
 presence also disables TRI2 runs, so shared triangle rows and the run NDC
-cache are never used. The interpreter now counts the same opcodes itself, and
-only calls the callback while GBI tracing is actually logging.
+cache are never used. The interpreter counts the same opcodes itself and
+calls the callback only while GBI tracing is logging.
 """
 import re
 from profile_projections import once

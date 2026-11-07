@@ -1,4 +1,4 @@
-"""Reusable range lowering adapted from donor cpp_range_lower + current Prism fix."""
+"""Reusable range lowering adapted from donor cpp_range_lower and the Prism fix."""
 
 from pathlib import Path
 import sys

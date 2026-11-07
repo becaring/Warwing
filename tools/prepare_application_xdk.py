@@ -1,4 +1,4 @@
-"""Compose owned source projections and audited game objects into Xbox projects.
+"""Combine the source projections and reviewed game objects into Xbox projects.
 
 This does not downlevel code or infer exclusions from compiler failures. Missing
 providers and unreviewed conflicts stop assembly with a machine-readable report.
@@ -166,7 +166,7 @@ def overlays(missing):
                     ".inc",
                 ):
                     continue
-                # Canonical game/endian providers already supply their headers.
+                # The game and endian providers already supply their headers.
                 if name.startswith("decomp/"):
                     continue
             if owner == "graphics" and not name.startswith("libultraship/include/fast/"):
@@ -194,7 +194,7 @@ def overlays(missing):
 
 
 # Explicit production sources. No discovery glob can turn a fixture/donor into
-# application code. The source inventory is reviewable before any link occurs.
+# application code. The source list can be reviewed before any link occurs.
 PLATFORM_SOURCES = [
     "platform/xbox360/environment.cpp",
     "platform/xbox360/math_constants.cpp",
@@ -538,8 +538,8 @@ def project(name, items, game=()):
             node(unit, "CompileAs", "CompileAsC")
         if "options" in item:
             node(unit, "AdditionalOptions", " ".join(item["options"]) + " %(AdditionalOptions)")
-        # Bounded real SDK project smoke compilation, without touching or
-        # excluding any production source in the normal build.
+        # Bounded smoke compilation of an SDK project; it does not touch or
+        # exclude any production source in the normal build.
         node(
             unit,
             "ExcludedFromBuild",
@@ -590,8 +590,8 @@ def prepare():
                 }
             )
     selected = [item for item in app["sources"] if item["selected"]]
-    # Every selected input remains represented, either by its audited game
-    # object or by a project compile item. No compilation-driven exclusions.
+    # Every selected input is represented, either by its game object or by a
+    # project compile item. Compiler failures never exclude a source.
     units = [
         item
         for item in selected

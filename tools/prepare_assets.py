@@ -91,7 +91,7 @@ def main():
 
     # Exact upstream CMake baked UI asset recipes; redirect every output so the
     # original tree (including its PNG paths) remains untouched. RGBA16 is
-    # emitted as explicit high/low bytes by the authoritative generator.
+    # emitted as explicit high/low bytes by the upstream generator.
     css = GENERATED / "css_icons"
     css.mkdir(parents=True, exist_ok=True)
     for name, symbol, flags in (("arrow", "arrow", []), ("arrow_left", "arrowLeft", ["--mirror"])):

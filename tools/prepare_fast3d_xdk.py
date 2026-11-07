@@ -1,6 +1,6 @@
-"""Prepare the real pinned Fast3D interpreter in an owned XDK compiler mirror.
+"""Prepare the pinned Fast3D interpreter in an XDK compiler mirror.
 
-The full-TU audit is allowed to fail on unported actual dependencies. No fake
+The full-TU audit is allowed to fail on dependencies that are not ported yet. No fake
 resource/logger/GUI facade or partial-success library is emitted.
 """
 
@@ -255,7 +255,7 @@ def lower(text, name):
             "static const std::string gAltAssetPrefix;",
         )
         # The corresponding Resource.cpp overlay below moves mIsDirty's
-        # default into the actual constructor; no state default is discarded.
+        # default into the constructor; no state default is discarded.
         text = once(text, "bool mIsDirty = false;", "bool mIsDirty;")
         text = once(
             text,
@@ -367,7 +367,7 @@ def lower(text, name):
         text = reloc_lookup_projection.interpreter(text)
         # The UV min/max loop exists only to prepare a diagnostic log payload.
         # The callee already returns immediately when this same flag is off.
-        # Keep the real later vertex UV packing and scheduler area calculations.
+        # Keep the later vertex UV packing and scheduler area calculations.
         text = once(
             text,
             "if (!usedTextures[t] || tex_width[t] == 0 || tex_height[t] == 0)",
@@ -388,7 +388,7 @@ def lower(text, name):
             "    mRdp = Shipyard::Fast3D::NewValueInitialized<RDP>();",
         )
         # A stored Window can be destroyed before Init installs its backend.
-        # Release the real resources already acquired, without dereferencing
+        # Release the resources already acquired, without dereferencing
         # a backend that has not yet been assigned.
         text = once(text, "    mWapi->Destroy();", "    if (mWapi) mWapi->Destroy();")
         text = once(
@@ -400,7 +400,7 @@ def lower(text, name):
         text = "#include <new>\n" + text
         module_start = text.index("bool gfxPointerInLoadedModule(const void* ptr) {")
         module_end = text.index("\n// Trusted low-VA static data ranges.", module_start)
-        # The two actual 32-bit callers both guard <=0x0FFFFFFF. SDK
+        # The two 32-bit callers both guard <=0x0FFFFFFF. SDK
         # dev_linker_images.htm mandates every loaded XEX above 0x82000000,
         # including low preferred-base images. Keep trusted assets independent.
         if text.count("gfxPointerInLoadedModule(") != 3:
@@ -490,7 +490,7 @@ def lower(text, name):
         )
         # This exact source map holds scalar depth values only. No references,
         # iterators or node identity from res escape; it dies at this function's
-        # end. Existing destination values remain unchanged, as for merge.
+        # end. Destination values already present are unchanged, as for merge.
         text = once(
             text,
             "mGetPixelDepthCached.merge(res);",
@@ -701,8 +701,8 @@ def prepare(overlays):
         if "/include/ship/resource/" in relative or relative.endswith(
             "/src/ship/resource/Resource.cpp"
         ):
-            # Canonical actual-resource adapters now belong to the resource
-            # generator. Remove only our prior owned generated duplicates.
+            # The resource generator produces the resource adapters. Remove only
+            # the duplicates this script generated earlier.
             stale = OUT / "overlay" / relative.removeprefix("upstream/BattleShip/")
             if not stale.resolve().is_relative_to((OUT / "overlay").resolve()):
                 raise ValueError("Escaped owned overlay")
@@ -789,7 +789,7 @@ def prepare(overlays):
         if len(signatures) != 1:
             raise ValueError("Expected actual opcode handler definition: " + name)
         declarations.append(signatures[0] + ";")
-    # Compile-only closure: every handler remains an unresolved REAL symbol.
+    # Compile-only closure: every handler stays an unresolved symbol.
     # No dummy implementations or alternate walker are generated.
     fixture = (
         '#include "fast/interpreter.h"\n#include <array>\n#include <algorithm>\nnamespace Fast'

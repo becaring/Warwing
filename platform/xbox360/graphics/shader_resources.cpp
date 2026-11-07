@@ -1,6 +1,6 @@
-// Native platform shader service through the actual current LUS resource path.
-// Contract follows pinned DX11 dx_include_fs: final f3d.o2r resources, exact
-// lookup, Binary Shader factory, native-order text; no direct-file fallback.
+// Native platform shader service, reading through the LUS resource path.
+// Follows pinned DX11 dx_include_fs: resources from the final f3d.o2r, exact
+// lookup, Binary Shader factory, native-order text, no direct-file fallback.
 #include "ship/Context.h"
 #include "ship/resource/ResourceManager.h"
 #include "ship/resource/type/Shader.h"

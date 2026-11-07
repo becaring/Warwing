@@ -1,4 +1,4 @@
-"""Stage actual manifest-selected controller sources over native input contract."""
+"""Stage the manifest-selected controller sources over the native input contract."""
 
 from pathlib import Path
 import hashlib, json, runpy, re
@@ -82,7 +82,7 @@ def platform(relative, text):
                 for params, args in signatures
             ),
         )
-    # Actual desktop USB implementation remains outside this target capability.
+    # The desktop USB implementation stays outside this target.
     if relative.endswith(".cpp"):
         for line in text.splitlines():
             if line.startswith("#include ") and "/raphnet/" in line:

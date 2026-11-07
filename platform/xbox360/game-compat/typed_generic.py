@@ -1,8 +1,8 @@
 """Resolve only BattleShip PORT_TOKEN_VALUE's C11 generic selection.
 
-The caller supplies a tree-sitter C parser. Types come from actual declarations
+The caller supplies a tree-sitter C parser. Types come from declarations
 and lexical scopes. Unknown, anonymous-member, function-pointer and ambiguous
-expressions remain untouched and are reported; there is no default cast.
+expressions are left untouched and reported; there is no default cast.
 """
 import re
 
@@ -195,7 +195,7 @@ def lower_port_generics(source, parser):
         if not helper:
             unresolved.append({'expression': text(children[0]), 'type': kind, 'reason': 'type not proven'})
             continue
-        # Preserve source line counts while selecting the existing typed helper.
+        # Preserve source line counts while selecting the typed helper.
         replacement = helper.encode() + b'\n' * source[node.start_byte:node.end_byte].count(b'\n')
         edits.append((node.start_byte, node.end_byte, replacement))
         resolved.append({'expression': text(children[0]), 'type': kind, 'helper': helper,

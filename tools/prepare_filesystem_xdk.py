@@ -1,4 +1,4 @@
-"""Audit pinned filesystem consumers and generate a narrowly lowered real Directory header."""
+"""Audit pinned filesystem consumers and generate a narrowly lowered Directory header."""
 
 import difflib
 import hashlib

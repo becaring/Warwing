@@ -1,4 +1,4 @@
-"""Compile the direct Smash diagnostics adapter and Shipyard queue with XDK."""
+"""Compile the direct Smash diagnostics adapter and the Shipyard queue with the XDK."""
 
 from pathlib import Path
 import hashlib

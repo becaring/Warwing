@@ -1,10 +1,9 @@
-"""Preserve the prior XEX and empty only Smash's owned build outputs.
+"""Keep the previous XEX and empty only Smash's build outputs.
 
 Pinned Git sources, installed host Python dependencies, the host Torch
-dependency build cache, ROMs, Xenia state, and historical receipts are retained.
-The named generators in prepare-native.ps1 and build-assets.ps1 recreate these
-outputs; the generated Visual Studio projects are recreated by application
-assembly.
+dependency build cache, ROMs, Xenia state, and old build records are kept.
+The generators named in prepare-native.ps1 and build-assets.ps1 recreate these
+outputs; application assembly recreates the generated Visual Studio projects.
 """
 
 import argparse

@@ -1,4 +1,4 @@
-"""Retain native listings for concrete /W3 pointer-width and UB findings."""
+"""Keep native listings for /W3 pointer-width and undefined-behavior findings."""
 from pathlib import Path
 import hashlib
 import json
@@ -33,7 +33,7 @@ def main():
     assert re.search(r'lwz\s+r11,first_man\$\(r1\)', best)
     assert not re.search(r'stw\s+[^\n]*first_man\$', best)
     matrix = function(FILES[0], 'func_ovl0_800CB140')
-    # The fake expression has no optimized read of f[2][2]. Its real value is
+    # The fake expression has no optimized read of f[2][2]. Its value is
     # stored before the conversion routine (which ignores matrix column3).
     assert re.search(r'stfs\s+[^\n]*f\$\+28h', matrix)
     assert not re.search(r'lfs\s+[^\n]*f\$\+28h', matrix)

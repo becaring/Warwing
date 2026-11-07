@@ -1,4 +1,4 @@
-"""Keep owned code readable and limit tracked documentation to the supported guides."""
+"""Keep the project's code readable and limit tracked documentation to the supported guides."""
 
 EXCLUDE = [
     "**/nlohmann/**",

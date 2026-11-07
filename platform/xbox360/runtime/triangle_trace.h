@@ -1,7 +1,7 @@
 #pragma once
 #include "perf_trace.h"
-// Sample real production triangles, independently of the expensive full
-// profiler. The same Xenon time-base primitive is inherited from SoH360.
+// Sample production triangles independently of the full profiler, which is
+// expensive. The same Xenon time-base primitive is inherited from SoH360.
 enum SmashTrianglePhase { SMASH_TRI_CULL, SMASH_TRI_STATE, SMASH_TRI_COMBINER,
     SMASH_TRI_TEXTURE, SMASH_TRI_SHADER, SMASH_TRI_DIAGNOSTIC, SMASH_TRI_AREA,
     SMASH_TRI_PACK, SMASH_TRI_FINISH, SMASH_TRI_PHASES };

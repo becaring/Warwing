@@ -1,4 +1,4 @@
-"""Compile actual pinned BattleShip C sources with XDK, retaining all failures.
+"""Compile the pinned BattleShip C sources with the XDK, keeping all failures.
 
 The SoH donor lowering is imported byte-for-byte, and only generated preprocessed
 copies are compiled. No archive is produced unless every selected TU succeeds;

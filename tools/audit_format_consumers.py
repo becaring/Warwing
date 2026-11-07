@@ -1,4 +1,4 @@
-"""Inventory actual format calls; keep diagnostic deviations out of data keys."""
+"""List the format calls in the consumers; keep diagnostic deviations out of data keys."""
 
 from pathlib import Path
 import hashlib, json, runpy

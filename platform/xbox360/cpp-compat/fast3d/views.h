@@ -7,8 +7,8 @@
 #include <vector>
 
 namespace Smash360Fast3D {
-// Dynamic-extent span surface used by Interpreter::PrewarmShaders. Non-owning;
-// callers retain the same bounds and lifetime obligations as std::span.
+// Dynamic-extent span used by Interpreter::PrewarmShaders. Non-owning; callers
+// must respect the same bounds and lifetimes as with std::span.
 template<class T> class span {
     T* pointer_;size_t length_;
 public:
@@ -53,9 +53,9 @@ public:
     }
     std::string str()const{return length_?std::string(pointer_,length_):std::string();}
 };
-// XDK's std::map lacks transparent find. Preserve non-owning lookup and avoid
-// introducing temporary-string allocation; the bounded texture registry is
-// walked in its existing key order. No insertion or comparator-state change.
+// XDK's std::map lacks transparent find. This looks keys up without owning them
+// and avoids a temporary string allocation. It walks the bounded texture
+// registry in key order and never inserts or changes the comparator.
 template<class Map> typename Map::iterator FindStringView(Map& map,string_view key){
     typename Map::iterator it=map.begin();
     for(;it!=map.end();++it){int order=string_view(it->first).compare(key);if(order==0)return it;if(order>0)break;}

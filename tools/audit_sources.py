@@ -1,6 +1,6 @@
 """Read-only source audit; writes reports under Smash360/scratch/audit only.
 
-This is a reconstruction tool, not an Xbox build or runtime validation.
+This reconstructs sources for review. It does not build for Xbox or check runtime behavior.
 """
 
 from pathlib import Path
@@ -58,7 +58,7 @@ def main():
     if any(not item["matches"] or item["status"] for item in sources):
         raise SystemExit("Source revisions differ or checkouts are dirty; inspect source-revisions.json")
 
-    # These patterns identify audit candidates, not an exhaustive semantic proof.
+    # These patterns find audit candidates only; they prove nothing about the code.
     patterns = {
         """\
 desktop_platform""": """\

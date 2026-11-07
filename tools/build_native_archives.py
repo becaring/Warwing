@@ -1,4 +1,4 @@
-"""Build production libzip/zlib for XDK from their pinned owned sources."""
+"""Build libzip and zlib for the XDK from their pinned sources."""
 
 from pathlib import Path
 import hashlib, json, os, subprocess

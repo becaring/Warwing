@@ -3,7 +3,7 @@
 Donor gfx_pc.cpp stores num_inputs/program_textures per ColorCombiner clamp
 variant and queries native_clip_parameters in gfx_init. Keep BattleShip's
 shader lookup/failure, flush, bind and alpha sequence intact. Metadata is read
-through its existing rendering API, not reconstructed from combiner bits.
+through its rendering API, not reconstructed from combiner bits.
 """
 from profile_projections import once
 

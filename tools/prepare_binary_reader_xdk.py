@@ -1,4 +1,4 @@
-"""Generate XDK-compatible copies of hash-locked, actual LUS binarytools files.
+"""Generate XDK-compatible copies of hash-locked LUS binarytools files.
 
 Only explicitly listed whole-line edits are allowed. Algorithms remain upstream.
 All inputs are validated and transformed in memory before any output is written.

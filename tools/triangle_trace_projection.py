@@ -1,4 +1,4 @@
-"""Diagnostic phase boundaries only; preserve real returns, state and output."""
+"""Diagnostic phase boundaries only; returns, state and output are unchanged."""
 from profile_projections import once,enter
 
 def transform(text):

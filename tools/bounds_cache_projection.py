@@ -1,7 +1,8 @@
-"""Cache proven UNKNOWN gaps in pinned BattleShip's existing DL range checker.
+"""Cache proven UNKNOWN gaps in pinned BattleShip's DL range checker.
 
 Compose after profiling, before XDK syntax lowering. The original locked scan,
-positive cache and synchronization remain authoritative. Every anchor is exact.
+positive cache and synchronization are unchanged and still decide the result.
+Every anchor is exact.
 """
 import re
 from profile_projections import once

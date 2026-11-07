@@ -1,4 +1,4 @@
-"""Build an owned compiler mirror so quoted sibling includes obey overlays.
+"""Build a compiler mirror of the source tree so quoted sibling includes obey overlays.
 
 Reusable entry point:
     stage_sources(upstream, destination, translation_units, overlays=(), extra=())
@@ -66,7 +66,7 @@ def stage_sources(upstream, destination, translation_units, overlays=(), extra=(
                 raise ValueError('Conflicting overlays for ' + relative + '; compose transformations first')
             replacements[relative] = (path, content)
             selected.add(relative)
-    # Some real C include fragments use .txt rather than .h/.inc.c (for example
+    # Some C include fragments use .txt rather than .h/.inc.c (for example
     # ft/ftcollision.txt). Follow literal quoted includes within the source tree
     # instead of copying unrelated text/assets or relying on original siblings.
     pending = list(selected)

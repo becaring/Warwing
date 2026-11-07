@@ -178,7 +178,7 @@ def lower(path, text):
 
 
 def integration_proposal():
-    """Write a reviewable patch only. Actual Context/Config integration is separate."""
+    """Write a reviewable patch only. The Context/Config integration is separate."""
     patch = []
     for relative, expected in PROPOSAL_LOCKS.items():
         raw = (UPSTREAM / relative).read_bytes()

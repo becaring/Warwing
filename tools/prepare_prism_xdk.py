@@ -151,7 +151,7 @@ def mapped(source_path, text, output):
         result.append("\n#endif\n")
     output.parent.mkdir(parents=True, exist_ok=True)
     content = "".join(result).encode("utf-8")
-    # Shared consumers may currently have unchanged generated headers open.
+    # Shared consumers may have unchanged generated headers open.
     # Deterministic regeneration need not rewrite those bytes or their mtimes.
     if not output.is_file() or output.read_bytes() != content:
         output.write_bytes(content)

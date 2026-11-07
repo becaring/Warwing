@@ -1,4 +1,4 @@
-"""Read actual pinned BattleShip compile definitions for the US application."""
+"""Read the pinned BattleShip compile definitions for the US application."""
 
 from pathlib import Path
 import hashlib, re, subprocess

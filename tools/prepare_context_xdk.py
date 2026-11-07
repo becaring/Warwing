@@ -1,4 +1,4 @@
-"""Compose the actual startup Context and its unclaimed lifecycle/C bridge closure."""
+"""Compose the startup Context and its unclaimed lifecycle/C bridge closure."""
 
 from pathlib import Path
 import argparse, hashlib, json, re, runpy, subprocess, sys
@@ -124,7 +124,7 @@ def transform(relative, t):
             .replace("#elif defined(_WIN32)", "#elif defined(_WIN32) && !defined(_XBOX)")
             .replace("#elif _WIN32", "#elif defined(_WIN32) && !defined(_XBOX)")
         )
-        # The actual callback/buffer diagnostics remain; desktop DbgHelp and x86
+        # The callback/buffer diagnostics remain; desktop DbgHelp and x86
         # register capture are unavailable on Xbox. No made-up PPC stack walk.
         t = once(
             t,

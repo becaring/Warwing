@@ -13,7 +13,7 @@ def transform(text):
     tri = text.split('void Interpreter::GfxSpTri1(', 1)[1]
     options = tri[tri.index('    uint64_t cc_options ='):tri.index('    if (!mShaderStack.empty())')]
     geometry = tri[tri.index('            uint8_t cms ='):tri.index('            if (mRenderingState.mTextures[i] == nullptr)')]
-    # A future authoritative arithmetic change requires a dependency/key audit.
+    # A change to the arithmetic needs a review of its dependencies and keys.
     for block, expected in [(options, '6a8fb6f826598cc00d36fac574d25d8bd53d81cb2729cc14745fdfdac98e7390'),
                             (geometry, '8adb2085235d034dfc11a8a04c33aa34fb671c79f386871829f658b9265e8f21')]:
         if hashlib.sha256(block.encode()).hexdigest() != expected:
@@ -132,9 +132,9 @@ static void XboxReleaseTextureGeometry() {
 ''')
     text = once(text, '    uint32_t tm = 0;', '''    uint32_t tm = 0;
     float xboxTextureWidth[2], xboxTextureHeight[2], xboxTextureBoundWidth[2], xboxTextureBoundHeight[2];''')
-    # Same implicit uint32 -> float conversion, now once per material rebuild.
+    # Same implicit uint32 -> float conversion, once per material rebuild.
     # Do not use reciprocal approximations, reorder operations, or change the
-    # framebuffer sub-rectangle transform in the authoritative packing loop.
+    # framebuffer sub-rectangle transform in the packing loop.
     for old,new,count in [('u / tex_width[t]', 'u / xboxTextureWidth[t]', 2),
                           ('v / tex_height[t]', 'v / xboxTextureHeight[t]', 2),
                           ('(tex_width2[t] - 0.5f) / tex_width[t]', '(xboxTextureBoundWidth[t] - 0.5f) / xboxTextureWidth[t]', 1),

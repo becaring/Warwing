@@ -17,20 +17,20 @@ namespace Smash360Fast3D {
 // 0x82000000..0x8BFFFFFF; 4-KB pages at 0x92000000..0x9BFFFFFF. Even
 // low preferred image bases are remapped there. The interpreter invokes
 // this exception only for <=0x0FFFFFFF, where no loaded XEX can reside.
-// This deliberately is NOT a general module-address query.
+// Do not use it as a general module-address query.
 inline bool LowAddressInLoadedModule(const void* pointer) {
     if (reinterpret_cast<uintptr_t>(pointer) > 0x0FFFFFFFu)
         throw std::logic_error("Fast3D low-address module query outside its audited domain");
     return false;
 }
 // The interpreter calls round only on already-rounded binary32 viewport sizes.
-// Same finite/tie-away expression as the proven SoH math_platform.cpp.
+// Same finite, ties-away expression as SoH's math_platform.cpp.
 inline double RoundViewport(double value) {
     if (!_finite(value) || value == 0 || fabs(value) >= 4503599627370496.0) return value;
     return _copysign(floor(fabs(value) + 0.5), value);
 }
-// SDK ppcintrinsics.h explicitly specifies current-rounding-mode conversion.
-// stfiwx stores the signed word unchanged; no subsequent numeric float cast.
+// SDK ppcintrinsics.h specifies conversion in the current rounding mode.
+// stfiwx stores the signed word unchanged, with no later float cast.
 inline int32_t RoundSignedWord(double value) {
 #ifdef _XBOX
     int32_t word;

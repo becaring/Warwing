@@ -32,7 +32,7 @@ def transform(text):
     end = text.index(vertex_end, start)
     original = text[start:end]
     replacement, normals = re.subn(r"vn->n\[[012]\]", lambda m: "Smash360Fast::NormalByteFloat(" + m[0] + ")", original)
-    # The original integer variables remain authoritative for the fallback.
+    # The original integer variables still decide the result on the fallback path.
     replacement, colors = re.subn(
         r"intensity \* (mRsp->current_lights\[i\]\.l\.col\[[012]\])",
         r"intensity * Smash360Fast::LightByteFloat(\1)",

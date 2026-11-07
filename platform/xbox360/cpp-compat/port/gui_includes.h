@@ -1,6 +1,6 @@
 #pragma once
-// Actual directly used public contracts; the upstream umbrella additionally
-// imports desktop WASAPI/SDL player implementations into every GUI header.
+// Only the public headers the GUI uses directly; the upstream umbrella header
+// also pulls desktop WASAPI/SDL player code into every GUI header.
 #include <libultraship/libultra.h>
 #include <libultraship/bridge.h>
 #include <libultraship/color.h>

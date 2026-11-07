@@ -5,8 +5,8 @@
 #include <vector>
 #include "../environment.h"
 
-// Real platform services are link requirements. No stand-in implementation is
-// linked by the graphics compile probe. The application owns their lifetime.
+// The platform services are link requirements; the graphics compile probe links
+// no stand-in for them. The application owns their lifetime.
 void Smash360_Log(const char* format, ...);
 void Shipyard_Log(const char* format, ...);
 __declspec(noreturn) void Shipyard_Fatal(const char* operation, HRESULT result);
@@ -23,8 +23,8 @@ inline void Smash360_Check(HRESULT result, const char* operation) {
     if (FAILED(result)) Smash360_Fatal(operation, result);
 }
 
-// The app supplies actual event processing and GUI pointer state. A console
-// without a mouse reports its real absence there, not inside renderer glue.
+// The app supplies event processing and GUI pointer state. A console without
+// a mouse reports that here, not in the renderer glue.
 struct Smash360WindowInput {
     int32_t x, y, deltaX, deltaY;
     float wheelX, wheelY;

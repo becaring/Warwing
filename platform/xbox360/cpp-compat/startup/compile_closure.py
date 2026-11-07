@@ -1,4 +1,4 @@
-"""Record full authoritative startup TU dependency failures without stand-ins."""
+"""Record every dependency failure in the startup translation units; no stand-ins are used."""
 
 from pathlib import Path
 import json, subprocess

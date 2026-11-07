@@ -1,8 +1,8 @@
-"""Closed, fail-closed C _Bool lowering for the pinned BattleShip C surface.
+"""Lower C _Bool for the pinned BattleShip C sources.
 
-Canonicalize every supported store/return/cast before using byte storage.
-Pointers/arrays/parameters/compound stores and unknown aggregate layouts stop
-the pass. This is deliberately not a general C compiler or a bool typedef.
+Every supported store, return and cast is normalized before byte storage is used.
+Pointers, arrays, parameters, compound stores and unknown aggregate layouts stop
+the pass. It handles only this source set: it is not a general C compiler or a bool typedef.
 """
 import re
 from typed_generic import parse_view

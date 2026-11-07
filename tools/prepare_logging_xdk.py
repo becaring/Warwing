@@ -1,4 +1,4 @@
-"""Strict pinned current-spdlog queue and core source projection for XDK."""
+"""Strict pinned spdlog queue and core source projection for the XDK."""
 
 from pathlib import Path
 import hashlib, json, argparse, re, importlib.util
@@ -69,7 +69,7 @@ def main():
                 " v_=other.v_; return *this; }",
             )
         elif rel.endswith("mpmc_blocking_q.h"):
-            # The real thread_pool uses blocking dequeue; reject unneeded timed
+            # The thread_pool uses blocking dequeue; reject unneeded timed
             # consumers by omitting dequeue_for rather than silently ignoring time.
             start = t.index("#ifndef __MINGW32__")
             otherwise = t.index("\n#else", start)

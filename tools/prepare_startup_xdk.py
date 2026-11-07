@@ -1,7 +1,7 @@
-"""Stage the real BattleShip startup and explicit Xbox capability branches.
+"""Stage the BattleShip startup code and the explicit Xbox capability branches.
 
-This is a platform integration overlay, not a claim that its complete header
-graph compiles yet. All game and LUS lifecycle functions remain authoritative.
+This is a platform integration overlay; its full header graph may not compile
+yet. The game and LUS lifecycle functions are unchanged.
 """
 
 from pathlib import Path
@@ -286,7 +286,7 @@ def transform(relative, text):
         text = guard(text, "\tssb64::enhancements::TickDiscordPresence(); // DRP")
         text = guard(text, "\tportRenderDocOnFrame(static_cast<unsigned int>(sFrameCount));")
     elif relative == "port/gui/PortMenu.cpp":
-        # Existing guards own entire desktop widgets; retain their boundaries.
+        # Guards already wrap whole desktop widgets; keep their boundaries.
         for comment in ("    // DRP", "    // BUILT-IN UPDATER"):
             text = once(
                 text,

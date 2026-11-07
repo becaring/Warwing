@@ -1,4 +1,4 @@
-"""Smash adapter for Shipyard's exact combiner lookup split."""
+"""Smash adapter for Shipyard's combiner lookup split."""
 from pathlib import Path
 from platform_base import resolve
 

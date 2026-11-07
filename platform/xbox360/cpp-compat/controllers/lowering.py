@@ -1,4 +1,4 @@
-"""AST-only pair binding/contains lowering for audited standard containers."""
+"""AST-only lowering of pair bindings and contains for reviewed standard containers."""
 from pathlib import Path
 import runpy
 ROOT=Path(__file__).resolve().parents[4]

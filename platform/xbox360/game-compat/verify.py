@@ -1,7 +1,7 @@
-"""Meaningful compile-time compatibility and source-selection verification.
+"""Compile-time compatibility and source-selection checks.
 
-Creates host executables and XDK objects in scratch/game-xdk/verification only;
-never creates an XEX. The host fixture verifies donor declaration lowering.
+Writes host executables and XDK objects only under scratch/game-xdk/verification;
+never creates an XEX. The host fixture checks donor declaration lowering.
 """
 
 from pathlib import Path
@@ -53,7 +53,7 @@ def symbol_data(coff, requested, size):
 
 def main():
     text = (UPSTREAM / "CMakeLists.txt").read_text(encoding="utf-8")
-    # Evaluate audited CMake source statements with CMake itself, independently
+    # Evaluate the reviewed CMake source statements with CMake itself, independently
     # of Python's glob and source-list parser.
     commands = re.findall(r"file\(GLOB_RECURSE SSB64_SRC_(?!PORT)[^\n]+\)", text)
     for variable in ("SSB64_DECOMP_SOURCES", "SSB64_LIBULTRA_PORT", "SSB64_NAUDIO_PORT"):

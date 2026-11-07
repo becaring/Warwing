@@ -1,7 +1,7 @@
 """Adapt SoH's three-row packing: invariant work once, exact BattleShip values.
 
-Retain the real stream layout and arithmetic, including Smash framebuffer UVs,
-primitive depth, fog-alpha mux and blend-color mode. No draw batching changes.
+Retain the stream layout and arithmetic, including Smash framebuffer UVs,
+primitive depth, fog-alpha mux and blend-color mode. Draw batching is unchanged.
 """
 from profile_projections import once
 
@@ -21,7 +21,7 @@ def transform(text):
     end=text.index('    mBufVboLen = (size_t)(xboxVertexOutput - mBufVbo);',start)
     end+=len('    mBufVboLen = (size_t)(xboxVertexOutput - mBufVbo);')
     original=text[start:end]
-    # Preserve the authoritative depth conversion block verbatim.
+    # Keep the depth conversion block verbatim.
     pos_start=original.index('        float z =')
     pos_end=original.index('        for (int t =',pos_start)
     positions=original[pos_start:pos_end]

@@ -1,4 +1,4 @@
-"""Hashlocked current LUS widget projection; no replacement GUI classes."""
+"""Hash-locked LUS widget projection; no replacement GUI classes."""
 
 from pathlib import Path
 import argparse, hashlib, json, re, subprocess
@@ -31,7 +31,7 @@ def inherited_windows(name, initializers):
 
 
 def vector_defaults(text):
-    # Actual const-vector defaults must finish construction before ctor body.
+    # Const-vector defaults must finish construction before the ctor body.
     pattern = r"const std::vector<([^>]+)> (\w+) = \{(.*?)\};"
     helpers = []
 
@@ -61,7 +61,7 @@ def vector_defaults(text):
 def lower_header(text, name):
     if name == "GuiWindow.h":
         # Defined value-initialization initializes the scalar flag to zero.
-        # Plain default-initialization formerly left it indeterminate.
+        # Plain default-initialization leaves it indeterminate.
         text = once(text, "GuiWindow() = default;", "GuiWindow() : mWindowFlags(0) {}")
     if name == "ConsoleWindow.h":
         text, helpers = vector_defaults(text)
@@ -412,7 +412,7 @@ def prepare():
 
 
 def compile_xdk():
-    # The complete current Fast3D compile records canonical shared dependencies.
+    # The complete Fast3D compile records the shared dependencies.
     flags = json.loads((ROOT / "scratch/fast3d-xdk/compile-audit.json").read_text())[
         "translation_units"
     ][0]["command"]

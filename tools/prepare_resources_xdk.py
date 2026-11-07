@@ -1,4 +1,4 @@
-"""Lower pinned current LUS resource/archive classes; never substitute application classes."""
+"""Lower the pinned LUS resource/archive classes; never substitute application classes."""
 
 from pathlib import Path
 import hashlib, json, re, runpy

@@ -3,7 +3,8 @@
 
 // Implement through Ship::ResourceManager LoadResource(path,true,init), with
 // type Shader, Native byte order and Binary format, then copy the raw string.
-// False means resource absent/failed; no disk/fabricated shader fallback here.
+// False means the resource is missing or failed to load; there is no disk or
+// generated shader fallback here.
 bool Smash360_LoadShaderResource(const std::string& path,std::string& source);
 namespace Fast {
 const char* gfx_get_shader(int16_t shaderId);

@@ -1,4 +1,4 @@
-"""Stage actual Config/CVar classes for XDK; no substituted application classes."""
+"""Stage the Config/CVar classes for the XDK; no application classes are substituted."""
 
 from pathlib import Path
 import hashlib, json, runpy, re, difflib
@@ -267,8 +267,8 @@ def transform(relative, text):
             "int32_t mLastScancode; // Relocated to real Window.cpp primary constructor.",
         )
     elif relative.endswith("/Window.cpp"):
-        # This paired source relocation must accompany the staged Window header.
-        # It is not a claim that all Window implementation dependencies compile.
+        # This source relocation must accompany the staged Window header. It does not
+        # mean every Window implementation dependency compiles.
         text = once(
             text,
             "Window::Window(std::shared_ptr<Gui> gui, std::shared_ptr<MouseStateManager>"
@@ -285,7 +285,7 @@ def transform(relative, text):
             "AudioSettings audioSettings = {}",
             "AudioSettings audioSettings = AudioSettings()",
         )
-        # Disabled scripting is excluded by the authoritative runtime target.
+        # Disabled scripting is excluded by the runtime target.
     elif relative.endswith("/StringHelper.cpp"):
         text = once(
             text, "std::begin(elements), std::end(elements)", "elements.begin(), elements.end()"

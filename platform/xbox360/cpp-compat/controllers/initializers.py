@@ -1,4 +1,4 @@
-"""Typed, bounded initializer-list expansion for current mapping containers."""
+"""Typed, bounded initializer-list expansion for the mapping containers in use."""
 import re
 def split_type(value):
     value=' '.join(value.split());start=value.find('<')

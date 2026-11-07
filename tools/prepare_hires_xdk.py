@@ -1,4 +1,4 @@
-"""Pinned real HiRes cache/worker/hook source projection plus explicit LE dump IO."""
+"""Pinned HiRes cache/worker/hook source projection plus explicit LE dump IO."""
 
 from pathlib import Path
 import argparse, hashlib, json, re, runpy, subprocess, sys

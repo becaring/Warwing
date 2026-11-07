@@ -80,7 +80,7 @@ kDLBoundsWalkedPast) {""",
         "    if (sGbiTraceCallback) {\n        sGbiTraceCallback(",
         "    if (sGbiTraceCallback) {\n        Smash360PerfScope traceScope(SMASH_PERF_GBI_TRACE);\n        sGbiTraceCallback(",
     )
-    # Existing dispatch and every early return stay intact; raw opcode bytes
+    # Dispatch and every early return stay intact; raw opcode bytes
     # identify the workload without imposing a game/microcode classification.
     text = once(
         text,

@@ -1,4 +1,4 @@
-"""Retain one selected interpreter owner for the existing production DL walk."""
+"""Retain one selected interpreter owner for the production DL walk."""
 from profile_projections import once
 
 def transform(text):

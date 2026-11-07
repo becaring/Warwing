@@ -1,4 +1,4 @@
-"""Verify production symbol ownership and record the actual XEX; not boot proof."""
+"""Verify production symbol ownership and record the XEX; it does not show that the title boots."""
 from pathlib import Path
 import hashlib, json, re
 

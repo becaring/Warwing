@@ -13,9 +13,9 @@
 /* SoH360's active CALL_2 rescan workaround, namespaced for this C boundary. */
 #define SMASH360_GBI_APPLY(macro, arguments) macro arguments
 
-/* Native environment/configuration is supplied by the platform layer. This
- * declaration does not provide a fallback value or a success-returning stub.
- * Root platform implementation must preserve the getenv pointer lifetime. */
+/* The platform layer supplies the environment and configuration. This
+ * declaration adds no fallback value and no stub that returns success.
+ * The platform implementation must keep getenv's pointer lifetime. */
 extern char *XboxEnv_Get(const char *name);
 #define getenv XboxEnv_Get
 

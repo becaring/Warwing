@@ -44,7 +44,7 @@ private:
     SmashCommandTrace(const SmashCommandTrace&);
     SmashCommandTrace& operator=(const SmashCommandTrace&);
 };
-// A few reads per Run split actual total time into setup, command walk, and
+// A few reads per Run split total time into setup, command walk, and
 // final flush/composition. These totals are measured, not extrapolated.
 struct SmashWalkTrace {
     bool active;
