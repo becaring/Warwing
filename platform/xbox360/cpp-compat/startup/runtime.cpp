@@ -16,7 +16,7 @@ bool Initialize() {
     Smash360_Log("THREAD application hardware=%lu", GetCurrentProcessorNumber());
     // The donor QPC frequency cache must initialize before worker creation.
     (void)Smash360_Time();
-    const int status = XboxEnv_LoadFromFile("game:\\smash360.env");
+    const int status = XboxEnv_LoadFromFile("game:\\warwing.env");
     if (status != XBOX_ENV_LOADED && status != XBOX_ENV_ABSENT) {
         Smash360_Log("startup environment failed status=%d", status);
         return false;
@@ -28,7 +28,7 @@ bool Initialize() {
     }
     Smash360_Log("BattleShip Xbox startup environment=%s cwd=game:\\", status == XBOX_ENV_LOADED ? "loaded" : "absent");
     if (!Smash360_PrepareAppStorage()) return false;
-    Smash360_Log("BattleShip writable app data mounted at smashsave:\\");
+    Smash360_Log("BattleShip writable app data mounted at warwingsave:\\");
     return true;
 }
 bool RequireArchive(const std::string& path) {

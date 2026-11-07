@@ -46,7 +46,7 @@ if ($CompileOnly) {
 if ($smashExit -ne 0) { exit $smashExit }
 if ($Project -eq 'Smash360' -and !$CompileOnly) {
     $smashOutput = Join-Path $smashNative 'build'
-    if (!(Test-Path -LiteralPath (Join-Path $smashOutput 'Smash360.xex'))) { throw 'SDK build returned without the application XEX' }
+    if (!(Test-Path -LiteralPath (Join-Path $smashOutput 'Warwing.xex'))) { throw 'SDK build returned without the application XEX' }
     & python -B -X utf8 (Join-Path $smashRoot 'tools\verify_native_link.py')
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
     & python -B -X utf8 (Join-Path $smashRoot 'tests\logging\check_xdk_control_flow.py')
@@ -57,6 +57,6 @@ if ($Project -eq 'Smash360' -and !$CompileOnly) {
     $smashAsset = Join-Path $smashRoot 'scratch\assets\f3d.o2r'
     if (!(Test-Path -LiteralPath $smashAsset)) { throw "Required host-generated archive missing: $smashAsset" }
     Copy-Item -LiteralPath $smashAsset -Destination (Join-Path $smashOutput 'f3d.o2r') -Force
-    @{ fullProfiling = [bool]$FullProfiling; sha256 = (Get-FileHash -LiteralPath (Join-Path $smashOutput 'Smash360.xex')).Hash } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $smashOutput 'build-options.json') -Encoding Ascii
+    @{ fullProfiling = [bool]$FullProfiling; sha256 = (Get-FileHash -LiteralPath (Join-Path $smashOutput 'Warwing.xex')).Hash } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $smashOutput 'build-options.json') -Encoding Ascii
 }
 exit 0

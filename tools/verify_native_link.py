@@ -29,10 +29,10 @@ def main():
         symbols[symbol] = {'address': matches[0][0], 'object': owner}
     if 'UnavailableLusFallbackViTimer' in text or re.search(r'\bos_(?:vi|mesg)\.obj\b', text):
         raise RuntimeError('A competing LUS game-scheduler fallback was linked')
-    executable = (BUILD / 'Smash360.xex').read_bytes()
+    executable = (BUILD / 'Warwing.xex').read_bytes()
     if executable[:4] != b'XEX2':
         raise RuntimeError('Output is not an XEX2 executable')
-    result = {'xex': str((BUILD / 'Smash360.xex').relative_to(ROOT)),
+    result = {'xex': str((BUILD / 'Warwing.xex').relative_to(ROOT)),
               'bytes': len(executable), 'sha256': hashlib.sha256(executable).hexdigest(),
               'symbols': symbols, 'visible_boot_verified': False,
               'scope': 'Static executable and production symbol ownership only'}

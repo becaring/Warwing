@@ -60,8 +60,8 @@ def interpreter(text):
         ("gfx_step", "DL_STEP"),
     ):
         # Per-command and per-pointer scopes: two time-base reads each would
-        # tax every command. SMASH360_PROFILE_DETAIL=1 or the sampled command
-        # trace (SMASH360_COMMAND_TRACE=1) measures them.
+        # tax every command. WARWING_PROFILE_DETAIL=1 or the sampled command
+        # trace (WARWING_COMMAND_TRACE=1) measures them.
         text = detail_scope(text, name, section)
     text = enter(text, "Interpreter::GfxSpVertex", "Smash360_PerfCount(SMASH_COUNT_VERTICES, (unsigned)n_vertices);")
     text = enter(text, "Interpreter::GfxSpTri1", "Smash360_PerfCount(SMASH_COUNT_TRIANGLES);")

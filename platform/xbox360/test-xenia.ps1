@@ -1,5 +1,5 @@
 param(
-    [string]$Xex = 'scratch/application-xdk/native/build/Smash360.xex',
+    [string]$Xex = 'scratch/application-xdk/native/build/Warwing.xex',
     [ValidateRange(1,60)][int]$Seconds = 20,
     [switch]$KeepRunning,
     [switch]$KeyboardController,

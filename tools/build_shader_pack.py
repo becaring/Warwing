@@ -7,7 +7,7 @@ scratch/graphics-xdk) and prepare_assets.py. Harvests draw states from the nativ
 display lists inside BattleShip.o2r's relocatable files and the decomp's constant
 gDP calls, derives keys with the projected GenerateCC and the pinned option block,
 generates and lowers each program (ABI 3) on the host, compiles it with the XDK's
-fxc and writes scratch/shader-pack/smash360.shaderpack. package.ps1 copies it into shaders/ beside
+fxc and writes scratch/shader-pack/warwing.shaderpack. package.ps1 copies it into shaders/ beside
 the XEX; the XEX verifies every program it uses and compiles any mismatch itself.
 """
 
@@ -118,7 +118,7 @@ def build(base, jobs):
     program_keys = keys.derive(harness, states)
     print("draw states: %d, shader keys: %d" % (len(states), len(program_keys)))
     generator = build_generator(base, OUT / "generator")
-    record = shader_pack.build(generator, OUT / "template.hlsl", program_keys, ABI, OUT, OUT / "smash360.shaderpack",
+    record = shader_pack.build(generator, OUT / "template.hlsl", program_keys, ABI, OUT, OUT / "warwing.shaderpack",
                                jobs)
     record.update(display_lists=lists, draw_states=len(states), archives=[str(a) for a in ARCHIVES])
     (OUT / "report.json").write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")

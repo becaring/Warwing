@@ -284,7 +284,7 @@ def transform(relative, text):
             raise ValueError("save path drift")
         text = text.replace(
             relative_save,
-            '#ifdef _XBOX\n        gSavePath = "smashsave:\\\\ssb64_save.bin";\n#else\n'
+            '#ifdef _XBOX\n        gSavePath = "warwingsave:\\\\ssb64_save.bin";\n#else\n'
             + relative_save + "\n#endif",
         )
         start = text.index("    if (char *p = SDL_GetPrefPath")
@@ -473,7 +473,7 @@ def transform(relative, text):
     ):
         text = '#include "config/compiler.h"\n' + CPP_LOWER(text.encode()).decode()
     if relative == "port/port_log.c":
-        # One console log: port_log lines join game:\smash360.log through the platform queue.
+        # One console log: port_log lines join game:\warwing.log through the platform queue.
         header = '#include "port_log.h"\n'
         if text.count(header) != 1 or text.count("void port_log(const char *fmt, ...)") != 1:
             raise ValueError("Port logging source changed")

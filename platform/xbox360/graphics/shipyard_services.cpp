@@ -14,6 +14,6 @@ bool Shipyard_WriteFile(const char* relative,const void* bytes,size_t size){
     return Smash360_WriteFile(relative,bytes,size);
 }
 bool Shipyard_VerifyFast3DReuse(){
-    static const char* verify=XboxEnv_Get("SMASH360_VERIFY_NATIVE_REUSE");
+    static const char* verify=XboxEnv_Get("WARWING_VERIFY_NATIVE_REUSE");
     return verify && verify[0]=='1';
 }

@@ -98,13 +98,13 @@ void Smash360_ResetPerf() {
     Smash360NativePerf ignored; Fast::CaptureNativePerf(&ignored);
 }
 void Smash360_InitPerf() {
-    const char* triangle = XboxEnv_Get("SMASH360_TRIANGLE_TRACE");
+    const char* triangle = XboxEnv_Get("WARWING_TRIANGLE_TRACE");
     smash360_triangle_trace = triangle && triangle[0]=='1';
-    const char* command = XboxEnv_Get("SMASH360_COMMAND_TRACE");
+    const char* command = XboxEnv_Get("WARWING_COMMAND_TRACE");
     smash360_command_trace = command && command[0]=='1';
-    const char* mode = XboxEnv_Get("SMASH360_PROFILE");
+    const char* mode = XboxEnv_Get("WARWING_PROFILE");
     smash360_perf_enabled = SMASH360_ENABLE_FULL_PROFILING && (!mode || mode[0]!='0');
-    const char* detail = XboxEnv_Get("SMASH360_PROFILE_DETAIL");
+    const char* detail = XboxEnv_Get("WARWING_PROFILE_DETAIL");
     smash360_perf_detail = smash360_perf_enabled && detail && detail[0]=='1';
     // Same unit/epoch validation as SoH's direct-counter bring-up check.
     LARGE_INTEGER before, after;

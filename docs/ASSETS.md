@@ -11,7 +11,7 @@ After fetching the sources and dependencies in [Building](BUILDING.md), run:
 ```
 
 The script builds pinned Torch on the PC and extracts `BattleShip.o2r` and
-`f3d.o2r`. `f3d.o2r` holds only shaders and ships beside `Smash360.xex`.
+`f3d.o2r`. `f3d.o2r` holds only shaders and ships beside `Warwing.xex`.
 `BattleShip.o2r` holds ROM data and never ships: when it is missing, the XEX
 builds it from a US v1.0 ROM beside it, byte for byte the same as Torch.
 `tools/check_rom_archive.py <ROM folder>` checks that match on the PC. Keep

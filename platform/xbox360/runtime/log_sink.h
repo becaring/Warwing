@@ -1,6 +1,6 @@
 #ifndef SMASH360_LOG_SINK_H
 #define SMASH360_LOG_SINK_H
-// libultraship's spdlog lines join game:\smash360.log instead of a rotating file under game:\logs,
+// libultraship's spdlog lines join game:\warwing.log instead of a rotating file under game:\logs,
 // so the console writes one log. The sink forwards the message text only; the platform log adds no
 // timestamps, and its queue is thread safe, so no formatter or mutex is needed.
 #include "runtime.h"

@@ -22,7 +22,7 @@ static void lexical_contract() {
         CHECK(actual.make_preferred().string() == expected.make_preferred().string());
     }
     CHECK((fs::path("game:/mods") / "pack/file.o2r").generic_string() == "game:/mods/pack/file.o2r");
-    CHECK((fs::path("smashsave:\\") / "logs/BattleShip.log").make_preferred().string() == "smashsave:\\logs\\BattleShip.log");
+    CHECK((fs::path("warwingsave:\\") / "logs/BattleShip.log").make_preferred().string() == "warwingsave:\\logs\\BattleShip.log");
     CHECK((fs::path("game:/mods") / "cache:/textures").generic_string() == "cache:/textures");
     CHECK((fs::path("game:/mods") / "/base").generic_string() == "game:/base");
     CHECK(fs::path("XContent:/container/../save.bin").lexically_normal().generic_string() == "XContent:/save.bin");

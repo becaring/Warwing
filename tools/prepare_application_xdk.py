@@ -454,7 +454,7 @@ def project(name, items, game=()):
     # Set it after Cpp.props so its earlier default cannot retain Release\.
     node(group, "OutputFile", "$(OutDir)$(TargetName)$(TargetExt)")
     if name == "Smash360":
-        node(group, "ImageXexOutput", "$(OutDir)Smash360.xex")
+        node(group, "ImageXexOutput", "$(OutDir)Warwing.xex")
     defs = node(root, "ItemDefinitionGroup")
     cl = node(defs, "ClCompile")
     for key, value in [
@@ -520,7 +520,7 @@ def project(name, items, game=()):
             node(link, key, value)
         image = node(defs, "ImageXex")
         node(image, "TitleId", "0x534D3601")
-        node(image, "OutputFile", "$(OutDir)Smash360.xex")
+        node(image, "OutputFile", "$(OutDir)Warwing.xex")
     else:
         node(node(defs, "Lib"), "OutputFile", "$(OutDir)Libultraship360.lib")
     group = node(root, "ItemGroup")

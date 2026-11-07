@@ -33,7 +33,7 @@ void InitSection(CRITICAL_SECTION& section, volatile LONG& state) {
 void FileError(const char* operation) {
     int error = errno;
     if (InterlockedIncrement(&fileErrors) == 1)
-        DbgPrint("SMASH360 diagnostic file %s failed errno=%d; console output retained\n", operation, error);
+        DbgPrint("WARWING diagnostic file %s failed errno=%d; console output retained\n", operation, error);
 }
 void FlushFile(void*) {
     InitSection(fileMutex, fileState);
@@ -54,15 +54,15 @@ void WriteFileLine(const char* text) {
     InitSection(fileMutex, fileState);
     EnterCriticalSection(&fileMutex);
     if (!diagnosticLog) {
-        diagnosticLog = fopen("game:\\smash360.log", "ab");
-        if (!diagnosticLog) diagnosticLog = fopen("cache:\\smash360.log", "ab");
+        diagnosticLog = fopen("game:\\warwing.log", "ab");
+        if (!diagnosticLog) diagnosticLog = fopen("cache:\\warwing.log", "ab");
     }
     if (!diagnosticLog) FileError("open");
     else if (fprintf(diagnosticLog, "%s\n", text) < 0) FileError("write");
     LeaveCriticalSection(&fileMutex);
 }
 void EmitLine(int level, const char* text) {
-    DbgPrint("SMASH360 %s\n", text);
+    DbgPrint("WARWING %s\n", text);
     WriteFileLine(text);
 }
 void EmitReport(const char* format, ...) {
@@ -88,7 +88,7 @@ void Consume(const Record& record, void*) {
         record.metadata.producer, GetCurrentThreadId());
 }
 void SinkError(void*) {
-    DbgPrint("SMASH360 diagnostic sink callback failed; later records retained\n");
+    DbgPrint("WARWING diagnostic sink callback failed; later records retained\n");
 }
 void BeginRecord(const Record& record, Shipyard::Diagnostics::Metadata& metadata, void*) {
     if (record.format) {
@@ -103,7 +103,7 @@ void Accepted(const Record& record, uint32_t captureStart,
 void WorkerStarted(void*) {
     if (XSetThreadProcessor(GetCurrentThread(), 3) == (DWORD)-1 ||
         !SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_BELOW_NORMAL))
-        DbgPrint("SMASH360 diagnostic worker affinity/priority setup failed\n");
+        DbgPrint("WARWING diagnostic worker affinity/priority setup failed\n");
     Smash360_Log("THREAD diagnostics hardware=%lu priority=%d",
         GetCurrentProcessorNumber(), GetThreadPriority(GetCurrentThread()));
 }
@@ -128,7 +128,7 @@ Queue& GetQueue() {
 }
 void QueueOrFail(const Record& record, uint32_t captureStart) {
     if (!GetQueue().submit(record, captureStart)) {
-        DbgPrint("SMASH360 FAIL diagnostic record enqueue\n");
+        DbgPrint("WARWING FAIL diagnostic record enqueue\n");
         exit(1);
     }
 }
@@ -173,7 +173,7 @@ void Smash360_ShutdownDiagnostics() {
             stats.backpressure, (unsigned)fileErrors);
         WriteFileLine(summary);
         CloseFile();
-        DbgPrint("SMASH360 %s\n", summary);
+        DbgPrint("WARWING %s\n", summary);
     }
 }
 void Smash360_Fatal(const char* operation, HRESULT result) {

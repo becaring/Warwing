@@ -41,8 +41,8 @@ void GfxRenderingAPIXenos::SetUseAlpha(bool alpha){ShipyardXenos::SetUseAlpha(al
 void GfxRenderingAPIXenos::DrawTriangles(float v[],size_t count,size_t tris){ShipyardXenos::DrawTriangles(v,count,tris);}
 void GfxRenderingAPIXenos::Init(){
     // tools/build_shader_pack.py output, each program verified against this build on first use.
-    Shipyard::Xenos::ConfigureShaderPack("game:\\shaders\\smash360.shaderpack");
-    const Shipyard::Xenos::ShaderCacheConfig config={"smashsave:\\smash360-shaders.cache",2,Smash360_QueueShaderCacheWrite};
+    Shipyard::Xenos::ConfigureShaderPack("game:\\shaders\\warwing.shaderpack");
+    const Shipyard::Xenos::ShaderCacheConfig config={"warwingsave:\\warwing-shaders.cache",2,Smash360_QueueShaderCacheWrite};
     if(!Shipyard::Xenos::ConfigureShaderCache(config))Smash360_Fatal("shader cache configuration",E_UNEXPECTED);
     const ShipyardXenos::ShaderCacheOps cache={Shipyard::Xenos::LoadShaderCode,Shipyard::Xenos::StoreShaderCode,
                                                Shipyard::Xenos::PackedFast3DProgram};

@@ -5,33 +5,33 @@ $smashRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
 $smashBuild = Join-Path $smashRoot 'scratch/application-xdk/native/build'
 $smashPackage = [IO.Path]::GetFullPath((Join-Path $smashRoot $Destination))
 $smashReceipt = Get-Content -LiteralPath (Join-Path $smashBuild 'native-link-verification.json') -Raw | ConvertFrom-Json
-$smashHash = (Get-FileHash -LiteralPath (Join-Path $smashBuild 'Smash360.xex') -Algorithm SHA256).Hash
+$smashHash = (Get-FileHash -LiteralPath (Join-Path $smashBuild 'Warwing.xex') -Algorithm SHA256).Hash
 if ($smashHash -ne $smashReceipt.sha256) { throw 'Current XEX does not match the production link audit' }
 $smashOptions = Get-Content -LiteralPath (Join-Path $smashBuild 'build-options.json') -Raw | ConvertFrom-Json
 if ($smashOptions.sha256 -ne $smashHash) { throw 'Build options do not match this XEX' }
 if ($ProfileDetail -and !$smashOptions.fullProfiling) { throw 'Rebuild with build.ps1 -FullProfiling before requesting detailed profiling' }
 # The game folder holds only what the console loads; README.txt and SHA256SUMS.txt sit beside it.
 if (Test-Path -LiteralPath $smashPackage) { throw "Package folder exists: $smashPackage" }
-$smashGame = Join-Path $smashPackage 'Smash360'
+$smashGame = Join-Path $smashPackage 'Warwing'
 New-Item -ItemType Directory -Path (Join-Path $smashGame 'shaders') -Force | Out-Null
-foreach ($smashFile in @('Smash360.xex','f3d.o2r')) {
+foreach ($smashFile in @('Warwing.xex','f3d.o2r')) {
     $smashSource = Join-Path $smashBuild $smashFile
     if (!(Test-Path -LiteralPath $smashSource -PathType Leaf)) { throw "Missing runtime file: $smashFile" }
     Copy-Item -LiteralPath $smashSource -Destination (Join-Path $smashGame $smashFile)
 }
 # tools/build_shader_pack.py output; the XEX verifies each program and compiles at runtime without it.
-$smashPack = Join-Path $smashRoot 'scratch/shader-pack/smash360.shaderpack'
+$smashPack = Join-Path $smashRoot 'scratch/shader-pack/warwing.shaderpack'
 if (Test-Path -LiteralPath $smashPack -PathType Leaf) {
-    Copy-Item -LiteralPath $smashPack -Destination (Join-Path $smashGame 'shaders/smash360.shaderpack')
+    Copy-Item -LiteralPath $smashPack -Destination (Join-Path $smashGame 'shaders/warwing.shaderpack')
 } else {
     Write-Output 'No shader pack packaged: run python tools/build_shader_pack.py first'
 }
-$smashProfileEnv = "# Full profiler compiled in: $($smashOptions.fullProfiling). Requires build.ps1 -FullProfiling to enable.`r`n# SMASH360_PROFILE=0 runtime-disables compiled-in scopes; triangle sampling is independent.`r`n"
-if ($ProfileDetail) { $smashProfileEnv += "SMASH360_PROFILE_DETAIL=1`r`n" }
-if ($ProfileDisabled) { $smashProfileEnv += "SMASH360_PROFILE=0`r`nSMASH360_PROFILE_DETAIL=0`r`n" }
-if ($TriangleTrace) { $smashProfileEnv += "SMASH360_TRIANGLE_TRACE=1`r`n" }
-if ($CommandTrace) { $smashProfileEnv += "SMASH360_COMMAND_TRACE=1`r`n" }
-[IO.File]::WriteAllText((Join-Path $smashGame 'smash360.env'), $smashProfileEnv)
+$smashProfileEnv = "# Full profiler compiled in: $($smashOptions.fullProfiling). Requires build.ps1 -FullProfiling to enable.`r`n# WARWING_PROFILE=0 runtime-disables compiled-in scopes; triangle sampling is independent.`r`n"
+if ($ProfileDetail) { $smashProfileEnv += "WARWING_PROFILE_DETAIL=1`r`n" }
+if ($ProfileDisabled) { $smashProfileEnv += "WARWING_PROFILE=0`r`nWARWING_PROFILE_DETAIL=0`r`n" }
+if ($TriangleTrace) { $smashProfileEnv += "WARWING_TRIANGLE_TRACE=1`r`n" }
+if ($CommandTrace) { $smashProfileEnv += "WARWING_COMMAND_TRACE=1`r`n" }
+[IO.File]::WriteAllText((Join-Path $smashGame 'warwing.env'), $smashProfileEnv)
 $smashSums = foreach ($smashItem in Get-ChildItem -LiteralPath $smashGame -Recurse -File | Sort-Object FullName) {
     $smashRelative = $smashItem.FullName.Substring($smashPackage.Length + 1).Replace('\', '/')
     (Get-FileHash -LiteralPath $smashItem.FullName -Algorithm SHA256).Hash.ToLower() + '  ' + $smashRelative
@@ -40,8 +40,8 @@ $smashSums = foreach ($smashItem in Get-ChildItem -LiteralPath $smashGame -Recur
 @'
 Warwing Xbox 360 package
 
-Copy Smash360/ to the console and put your own US v1.0 Super Smash Bros. ROM
-(.z64, .n64 or .v64) beside Smash360.xex. The first launch builds BattleShip.o2r
+Copy Warwing/ to the console and put your own US v1.0 Super Smash Bros. ROM
+(.z64, .n64 or .v64) beside Warwing.xex. The first launch builds BattleShip.o2r
 from the ROM; later launches reuse it. SHA256SUMS.txt records the game folder's
 file hashes. No ROM data, SDK files, Xenia settings, or PC save data are
 included.
@@ -49,7 +49,7 @@ included.
 Back/View: enhancements. Right stick: cursor. A: click/drag. B: right-click.
 LT/RT: scroll. R3: switch cursor/D-pad navigation.
 
-Check smash360.env for this package's build and diagnostic modes. Full-profiler
+Check warwing.env for this package's build and diagnostic modes. Full-profiler
 scopes require a build made with build.ps1 -FullProfiling; environment switches
 cannot restore compiled-out scopes. package.ps1 -ProfileDetail requests detailed
 profiling and requires that build option. Command and triangle sampling are

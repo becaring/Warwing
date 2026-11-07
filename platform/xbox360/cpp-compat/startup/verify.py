@@ -40,7 +40,7 @@ def source_contracts():
     assert "if (GetWindow()) GetWindow()->SaveWindowToConfig();" in context
     assert "if (GetConfig()) GetConfig()->Save();" in context
     assert context.count('return "game:\\\\";') == 2
-    assert 'smashsave' not in context
+    assert 'warwingsave' not in context
     try:
         m["transform"](
             "port/port.cpp", read("port/port.cpp").replace("int main(int argc, char* argv[]) {", "int renamed() {")

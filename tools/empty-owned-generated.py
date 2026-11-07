@@ -54,7 +54,7 @@ def clean():
     preserved = SCRATCH / "final-preclean" / stamp
     preserved.mkdir(parents=True, exist_ok=False)
     records = []
-    for relative in ("application-xdk/native/build/Smash360.xex",
+    for relative in ("application-xdk/native/build/Warwing.xex",
                      "application-xdk/native/build/build-options.json",
                      "application-xdk/native/assembly-report.json"):
         source = SCRATCH / relative

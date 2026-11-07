@@ -6,14 +6,14 @@
 namespace {
 Shipyard::Async::mutex storageMutex;
 bool mounted;
-const char* const mountName = "smashsave";
+const char* const mountName = "warwingsave";
 }
 
 bool Smash360_PrepareAppStorage() {
     Shipyard::Async::lock_guard<Shipyard::Async::mutex> lock(storageMutex);
     if (mounted) return true;
     const Shipyard::Storage::MountPolicy policy = {
-        0, 1024 * 1024, mountName, "Smash360", L"BattleShip"
+        0, 1024 * 1024, mountName, "Warwing", L"Warwing"
     };
     const Shipyard::Storage::StartupDisplay display = {
         Fast::InitializeNativeDisplay, Fast::PresentNativeStartupUI

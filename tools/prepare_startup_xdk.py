@@ -69,7 +69,7 @@ def transform(relative, text):
         text = once(
             text,
             "\t\tstd::string logPath;",
-            "\t\tstd::string logPath;\n#ifdef _XBOX\n        // port_log joins game:\\\\smash360.log on Xbox.\n#else",
+            "\t\tstd::string logPath;\n#ifdef _XBOX\n        // port_log joins game:\\\\warwing.log on Xbox.\n#else",
         )
         text = once(
             text,

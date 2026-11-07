@@ -34,19 +34,19 @@ Sources come from the pinned BattleShip submodules. Dependencies follow
 `dependencies.lock.json`; `fetch-dependencies.ps1 -VerifyOnly` checks a checkout.
 [Assets](ASSETS.md) covers extraction and packaging.
 
-The executable is `scratch/application-xdk/native/build/Smash360.xex`.
+The executable is `scratch/application-xdk/native/build/Warwing.xex`.
 `-Regenerate` projects sources and stages native projects; `-Rebuild` recompiles.
 Leave these flags off when the inputs have not changed. Logs and build records
 stay under `scratch/application-xdk/native`.
 
 `platform/xbox360/package.ps1 -Destination dist/<name>` writes a new folder:
-`Smash360/` holds the XEX, `f3d.o2r`, `smash360.env` and `shaders/`, with
+`Warwing/` holds the XEX, `f3d.o2r`, `warwing.env` and `shaders/`, with
 `README.txt` and `SHA256SUMS.txt` beside it. Before packaging, you can run
 `python -B tools/build_shader_pack.py --jobs 8` to build the prebuilt shader pack
 from the regenerated projections with the XDK's `fxc.exe`. Packaging copies the
-pack to `shaders/smash360.shaderpack`. On first use the XEX checks each packed program against its
+pack to `shaders/warwing.shaderpack`. On first use the XEX checks each packed program against its
 own shader generator and compiles any mismatch itself. Programs compiled at run
-time are cached in `smashsave:\smash360-shaders.cache`.
+time are cached in `warwingsave:\warwing-shaders.cache`.
 
 `build.ps1 -PrepareOnly` stages without compiling. `-CompileOnly` takes a
 production source path from `project-items.json`. To audit a port source, prepare
@@ -72,12 +72,12 @@ prepare-script limit. After runtime changes, build the affected Xbox integration
 and test it on hardware.
 
 Normal builds omit full-profiler scopes. `build.ps1 -FullProfiling` enables them.
-`SMASH360_PROFILE=0` disables reporting, and in that build
-`SMASH360_PROFILE_DETAIL=1` turns on detail. The packaging flags
+`WARWING_PROFILE=0` disables reporting, and in that build
+`WARWING_PROFILE_DETAIL=1` turns on detail. The packaging flags
 `-ProfileDisabled` and `-ProfileDetail` are mutually exclusive.
-`platform/xbox360/package.ps1` writes the package's `smash360.env`, and its
+`platform/xbox360/package.ps1` writes the package's `warwing.env`, and its
 `-TriangleTrace` and `-CommandTrace` switches enable triangle and command
-tracing. The runtime loads the optional `game:\smash360.env` before workers
+tracing. The runtime loads the optional `game:\warwing.env` before workers
 start. [Architecture](ARCHITECTURE.md) explains the timing semantics.
 
 Run `python -B tools/empty-owned-generated.py --list` before using `--clean`.
