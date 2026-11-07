@@ -10,11 +10,13 @@ if ($smashHash -ne $smashReceipt.sha256) { throw 'Current XEX does not match the
 $smashOptions = Get-Content -LiteralPath (Join-Path $smashBuild 'build-options.json') -Raw | ConvertFrom-Json
 if ($smashOptions.sha256 -ne $smashHash) { throw 'Build options do not match this XEX' }
 if ($ProfileDetail -and !$smashOptions.fullProfiling) { throw 'Rebuild with build.ps1 -FullProfiling before requesting detailed profiling' }
-$smashFiles = @('Smash360.xex','BattleShip.o2r','f3d.o2r')
+$smashFiles = @('Smash360.xex','f3d.o2r')
 foreach ($smashFile in $smashFiles) {
     if (!(Test-Path -LiteralPath (Join-Path $smashBuild $smashFile) -PathType Leaf)) { throw "Missing runtime file: $smashFile" }
 }
 New-Item -ItemType Directory -Path $smashPackage -Force | Out-Null
+# ROM data never ships; an older package may still hold an archive built on the PC.
+Remove-Item -LiteralPath (Join-Path $smashPackage 'BattleShip.o2r') -Force -ErrorAction SilentlyContinue
 $smashHashes = [ordered]@{}
 foreach ($smashFile in $smashFiles) {
     $smashSource = Join-Path $smashBuild $smashFile
@@ -46,9 +48,11 @@ $smashHashes | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $smashPackag
 @'
 Warwing Xbox 360 package
 
-Copy this folder intact. Launch Smash360.xex on your homebrew-capable Xbox 360.
-BattleShip.o2r and f3d.o2r must remain beside the XEX. SHA256.json records the
-package file hashes. No SDK files, Xenia settings, or PC save data are included.
+Copy this folder intact and add your own US v1.0 Super Smash Bros. ROM (.z64,
+.n64 or .v64) beside Smash360.xex. The first launch builds BattleShip.o2r from
+the ROM; later launches reuse it. f3d.o2r must remain beside the XEX.
+SHA256.json records the package file hashes. No ROM data, SDK files, Xenia
+settings, or PC save data are included.
 
 Back/View: enhancements. Right stick: cursor. A: click/drag. B: right-click.
 LT/RT: scroll. R3: switch cursor/D-pad navigation.

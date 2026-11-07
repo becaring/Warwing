@@ -8,6 +8,7 @@ from pathlib import Path
 import argparse, hashlib, json, re, runpy, shutil, sys
 import xml.etree.ElementTree as ET
 from application_compile_definitions import application_definitions
+import rom_entries
 
 ROOT = Path(__file__).resolve().parents[1]
 from platform_base import resolve as resolve_platform_base
@@ -209,6 +210,8 @@ PLATFORM_SOURCES = [
     "platform/xbox360/graphics/shader_cache_adapter.cpp",
     "platform/xbox360/graphics/screenshot.cpp",
     "platform/xbox360/cpp-compat/startup/runtime.cpp",
+    "platform/xbox360/cpp-compat/startup/rom_archive.cpp",
+    "scratch/rom-archive/rom_entries.cpp",
     "platform/xbox360/runtime/diagnostics_adapter.cpp",
     "platform/xbox360/runtime/clock_adapter.cpp",
     "platform/xbox360/runtime/diagnostic_file_adapter.cpp",
@@ -248,7 +251,12 @@ EXTERNAL_HEADERS = [
     "upstream/dependencies/tinyxml2",
 ]
 EXTRA_HEADERS = ["scratch/prism-xdk/shader_constants.h", "scratch/config-xdk/cvars.h"]
-INCLUDED_SOURCES = ["scratch/json-xdk/backend-generated/json/generated/ordered_json.cpp"]
+# rom_archive.cpp includes Torch's VPK0 decoder as C++.
+INCLUDED_SOURCES = [
+    "scratch/json-xdk/backend-generated/json/generated/ordered_json.cpp",
+    "upstream/BattleShip/torch/lib/libvpk0/vpk0.c",
+    "upstream/BattleShip/torch/lib/libvpk0/vpk0.h",
+]
 
 
 def external_sources(missing):
@@ -563,6 +571,7 @@ def prepare():
     missing = []
     owners, decisions = overlays(missing)
     game_names, objects = game_objects(missing)
+    rom_entries.generate()
     external = external_sources(missing)
     libraries = []
     for name in ("zip", "zlib"):
@@ -713,6 +722,16 @@ def prepare():
             "sha256": digest(PLATFORM_BASE / n64_clock),
         }
     )
+    for rom_source in ("sources/rom/rom.cpp", "sources/archive/stored_zip_writer.cpp"):
+        app_items.append(
+            {
+                "path": "shipyard/" + rom_source,
+                "shipyard_source": rom_source,
+                "provider": "Shipyard direct source",
+                "input": "platform_base:" + rom_source,
+                "sha256": digest(PLATFORM_BASE / rom_source),
+            }
+        )
     storage = "sources/storage/device.cpp"
     app_items.append(
         {

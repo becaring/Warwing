@@ -53,11 +53,10 @@ if ($Project -eq 'Smash360' -and !$CompileOnly) {
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
     & python -B -X utf8 (Join-Path $smashRoot 'tests\graphics\check_rdp_value_init.py') --output-dir (Join-Path $smashNative 'logs') --label rdp-value-init
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-    foreach ($smashArchive in @('BattleShip.o2r','f3d.o2r')) {
-        $smashAsset = Join-Path $smashRoot ('scratch\assets\'+$smashArchive)
-        if (!(Test-Path -LiteralPath $smashAsset)) { throw "Required host-generated archive missing: $smashAsset" }
-        Copy-Item -LiteralPath $smashAsset -Destination (Join-Path $smashOutput $smashArchive) -Force
-    }
+    # BattleShip.o2r holds ROM data, so the XEX builds it on first launch from the player's ROM.
+    $smashAsset = Join-Path $smashRoot 'scratch\assets\f3d.o2r'
+    if (!(Test-Path -LiteralPath $smashAsset)) { throw "Required host-generated archive missing: $smashAsset" }
+    Copy-Item -LiteralPath $smashAsset -Destination (Join-Path $smashOutput 'f3d.o2r') -Force
     @{ fullProfiling = [bool]$FullProfiling; sha256 = (Get-FileHash -LiteralPath (Join-Path $smashOutput 'Smash360.xex')).Hash } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $smashOutput 'build-options.json') -Encoding Ascii
 }
 exit 0

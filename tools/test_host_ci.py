@@ -8,7 +8,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def main():
-    scripts = ['tools/check_hygiene.py', 'tools/check_projector_style.py', 'tools/test_hygiene.py']
+    scripts = ['tools/check_hygiene.py', 'tools/check_projector_style.py', 'tools/test_hygiene.py', 'tools/test_rom_entries.py']
     for script in scripts:
         result = subprocess.run([sys.executable, "-B", str(ROOT / script)], cwd=ROOT)
         if result.returncode:

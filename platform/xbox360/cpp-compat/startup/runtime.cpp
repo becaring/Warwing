@@ -1,4 +1,5 @@
 #include "startup/runtime.h"
+#include "startup/rom_archive.h"
 #include "runtime/runtime.h"
 #include "environment.h"
 #include "filesystem/filesystem.h"
@@ -33,7 +34,19 @@ bool Initialize() {
 bool RequireArchive(const std::string& path) {
     std::error_code error;
     if (xbox_compat::filesystem::is_regular_file(path, error)) return true;
-    Smash360_Log("required archive unavailable: %s (error=%d %s); prepare assets on PC and copy beside the XEX",
+    // Only the game archive comes from the ROM; f3d.o2r ships with the build.
+    const std::string name = SSB64_O2R_NAME;
+    if (path.size() >= name.size() && path.compare(path.size() - name.size(), name.size(), name) == 0) {
+        const std::string directory = path.substr(0, path.size() - name.size());
+        const double start = Smash360_Time();
+        std::string failure;
+        if (ExtractArchive(directory, path, failure)) {
+            Smash360_Log("extracted %s from ROM in %.1f s", path.c_str(), Smash360_Time() - start);
+            return true;
+        }
+        Smash360_Log("ROM extraction failed: %s", failure.c_str());
+    }
+    Smash360_Log("required archive unavailable: %s (error=%d %s); put the US v1.0 ROM beside the XEX",
                  path.c_str(), error.value(), error.message().c_str());
     return false;
 }
