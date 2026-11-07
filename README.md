@@ -64,4 +64,4 @@ Developed with AI coding assistants; design, integration and hardware validation
 
 ## License
 
-Original Warwing code is [MIT](LICENSE). Upstream components keep their own licenses; [Upstream](docs/UPSTREAM.md) lists them. Warwing is an unofficial fan project, unaffiliated with Nintendo, HAL Laboratory or Microsoft, and contains no ROMs or game assets.
+Original Warwing code is [MIT](LICENSE). Upstream components keep their own licenses; [Upstream](docs/UPSTREAM.md) lists them. Warwing is an unofficial fan project, unaffiliated with Nintendo, HAL Laboratory or Microsoft. The repository contains no ROMs or ROM-extracted retail game assets.
