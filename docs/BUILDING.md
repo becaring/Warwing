@@ -35,7 +35,7 @@ Sources come from the pinned BattleShip submodules. Dependencies follow
 [Assets](ASSETS.md) covers extraction and packaging.
 
 The executable is `scratch/application-xdk/native/build/Warwing.xex`.
-`-Regenerate` projects sources and stages native projects; `-Rebuild` recompiles.
+`-Regenerate` rewrites sources and stages native projects; `-Rebuild` recompiles.
 Leave these flags off when the inputs have not changed. Logs and build records
 stay under `scratch/application-xdk/native`.
 
@@ -43,7 +43,7 @@ stay under `scratch/application-xdk/native`.
 `Warwing/` holds the XEX, `f3d.o2r`, `warwing.env` and `shaders/`, with
 `README.txt` and `SHA256SUMS.txt` beside it. Before packaging, you can run
 `python -B tools/build_shader_pack.py --jobs 8` to build the prebuilt shader pack
-from the regenerated projections with the XDK's `fxc.exe`. Packaging copies the
+from the regenerated sources with the XDK's `fxc.exe`. Packaging copies the
 pack to `shaders/warwing.shaderpack`. On first use the XEX checks each packed program against its
 own shader generator and compiles any mismatch itself. Programs compiled at run
 time are cached in `warwingsave:\warwing-shaders.cache`.
@@ -56,10 +56,9 @@ its dependencies and run
 ## Contributor checks
 
 Edit the maintained projectors or adapters and regenerate their outputs. Game
-behavior belongs in Warwing and reusable Xbox services in Shipyard. Keep source
-locks, legal notices, source mappings, and ordering contracts intact. Generated
-output is not a place to edit. A partial symbol index cannot show that a symbol
-has no callers.
+behavior goes in Warwing and reusable Xbox services in Shipyard. Keep source
+locks, legal notices, source mappings, and ordering contracts intact. Do not edit
+generated output. A partial symbol index cannot show that a symbol has no callers.
 
 ```powershell
 python -B tools/test_host_ci.py

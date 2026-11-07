@@ -4,13 +4,13 @@ Warwing integrates [BattleShip](https://github.com/JRickey/BattleShip) with its
 selected [ssb-decomp-re](https://github.com/JRickey/ssb-decomp-re),
 [libultraship/Fast3D](https://github.com/JRickey/libultraship), and
 [Torch](https://github.com/JRickey/Torch) submodules. BattleShip's source and
-asset-extraction pipeline remain authoritative for Smash behavior and data.
+asset-extraction pipeline define Smash behavior and data.
 The Xbox integration uses [Shipyard](https://github.com/becaring/Shipyard), with
 platform ancestry from SoH360 and Shipwright.
 
 ## Reproducible inputs
 
-| Input | Authority |
+| Input | Source of record |
 | --- | --- |
 | BattleShip and its submodules | `tools/fetch-sources.ps1` and `tools/audit_sources.py` |
 | External dependencies | `dependencies.lock.json` |
@@ -19,9 +19,9 @@ platform ancestry from SoH360 and Shipwright.
 | Imported platform material | Source copyright notices, source locks, and donor provenance records |
 | Emitted compiler inputs | Generated manifests, hashes, and source-line mappings |
 
-The fetched upstream trees live under `upstream/`. Do not maintain them by
-editing the generated build tree. A source update means reviewing the changed
-contracts, updating the exact locks, regenerating, and rerunning the affected
+The fetched upstream trees live under `upstream/`. Do not edit the generated
+build tree in their place. A source update means reviewing the changed
+contracts, updating the locks, regenerating, and rerunning the affected
 comparisons and native build. Do not lower upstream versions just to silence
 compiler errors, and do not swap a current interface for an older donor
 interface.
@@ -35,8 +35,7 @@ around a pin or contract.
 
 When you adapt code, keep all applicable copyright notices, license texts,
 attribution, and source provenance. The dependency repositories and selected
-revisions define their own license terms; this document does not give their code
-a new license. Keep the nlohmann JSON MIT notice at
+revisions define their own license terms. Keep the nlohmann JSON MIT notice at
 `platform/xbox360/cpp-compat/json/LICENSE.nlohmann.MIT` and the donor provenance
 at `platform/xbox360/game-compat/donor/provenance.json`, along with all source
 locks and notices embedded in maintained files.
