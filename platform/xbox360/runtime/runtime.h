@@ -15,6 +15,8 @@ void Smash360_ShutdownDiagnostics();
 double Smash360_Time();
 bool Smash360_PrepareAppStorage();
 void Smash360_CloseAppStorage();
+// The save container root, or game:\ when the console refused the container.
+std::string Smash360_AppDataPath(const char* name);
 bool Smash360_WriteFile(const char* relative, const void* data, size_t size);
 bool Smash360_QueueShaderCacheWrite(const std::string& record, bool truncate, void (*complete)(bool));
 bool Smash360_WriteShaderCacheRecord(const std::string& record, bool truncate);

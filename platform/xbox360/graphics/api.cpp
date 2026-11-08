@@ -5,6 +5,7 @@
 #include "xenos/shader_cache.h"
 #include "xenos/shader_pack_program.h"
 #include "../runtime/perf_trace.h"
+#include "../runtime/runtime.h"
 
 namespace Fast {
 void InitializeNativeDisplay(){ShipyardXenos::InitializeDisplay();}
@@ -42,7 +43,8 @@ void GfxRenderingAPIXenos::DrawTriangles(float v[],size_t count,size_t tris){Shi
 void GfxRenderingAPIXenos::Init(){
     // tools/build_shader_pack.py output, each program verified against this build on first use.
     Shipyard::Xenos::ConfigureShaderPack("game:\\shaders\\warwing.shaderpack");
-    const Shipyard::Xenos::ShaderCacheConfig config={"warwingsave:\\warwing-shaders.cache",2,Smash360_QueueShaderCacheWrite};
+    static const std::string cachePath=Smash360_AppDataPath("warwing-shaders.cache");
+    const Shipyard::Xenos::ShaderCacheConfig config={cachePath.c_str(),2,Smash360_QueueShaderCacheWrite};
     if(!Shipyard::Xenos::ConfigureShaderCache(config))Smash360_Fatal("shader cache configuration",E_UNEXPECTED);
     const ShipyardXenos::ShaderCacheOps cache={Shipyard::Xenos::LoadShaderCode,Shipyard::Xenos::StoreShaderCode,
                                                Shipyard::Xenos::PackedFast3DProgram};

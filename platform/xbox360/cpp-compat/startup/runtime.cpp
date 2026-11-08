@@ -28,7 +28,7 @@ bool Initialize() {
     }
     Smash360_Log("BattleShip Xbox startup environment=%s cwd=game:\\", status == XBOX_ENV_LOADED ? "loaded" : "absent");
     if (!Smash360_PrepareAppStorage()) return false;
-    Smash360_Log("BattleShip writable app data mounted at warwingsave:\\");
+    Smash360_Log("BattleShip writable app data at %s", Smash360_AppDataPath("").c_str());
     return true;
 }
 bool RequireArchive(const std::string& path) {

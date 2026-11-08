@@ -47,7 +47,7 @@ stay under `scratch/application-xdk/native`.
 from the regenerated sources with the XDK's `fxc.exe`. Packaging copies the
 pack to `shaders/warwing.shaderpack`. On first use the XEX checks each packed program against its
 own shader generator and compiles any mismatch itself. Programs compiled at run
-time are cached in `warwingsave:\warwing-shaders.cache`.
+time are cached in `warwing-shaders.cache` beside the save file.
 
 `build.ps1 -PrepareOnly` stages without compiling. `-CompileOnly` takes a
 production source path from `project-items.json`. To audit a port source, prepare

@@ -105,7 +105,9 @@ Shared changes go in Shipyard and reach Warwing through a pin update and regener
   apply the deadzone twice.
 - Storage: Initialize the display before the selector. The `warwingsave:` container (user 0, 1 MiB,
   `platform/xbox360/runtime/storage_adapter.cpp`) holds only the save file `ssb64_save.bin` and the
-  shader cache `warwing-shaders.cache`. Config, the log `warwing.log`, and mods live in `game:\`;
+  shader cache `warwing-shaders.cache`. If the selector is cancelled or the console refuses the
+  container, both stay in `game:\` and `warwing.log` records the mount error.
+  Config, the log `warwing.log`, and mods live in `game:\`;
   BattleShip's `port_log` and libultraship's spdlog lines join that log. Keep overlapped-operation
   storage alive until completion.
 
