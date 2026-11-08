@@ -11,7 +11,7 @@ body:
     attributes:
       label: Release
       description: The release ZIP you installed.
-      placeholder: Warwing-1.0.4.zip
+      placeholder: Warwing-1.0.5.zip
     validations:
       required: true
   - type: dropdown
