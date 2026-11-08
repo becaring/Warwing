@@ -55,7 +55,8 @@ def main():
             )
             method = """void ConnectedPhysicalDeviceManager::RefreshNativeGamepads(bool usePresentationSample) {
     if (usePresentationSample) ShipyardInput_RefreshGamepadsForGui();
-    else ShipyardInput_PumpGamepads();
+    // The game read keeps taps that the display-rate pumps saw between game frames.
+    else ShipyardInput_PumpGamepadsForGame();
     const uint32_t generation = ShipyardInput_GamepadTopologyGeneration();
     if (generation != mNativeTopologyGeneration) {
         RefreshConnectedSDLGamepads();

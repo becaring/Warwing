@@ -210,6 +210,18 @@ int main() {
     char guidText[33];
     SDL_JoystickGetGUIDString(guid, guidText, 33);
     assert(strlen(guidText) == 32);
+    // A tap seen only by a display pump between two game reads reaches the next game read once.
+    raw[0].buttons = 0;
+    manager.RefreshNativeGamepads();
+    assert(!SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_START));
+    raw[0].buttons = 0x0010;
+    ShipyardInput_PumpGamepads();
+    raw[0].buttons = 0;
+    ShipyardInput_PumpGamepads();
+    manager.RefreshNativeGamepads();
+    assert(SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_START));
+    manager.RefreshNativeGamepads();
+    assert(!SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_START));
     ShipyardInput_StopPhysicalRumble();
     for (int i = 0; i < 4; ++i)
         assert(motors[i][0] == 0 && motors[i][1] == 0);
