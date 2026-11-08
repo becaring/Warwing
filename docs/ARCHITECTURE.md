@@ -110,6 +110,9 @@ Shared changes go in Shipyard and reach Warwing through a pin update and regener
   Config, the log `warwing.log`, and mods live in `game:\`;
   BattleShip's `port_log` and libultraship's spdlog lines join that log. Keep overlapped-operation
   storage alive until completion.
+- Quit: When the main loop ends, save settings, drain shader writes, close storage and flush the log,
+  then launch the dashboard. The next title reclaims the rest, so game and Context teardown run only
+  on startup failures and hosts.
 
 ## Environment lookup
 

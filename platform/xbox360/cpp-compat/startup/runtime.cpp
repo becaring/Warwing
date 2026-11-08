@@ -60,4 +60,11 @@ void Shutdown() {
     Smash360_FlushLogs();
     Smash360_ShutdownDiagnostics();
 }
+void ExitTitle() {
+    Smash360_ShutdownShaderWrites();
+    Smash360_CloseAppStorage();
+    Smash360_Log("quit: launching the dashboard");
+    Smash360_FlushLogs();
+    XLaunchNewImage(XLAUNCH_KEYWORD_DEFAULT_APP, 0);
+}
 }

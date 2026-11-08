@@ -99,6 +99,14 @@ def transform(relative, text):
             "\tPortGameInit();",
             "#ifdef _XBOX\n    xboxGameStarted = true;\n#endif\n\tPortGameInit();",
         )
+        # Teardown after Quit is not needed on the console: the next title reclaims everything.
+        text = once(
+            text,
+            "\t         frame, WindowIsRunning());\n",
+            "\t         frame, WindowIsRunning());\n#ifdef _XBOX\n"
+            "    Ship::Context::GetInstance()->GetConsoleVariables()->Save();\n"
+            "    Smash360Startup::ExitTitle();\n#endif\n",
+        )
         text = once(
             text,
             "\tPortGameShutdown();",

@@ -6,6 +6,8 @@ namespace Smash360Startup {
 bool Initialize();
 // Called after game and Context teardown, while diagnostics still exist.
 void Shutdown();
+// Called when the main loop ends: persists writes and the log, then launches the dashboard or launcher.
+void ExitTitle();
 bool RequireArchive(const std::string& path);
 }
 #endif
