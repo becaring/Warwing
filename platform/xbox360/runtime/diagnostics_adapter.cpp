@@ -179,5 +179,7 @@ void Smash360_ShutdownDiagnostics() {
 void Smash360_Fatal(const char* operation, HRESULT result) {
     Smash360_LogLevel(5, "FAIL %s hr=%08lx", operation, result);
     Smash360_FlushLogs();
+    // A process exit powers a retail console off; leave for the dashboard instead.
+    XLaunchNewImage(XLAUNCH_KEYWORD_DEFAULT_APP, 0);
     exit(1);
 }
