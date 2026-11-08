@@ -8,6 +8,7 @@
 
 namespace Smash360Startup {
 bool Initialize() {
+    Smash360_InstallFaultHandler();
     // Match SoH360 main.cpp: the title/render thread owns hardware thread 0.
     if (XSetThreadProcessor(GetCurrentThread(), 0) == (DWORD)-1) {
         Smash360_Log("application processor setup failed code=%lu", GetLastError());

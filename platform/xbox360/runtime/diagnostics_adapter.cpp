@@ -176,6 +176,67 @@ void Smash360_ShutdownDiagnostics() {
         DbgPrint("WARWING %s\n", summary);
     }
 }
+namespace {
+volatile LONG faultClaimed;
+
+// Return addresses from the faulting frame outward. Each frame saves its caller's LR 8 bytes below the back chain.
+int FormatCallChain(const CONTEXT& context, char* text, size_t size) {
+    int length = _snprintf_s(text, size, _TRUNCATE, "lr=%08lx chain=", context.Lr);
+    DWORD sp = static_cast<DWORD>(context.Gpr1);
+    for (int frame = 0; frame < 12 && length > 0 && static_cast<size_t>(length) < size; ++frame) {
+        DWORD next = 0, lr = 0;
+        bool valid = false;
+        __try {
+            next = *reinterpret_cast<const DWORD*>(sp);
+            valid = next > sp && next - sp <= 0x100000 && !(next & 3);
+            if (valid) lr = *reinterpret_cast<const DWORD*>(next - 8);
+        } __except (EXCEPTION_EXECUTE_HANDLER) {
+            valid = false;
+        }
+        if (!valid) break;
+        const int added = _snprintf_s(text + length, size - length, _TRUNCATE, "%08lx,", lr);
+        if (added < 0) break;
+        length += added;
+        sp = next;
+    }
+    return length;
+}
+
+// The fault line goes straight to the file: the faulting thread may be the log writer or hold its lock.
+// ponytail: lines still queued when the fault hits are lost; a timed flush would keep them.
+LONG WINAPI UnhandledFault(EXCEPTION_POINTERS* information) {
+    if (InterlockedCompareExchange(&faultClaimed, 1, 0) != 0)
+        for (;;) Sleep(INFINITE);
+    const EXCEPTION_RECORD* record = information ? information->ExceptionRecord : NULL;
+    char line[320];
+    int length = _snprintf_s(line, sizeof(line), _TRUNCATE, "FAIL fault code=%08lx address=%08lx thread=%lu ",
+        record ? record->ExceptionCode : 0,
+        record ? static_cast<DWORD>(reinterpret_cast<uintptr_t>(record->ExceptionAddress)) : 0, GetCurrentThreadId());
+    if (length > 0 && information && information->ContextRecord) {
+        const int chain = FormatCallChain(*information->ContextRecord, line + length, sizeof(line) - length - 2);
+        if (chain > 0) length += chain;
+    }
+    if (length < 0) length = 0;
+    line[length++] = '\n';
+    line[length] = 0;
+    DbgPrint("WARWING %s", line);
+    HANDLE file = CreateFileA("game:\\warwing.log", GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
+                              OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (file != INVALID_HANDLE_VALUE) {
+        DWORD written = 0;
+        SetFilePointer(file, 0, NULL, FILE_END);
+        WriteFile(file, line, static_cast<DWORD>(length), &written, NULL);
+        FlushFileBuffers(file);
+        CloseHandle(file);
+    }
+    // A crash powers a retail console off; leave for the dashboard instead.
+    XLaunchNewImage(XLAUNCH_KEYWORD_DEFAULT_APP, 0);
+    return EXCEPTION_CONTINUE_SEARCH;
+}
+}
+
+void Smash360_InstallFaultHandler() { SetUnhandledExceptionFilter(UnhandledFault); }
+
 void Smash360_Fatal(const char* operation, HRESULT result) {
     Smash360_LogLevel(5, "FAIL %s hr=%08lx", operation, result);
     Smash360_FlushLogs();
