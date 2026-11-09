@@ -41,7 +41,8 @@ __declspec(thread) void* workerFiber = NULL;
 // Sessions start and end at handoffs, so every lock pair sees the same session state.
 struct RelocLock {
     CRITICAL_SECTION section;
-    RelocLock() { InitializeCriticalSection(&section); }
+    // Render lookups hold the lock for about a microsecond; spinning avoids a kernel wake per handoff.
+    RelocLock() { InitializeCriticalSectionAndSpinCount(&section, 4000); }
 };
 static RelocLock relocLock;
 __declspec(thread) int relocDepth = 0;
@@ -94,6 +95,7 @@ struct Session : Shipyard::Overlap::Runtime<Session, FramePacket, GuiCapture> {
         // Game fibers return to whichever fiber resumed them.
         if (!workerFiber && !(workerFiber = ConvertThreadToFiber(NULL)))
             throw std::runtime_error("Worker fiber unavailable");
+        const uint32_t buildStart = Smash360_PerfCounter();
         FramePacket& packet = worker.buildingPacket();
         lbBackupApplyCheats();
         port_vi_simulate_vblank();
@@ -106,7 +108,14 @@ struct Session : Shipyard::Overlap::Runtime<Session, FramePacket, GuiCapture> {
         packet.viFrame = sFrameCount + 1;
         CALL_EVENT(GamePostUpdateEvent);
         sFrameCount++;
-        if (!worker.publishAndWait()) throw std::runtime_error("Game handoff aborted");
+        const uint32_t waitStart = Smash360_PerfCounter();
+        const bool published = worker.publishAndWait();
+        if (smash360_perf_enabled) {
+            smash360_worker_perf.build += waitStart - buildStart;
+            smash360_worker_perf.wait += Smash360_PerfCounter() - waitStart;
+            ++smash360_worker_perf.ticks;
+        }
+        if (!published) throw std::runtime_error("Game handoff aborted");
     }
 
     void CaptureInput() { input.Capture(*Ship::Context::GetInstance()->GetControlDeck()); }
@@ -210,10 +219,20 @@ extern "C" int Shipyard_OverlapDrawGui(int begin) { return SmashOverlap::Session
 extern "C" int Shipyard_OverlapInputBlocked(unsigned kind, int* value) {
     return SmashOverlap::Session::InputBlocked(kind, value);
 }
-extern "C" void Shipyard_OverlapFence(void) { SmashOverlap::Session::Fence(); }
+extern "C" void Shipyard_OverlapFence(void) {
+    const uint32_t start = Smash360_PerfCounter();
+    SmashOverlap::Session::Fence();
+    if (smash360_perf_enabled && SmashOverlap::Session::OnGameWorker())
+        smash360_worker_perf.fence += Smash360_PerfCounter() - start;
+}
 extern "C" void Smash360_RelocLock(void) {
     if (!SmashOverlap::Session::session) return;
-    EnterCriticalSection(&SmashOverlap::relocLock.section);
+    // Lock waits would otherwise land in whichever opcode asked for the lookup.
+    const uint32_t start = Smash360_PerfCounter();
+    { Smash360PerfScope waitScope(SMASH_PERF_RELOC_LOCK, smash360_perf_detail);
+      EnterCriticalSection(&SmashOverlap::relocLock.section); }
+    if (smash360_perf_enabled && SmashOverlap::Session::OnGameWorker())
+        smash360_worker_perf.lock += Smash360_PerfCounter() - start;
     ++SmashOverlap::relocDepth;
 }
 extern "C" void Smash360_RelocUnlock(void) {

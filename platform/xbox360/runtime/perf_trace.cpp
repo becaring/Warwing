@@ -19,6 +19,7 @@ __declspec(thread) uint32_t smash360_command_random=0x8f315a27;
 __declspec(thread) Smash360PerfSample smash360_perf_samples[SMASH_PERF_COUNT + 1];
 __declspec(thread) uint64_t smash360_perf_counts[SMASH_COUNT_COUNT];
 __declspec(thread) Smash360PerfScope* smash360_perf_parent;
+Smash360WorkerPerf smash360_worker_perf;
 namespace {
 #define SECTION_NAME(id, label) #label,
 const char* sections[] = { SMASH360_PERF_SECTIONS(SECTION_NAME) };
@@ -35,8 +36,10 @@ struct Snapshot {
     uint32_t observer;
     Smash360NativePerf native;
     Smash360ShaderCounts shader;
+    uint32_t worker[5];
 };
 unsigned windowNumber;
+uint32_t workerSeen[5];
 void Format(const void* bytes, Smash360DiagnosticEmit emit) {
     Snapshot s;
     memcpy(&s, bytes, sizeof(s)); // The donor transport's byte buffer need not be aligned.
@@ -76,10 +79,14 @@ void Format(const void* bytes, Smash360DiagnosticEmit emit) {
     for (unsigned i=0; i<SMASH_COUNT_COUNT; ++i)
         emit("PERF count=%s per_frame=%.2f", counters[i], double(s.counts[i])/s.frames);
     const double observer = double(s.observer)/s.frequency/1024;
+    emit("PERF worker ticks_per_frame=%.2f build_ms=%.3f handoff_wait_ms=%.3f fence_ms=%.3f reloc_lock_wait_ms=%.3f",
+         double(s.worker[4])/s.frames, s.worker[0]*ms, s.worker[1]*ms, s.worker[2]*ms, s.worker[3]*ms);
     emit("PERF observer ns_per_scope=%.1f scopes_per_frame=%.2f estimated_ms_per_frame=%.3f measured_self_ms=%.3f",
          observer*1e9, double(calls)/s.frames, observer*calls*1000/s.frames, self*ms);
     const Smash360NativePerf& n = s.native;
-    emit("PERF native_state sampler_attempted=%u sampler_written=%u sampler_suppressed=%u constants_attempted=%u constants_written=%u constants_suppressed=%u binding_attempted=%u binding_written=%u binding_suppressed=%u",
+    emit("PERF native_state sampler_attempted=%u sampler_written=%u sampler_suppressed=%u"
+         " constants_attempted=%u constants_written=%u constants_suppressed=%u"
+         " binding_attempted=%u binding_written=%u binding_suppressed=%u",
          n.samplerAttempted,n.samplerWritten,n.samplerSuppressed,n.constantsAttempted,n.constantsWritten,n.constantsSuppressed,
          n.bindingAttempted,n.bindingWritten,n.bindingSuppressed);
     emit("PERF uploads requests=%u reused=%u saved_bytes=%u pending_textures=%u pending_bytes=%u",
@@ -98,14 +105,16 @@ void Smash360_ResetPerf() {
     Smash360NativePerf ignored; Fast::CaptureNativePerf(&ignored);
 }
 void Smash360_InitPerf() {
-    const char* triangle = XboxEnv_Get("WARWING_TRIANGLE_TRACE");
-    smash360_triangle_trace = triangle && triangle[0]=='1';
-    const char* command = XboxEnv_Get("WARWING_COMMAND_TRACE");
-    smash360_command_trace = command && command[0]=='1';
     const char* mode = XboxEnv_Get("WARWING_PROFILE");
     smash360_perf_enabled = SMASH360_ENABLE_FULL_PROFILING && (!mode || mode[0]!='0');
+    // The sampled phase traces split triangle and command cost; a profiling build runs them unless told not to.
+    const char* triangle = XboxEnv_Get("WARWING_TRIANGLE_TRACE");
+    smash360_triangle_trace = triangle ? triangle[0]=='1' : smash360_perf_enabled;
+    const char* command = XboxEnv_Get("WARWING_COMMAND_TRACE");
+    smash360_command_trace = command ? command[0]=='1' : smash360_perf_enabled;
     const char* detail = XboxEnv_Get("WARWING_PROFILE_DETAIL");
-    smash360_perf_detail = smash360_perf_enabled && detail && detail[0]=='1';
+    // A profiling build exists to attribute frame time, so per-command scopes default on.
+    smash360_perf_detail = smash360_perf_enabled && (!detail || detail[0]!='0');
     // Same unit/epoch validation as SoH's direct-counter bring-up check.
     LARGE_INTEGER before, after;
     QueryPerformanceCounter(&before);
@@ -165,6 +174,9 @@ void Smash360_ReportPerf(unsigned frames, double elapsed, double logic, double r
     LARGE_INTEGER frequency; QueryPerformanceFrequency(&frequency); s.frequency=double(frequency.QuadPart);
     memcpy(s.samples,smash360_perf_samples,sizeof(s.samples));
     memcpy(s.counts,smash360_perf_counts,sizeof(s.counts));
+    const uint32_t worker[5] = {smash360_worker_perf.build, smash360_worker_perf.wait, smash360_worker_perf.fence,
+                                smash360_worker_perf.lock, smash360_worker_perf.ticks};
+    for (unsigned i=0; i<5; ++i) { s.worker[i] = worker[i] - workerSeen[i]; workerSeen[i] = worker[i]; }
     const uint32_t begin=Smash360_PerfCounter();
     for(unsigned i=0;i<1024;++i) {Smash360PerfScope probe(SMASH_PERF_COUNT);}
     s.observer=Smash360_PerfCounter()-begin;

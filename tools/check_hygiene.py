@@ -16,8 +16,7 @@ DEFERRED = [
     "platform/xbox360/cpp-compat/config/compiler.h",
     "platform/xbox360/cpp-compat/config/string_view.h",
     "platform/xbox360/cpp-compat/json/runtime_conversions.h",
-    "platform/xbox360/cpp-compat/postprocess/compat.h",
-    "platform/xbox360/runtime/perf_trace.cpp"
+    "platform/xbox360/cpp-compat/postprocess/compat.h"
 ]
 
 import fnmatch

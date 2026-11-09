@@ -135,4 +135,5 @@ def transform(text):
                                uses=16, loops=7)
     return deferred.source(text, constructor='    mBufVbo = new float[MAX_TRI_BUFFER * (32 * 3)];',
                            positions=POSITIONS,
-                           emit='    XboxEmitTriangle(vtx1_idx, vtx2_idx, vtx3_idx, is_rect, triangleTrace);')
+                           emit='    XboxEmitTriangle(vtx1_idx, vtx2_idx, vtx3_idx, is_rect, triangleTrace);',
+                           texgen_linear_scale='0.159155f')

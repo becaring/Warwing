@@ -1,0 +1,14 @@
+{
+  "restore_revision": "f74646d5985d0e7b7965aa3fb4f837fff97589d0",
+  "restored": {
+    "decomp/src/db/dbbattle.c": "4b89311732c2eafa639df0863713fbd058ef5ab6f9993068ff55c53e21eaecaf",
+    "decomp/src/db/dbfalls.c": "6e1b2870854a6ee8fb3ded584e2c65289b5559614beb5dd388a16821d7b0ae72",
+    "decomp/src/db/dbmaps.c": "169577174df059eba7cac3be0669b2e4ccda7207d6ee48e0d62e1c5c6e5a7e67",
+    "decomp/src/db/dbmenu.c": "75bbb581aa29e93ea433b98d3f03a715ae5009123a4c06550d1745319634c058"
+  },
+  "patched": {
+    "decomp/src/sc/scmanager.c": "75ac154f1b590f4b03210686b7bbd29bd29cfccee956b6db70eb680110f0dead",
+    "port/stubs/debug_stubs.c": "42283d3de841881ebc147e061500dd91266ff161a2c08434ab726015d2d19f1b",
+    "decomp/src/ft/ftchar/ftboss/ftbossgootsubusudown.c": "471ddada742f8f23e6d5368f3c4d876cfcd4c14e380329d99d5d44b2a22f23a2"
+  }
+}

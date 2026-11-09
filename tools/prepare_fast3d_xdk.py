@@ -365,6 +365,10 @@ def lower(text, name):
         text = command_work_projection.skip_stubs(text)
         text = bounds_cache_projection.interpreter(text)
         text = reloc_lookup_projection.interpreter(text)
+        text = profile_projections.vertex_phases(text)
+        # Every G_SETTIMG checks for an OTR path; the upstream call copies two shared_ptrs (four atomics).
+        from xbox360_platform.resource_lookup import stateless_signature
+        text = stateless_signature(text)
         # The UV min/max loop exists only to prepare a diagnostic log payload.
         # The callee already returns immediately when this same flag is off.
         # Keep the later vertex UV packing and scheduler area calculations.

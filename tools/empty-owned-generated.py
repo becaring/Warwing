@@ -19,7 +19,7 @@ SCRATCH = ROOT / "scratch"
 PROJECTS = ROOT / "platform/xbox360"
 NAMES = (
     "application-xdk", "assets", "audio-xdk", "audit", "binary-reader-xdk",
-    "config-xdk", "context-xdk", "controllers-xdk", "crt-xdk",
+    "config-xdk", "context-xdk", "controllers-xdk", "crt-xdk", "debug-xdk",
     "endian-xdk", "fast-resources-xdk", "fast3d-xdk", "filesystem-xdk",
     "fmt-xdk", "game-xdk", "generated", "graphics-xdk", "gui-widgets-xdk",
     "gui-xdk", "hires-xdk", "imgui-xdk", "input-editor-xdk", "input-xdk",

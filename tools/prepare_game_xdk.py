@@ -244,7 +244,7 @@ def main():
         }
     objects = []
     for source in sources:
-        path = UPSTREAM / source["path"]
+        path = (ROOT / source["origin"] if "origin" in source else UPSTREAM) / source["path"]
         compiled_input = compile_tree / source["path"]
         name = source["path"].replace("/", "__").removesuffix(".c")
         generated = output / "sources" / (name + ".c")

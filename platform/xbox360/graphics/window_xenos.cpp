@@ -136,6 +136,7 @@ void GfxWindowBackendXenos::SwapBuffersBegin() {
             end-lastPresentAt, frameReadyAt-lastPresentAt, begin-frameReadyAt, end-begin);
     }
     lastPresentAt = end;
+    Smash360_FrameHeartbeat();
     ++profileFrames;
     if (end-profileStart>=5) {
         Smash360_Log("FRAME timing frames=%u elapsed=%.3f logic_ms=%.3f render_ms=%.3f present_ms=%.3f",

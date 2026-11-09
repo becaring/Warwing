@@ -18,7 +18,7 @@ class OverlayTests(unittest.TestCase):
             run = subprocess.run([sys.executable,str(SCRIPT),'--output',str(output)],capture_output=True,text=True)
             self.assertEqual(run.returncode,0,run.stdout+run.stderr)
             manifest = json.loads((output/'endian-manifest.json').read_text())
-            self.assertEqual(len(manifest['files']),9)
+            self.assertEqual(len(manifest['files']),11)
             before = {p.relative_to(output):p.read_bytes() for p in output.rglob('*') if p.is_file()}
             run = subprocess.run([sys.executable,str(SCRIPT),'--output',str(output)],capture_output=True,text=True)
             self.assertEqual(run.returncode,0,run.stdout+run.stderr)
@@ -41,6 +41,18 @@ class OverlayTests(unittest.TestCase):
             self.assertNotEqual(run.returncode,0)
             self.assertIn('source hash mismatch',run.stderr)
             self.assertFalse(output.exists(), 'must validate every input before writing output')
+
+    def test_audio_tops_up_queue_after_each_tic(self):
+        sys.path.insert(0, str(ROOT/'tools'))
+        import prepare_endian_xdk
+        relative = 'decomp/src/sys/audio.c'
+        source = (ROOT/'upstream/BattleShip'/relative).read_text()
+        text, _ = prepare_endian_xdk.transform(relative, source)
+        submit = text.index('portAudioSubmitFrame(sSYAudioDataBuffers[port_id_mod3],\n')
+        top_up = text.index('AudioPlayerBuffered() < AudioPlayerGetDesiredBuffered() / 2', submit)
+        self.assertLess(top_up, text.index('dSYAudioCurrentTic++;', submit))
+        self.assertIn('port_extra < 2', text[submit:top_up])
+        self.assertEqual(text.count('\n'), source.count('\n'))
 
     def test_refuses_source_tree_output(self):
         self.assertTrue(SCRIPT.is_file(), 'endian overlay generator is not implemented')

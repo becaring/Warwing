@@ -11,6 +11,8 @@ void Smash360_LogLevel(int level, const char* format, ...);
 __declspec(noreturn) void Smash360_Fatal(const char* operation, HRESULT result);
 // A crash on any thread then writes its address and call chain to warwing.log and leaves for the dashboard.
 void Smash360_InstallFaultHandler();
+// Counts presented frames; the fault handler's watchdog samples the game thread after five seconds without one.
+void Smash360_FrameHeartbeat();
 void Smash360_FlushLogs();
 void Smash360_QueueDiagnostic(Smash360DiagnosticFormat format, const void* snapshot, size_t size, uint32_t captureStart);
 void Smash360_ShutdownDiagnostics();

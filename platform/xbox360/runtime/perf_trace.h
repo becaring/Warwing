@@ -30,9 +30,11 @@
     X(OVERLAP_VARIABLES, overlap_cvar_snapshot) X(OVERLAP_GUI, overlap_passive_gui) \
     X(NATIVE_END, native_end) X(NATIVE_FINISH, native_finish) \
     X(INSTANCE_ACQUIRE, interpreter_owner) X(RELOC_RANGE, reloc_range_lookup) \
-    X(RELOC_ID, reloc_id_lookup) X(RELOC_VERTEX, reloc_vertex_fixup) \
+    X(RELOC_ID, reloc_id_lookup) X(RELOC_TOKEN, reloc_token_resolve) X(RELOC_VERTEX, reloc_vertex_fixup) \
     X(RELOC_TEXTURE, reloc_texture_fixup) X(BOUNDS_GENERATION, bounds_generation) \
-    X(BOUNDS_SCAN, bounds_locked_scan)
+    X(BOUNDS_SCAN, bounds_locked_scan) X(RELOC_LOCK, reloc_lock_wait) \
+    X(VERTEX_MATRIX, vertex_matrix) X(VERTEX_TRANSFORM, vertex_transform) X(VERTEX_SETUP, vertex_setup) \
+    X(VERTEX_SHADE, vertex_shade_loop) X(VERTEX_CLIP, vertex_clip)
 #define SMASH360_PERF_COUNTERS(X) \
     X(COMMANDS, commands) X(VERTICES, vertices) X(TRIANGLES, triangle_requests) \
     X(DRAW_TRIANGLES, submitted_triangles) X(DRAW_BYTES, submitted_vertex_bytes) \
@@ -42,7 +44,11 @@
     X(BOUNDS_HIT, bounds_cache_hits) X(BOUNDS_MISS, bounds_cache_misses) \
     X(BOUNDS_VISITS, bounds_scan_entries) X(BOUNDS_FOUND, bounds_scan_found) \
     X(BOUNDS_UNKNOWN, bounds_unknown) X(BOUNDS_PAST, bounds_walked_past) \
-    X(BOUNDS_UNKNOWN_HIT, bounds_unknown_hits)
+    X(BOUNDS_UNKNOWN_HIT, bounds_unknown_hits) X(TOKEN_MISS, token_cache_misses) \
+    X(NORMALIZE_MISS, normalize_cache_misses) X(VERTEX_SLOW, vertex_unbatched) \
+    X(VERTEX_REUSE, vertex_shade_reused) X(VERTEX_SHADE_HIT, vertex_shade_cache_hits) \
+    X(VERTEX_LIT, vertex_lit) X(VERTEX_LIGHTS, vertex_light_terms) X(VERTEX_TEXGEN, vertex_texgen) \
+    X(VERTEX_TEXGEN_LINEAR, vertex_texgen_linear)
 #define SMASH360_SECTION_ENUM(id, label) SMASH_PERF_##id,
 enum Smash360PerfSection { SMASH360_PERF_SECTIONS(SMASH360_SECTION_ENUM)
     SMASH_PERF_OPCODE_BASE, SMASH_PERF_COUNT = SMASH_PERF_OPCODE_BASE + 256 };
@@ -71,9 +77,13 @@ __forceinline void Smash360_PerfCount(Smash360PerfCount counter, unsigned value 
     if (smash360_perf_enabled) smash360_perf_counts[counter] += value;
 #endif
 }
-__forceinline void Smash360_PerfDetailCount(Smash360PerfCount counter) {
-    if (smash360_perf_detail) Smash360_PerfCount(counter);
+__forceinline void Smash360_PerfDetailCount(Smash360PerfCount counter, unsigned value = 1) {
+    if (smash360_perf_detail) Smash360_PerfCount(counter, value);
 }
+
+// The overlap game worker's tick. Only that thread writes; the report reads deltas, so no reset races.
+struct Smash360WorkerPerf { volatile uint32_t build, wait, fence, lock, ticks; };
+extern Smash360WorkerPerf smash360_worker_perf;
 
 // Inclusive wall time plus self time excluding nested instrumented scopes.
 // SDK calls can wait for the GPU: neither column is GPU execution time or pure
@@ -104,9 +114,25 @@ struct Smash360PerfScope {
         smash360_perf_parent = parent;
         if (parent) parent->children += elapsed;
     }
+    // Closes this section and opens the next in place, so phases of one function need no extra braces.
+    __forceinline void Switch(Smash360PerfSection next) {
+        if (!active) return;
+        const uint32_t now = Smash360_PerfCounter();
+        const uint32_t elapsed = now - start;
+        Smash360PerfSample& sample = smash360_perf_samples[section];
+        sample.ticks += elapsed;
+        sample.self += elapsed - children;
+        ++sample.calls;
+        if (elapsed > sample.maximum) sample.maximum = elapsed;
+        if (parent) parent->children += elapsed;
+        section = next;
+        children = 0;
+        start = now;
+    }
 #else
     __forceinline Smash360PerfScope(Smash360PerfSection, bool = true) {}
     __forceinline ~Smash360PerfScope() {}
+    __forceinline void Switch(Smash360PerfSection) {}
 #endif
   private:
     Smash360PerfScope(const Smash360PerfScope&);

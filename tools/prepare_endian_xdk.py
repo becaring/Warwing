@@ -1,4 +1,6 @@
-"""Prepare a strict, reproducible sparse endian overlay of pinned BattleShip.
+"""Prepare a strict, reproducible sparse endian and ABI overlay of pinned BattleShip.
+
+Upstream PORT code assumes a little-endian LP64 host; the Xbox is big-endian ILP32 MSVC.
 
 No source-tree writes. Apply this overlay before XDK preprocessing/lowering.
 The manifest records each original/output hash and checked transformation.
@@ -74,6 +76,19 @@ def transform(relative, source, mapping_path=None):
             ("acmd_trace_end_task();", "ShipyardAudioControls_End"),
         ):
             replace(statement, "{ extern void %s(void); %s(); } %s" % (function, function, statement))
+        # Not endian: tics follow game frames, and the pacing assumes 60 of them a second.
+        # Below 60 FPS the XAudio2 queue drained and restarted; top it up by queued samples.
+        submit = ("            portAudioSubmitFrame(sSYAudioDataBuffers[port_id_mod3],\n"
+                  "                                 dSYAudioSampleCounts[port_id_mod3]);\n\n"
+                  "            dSYAudioCurrentTic++;")
+        top_up = ("{ extern int AudioPlayerBuffered(void); extern int AudioPlayerGetDesiredBuffered(void);"
+                  " extern void ShipyardAudioControls_Begin(void); extern void ShipyardAudioControls_End(void);"
+                  " int port_extra; for (port_extra = 0; port_extra < 2 &&"
+                  " AudioPlayerBuffered() < AudioPlayerGetDesiredBuffered() / 2; port_extra++) {"
+                  " ShipyardAudioControls_Begin(); n_alAudioFrame(sSYAudioCurrentAcmdListBuffer, &port_cmdLen,"
+                  " sSYAudioDataBuffers[port_id_mod3], sSYAudioFrequency); ShipyardAudioControls_End();"
+                  " portAudioSubmitFrame(sSYAudioDataBuffers[port_id_mod3], sSYAudioFrequency); } }")
+        replace(submit, submit.replace("\n\n", "\n" + top_up + "\n"))
     elif relative == "port/bridge/lbreloc_byteswap.cpp":
         # Every use in this translation unit repairs this same LE pass-one.
         calls = list(re.finditer(r"\bBSWAP32\(", text))
@@ -146,6 +161,17 @@ def transform(relative, source, mapping_path=None):
             " native host selects copy order. */\n                    /* Preserve source line"
             " mapping. */\n                    /* Preserve source line mapping. */",
         )
+    elif relative == "decomp/src/it/ittypes.h":
+        # ITAttackEvent/ITMonsterEvent: IDO packs `u8 timer` into the bitfield word and
+        # leaves size at 0x04; MSVC gives timer its own word, making events 12 bytes.
+        replace(
+            "#if IS_BIG_ENDIAN\n\tu8 timer;\n\ts32 angle : 10;\n\tu32 damage : 8;\n\tu32 : 14;\n\tu16 size;\n",
+            "#if IS_BIG_ENDIAN\n\tu32 timer : 8;\n\ts32 angle : 10;\n\tu32 damage : 8;\n\tu32 : 6;\n\tu16 size;\n",
+            2,
+        )
+    elif relative == "decomp/src/sc/sctypes.h":
+        # SCStaffrollMatrix puns SCStaffrollName; PORT's filler assumes an 8-byte `next`.
+        replace("#ifdef PORT\n\tu8 filler_0x0[0x10];\n", "#ifdef PORT\n\tu8 filler_0x0[0x8 + sizeof(void *)];\n")
     elif relative == "decomp/src/wp/wptypes.h":
         old = "    s32 angle : 10;"
         if text.count(old) != 1:

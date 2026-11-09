@@ -21,7 +21,11 @@ class Lowering(unittest.TestCase):
         self.assertIn('const auto& item = *',result)
     def test_snapshot_generation_counts_every_mutator(self):
         text=(ROOT/'scratch/config-xdk/generated/src/ship/config/ConsoleVariable.cpp').read_text()
-        self.assertEqual(text.count('++sXboxCVarMutations;'),len(GEN['CVAR_MUTATORS']))
+        registers=[name for name in GEN['CVAR_MUTATORS'] if name.startswith('Register')]
+        self.assertEqual(text.count('++sXboxCVarMutations;'),len(GEN['CVAR_MUTATORS'])-len(registers))
+        # Same-value rewrites return before the bump; Register bumps only through Set*.
+        self.assertEqual(text.count(') return;\n    ++sXboxCVarMutations;'),len(GEN['SAME_VALUE']))
+        self.assertIn('if (XboxLiveVariable(mVariables, name)) ++sXboxCVarMutations;',text)
         self.assertIn('sXboxCapturedGeneration == generation',text)
         with self.assertRaisesRegex(ValueError,'Re-audit CVar mutators'):
             GEN['snapshot_generation']('void ConsoleVariable::SetBool(int x) {\n}\n')

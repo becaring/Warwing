@@ -66,6 +66,14 @@ def once(text, a, b, count=1):
 CVAR_MUTATORS = ("SetInteger", "SetFloat", "SetString", "SetColor", "SetColor24", "RegisterInteger",
                  "RegisterFloat", "RegisterString", "RegisterColor", "RegisterColor24", "ClearVariable",
                  "ClearBlock", "CopyVariable", "Load", "LoadFromPath", "LoadLegacy")
+# Floats and colors compare bits, so a signed-zero rewrite still counts as a change.
+SAME_VALUE = {
+    "SetInteger": "Integer && xboxSame->Integer == value",
+    "SetFloat": "Float && memcmp(&xboxSame->Float, &value, sizeof(value)) == 0",
+    "SetString": "String && value && xboxSame->String && strcmp(xboxSame->String, value) == 0",
+    "SetColor": "Color && memcmp(&xboxSame->Color, &value, sizeof(value)) == 0",
+    "SetColor24": "Color24 && memcmp(&xboxSame->Color24, &value, sizeof(value)) == 0",
+}
 
 
 def snapshot_generation(text):
@@ -81,11 +89,28 @@ def snapshot_generation(text):
                "ConsoleVariable", "~ConsoleVariable"}
     if writers - readers != set(CVAR_MUTATORS):
         raise ValueError("Re-audit CVar mutators: " + str(sorted(writers - readers)))
+    # GUI visibility sync rewrites the same value every drawn frame; only a change may bump.
+    for name, same in SAME_VALUE.items():
+        text = enter(text, "ConsoleVariable::" + name, "const CVar* xboxSame = XboxLiveVariable(mVariables, name);\n"
+                     "    if (xboxSame && xboxSame->Type == ConsoleVariableType::" + same + ") return;\n"
+                     "    ++sXboxCVarMutations;")
+    # Register writes only through a Set* call, which bumps when the value changes.
     for name in CVAR_MUTATORS:
-        text = enter(text, "ConsoleVariable::" + name, "++sXboxCVarMutations;")
+        if name in SAME_VALUE or name.startswith("Register"):
+            continue
+        code = "++sXboxCVarMutations;"
+        if name == "ClearVariable":
+            # Clearing an absent name erases only config entries, never the map.
+            code = "if (XboxLiveVariable(mVariables, name)) ++sXboxCVarMutations;"
+        text = enter(text, "ConsoleVariable::" + name, code)
     signature = "void ConsoleVariable::CaptureSnapshot(Snapshot& snapshot) const {\n"
     text = once(text, signature, """\
 static volatile unsigned sXboxCVarMutations = 1;
+static const CVar* XboxLiveVariable(const ConsoleVariable::Snapshot& variables, const char* name) {
+    const ConsoleVariable::Snapshot::const_iterator found =
+        variables.find(Shipyard::ConsoleVariables::NameKey(name, Shipyard::ConsoleVariables::NameKey::Borrow));
+    return found != variables.end() ? found->second.get() : nullptr;
+}
 static const void* sXboxCapturedSnapshot = nullptr;
 static unsigned sXboxCapturedGeneration = 0;
 static size_t sXboxCapturedSize = 0;

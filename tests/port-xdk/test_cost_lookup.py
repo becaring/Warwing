@@ -78,7 +78,10 @@ int main() {
 
     def test_reloc_lookup_matches_scan(self):
         text = reloc_lookup_projection.transform(read("bridge/lbreloc_bridge.cpp"))
-        state = between(text, "struct PortRelocFileRange", "sPortRelocLookupNext = 0;\n")
+        state = between(text, "struct PortRelocFileRange", "kPortRelocRangesReserve = 4096;\n")
+        # Each range mutation is bracketed so unlocked scans can detect it.
+        self.assertEqual(len(re.findall(r"PORT_RANGES_BEGIN\(\);", text)), 4)
+        self.assertEqual(len(re.findall(r"PORT_RANGES_END\(\);", text)), 4)
         # The cached wrapper, the gap scan and the renamed upstream body, in order.
         lookup = between(text, "static bool portRelocFirstContainingFile(const void *ptr, uintptr_t *out_base, size_t *out_size);",
                          "\t\t}\n\t}\n\treturn FALSE;\n}\n")

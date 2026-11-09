@@ -21,6 +21,9 @@ LOCKS = {
     ),
     "port/gameloop.cpp": "8d8e84cb0a6f57d37da8a1c515790f1469033caf5ceff5b5c21d58bd40810a67",
     "port/gui/PortMenu.cpp": "934a4ee9728816870f8c5400490b554ca180ff5a23bbb7c9b65c1bfcd5e7691a",
+    "port/enhancements/ClassicCoop.cpp": (
+        "83849416c6371f5aab8c2084d171cd9f5f8385e58817d07d2fc3281676012362"
+    ),
     "port/enhancements/enhancements.h": (
         "7110bca49cbc4ae1ff264e6fc1eeed2f35bbc13571924823be5a0d7d02062ea3"
     ),
@@ -305,6 +308,27 @@ def transform(relative, text):
         start = text.index('    AddWidget(path, "Open App Files Folder"')
         end = text.index('\n\n    path.sidebarName = "Graphics";', start)
         text = guard(text, text[start:end])
+        # Restored battle debug menu (tools/prepare_debug_xdk.py); read by portDebugBattleIsBootScene.
+        anchor = '    AddWidget(path, "Classic Co-op (Needs reload)", WIDGET_CVAR_CHECKBOX)'
+        text = once(
+            text,
+            anchor,
+            '    AddWidget(path, "Boot to Battle Debug Menu", WIDGET_CVAR_CHECKBOX)\n'
+            '        .CVar("gDeveloperTools.BootToDebugBattle")\n'
+            "        .RaceDisable(false)\n"
+            '        .Options(CheckboxOptions().Tooltip("Boots, and resets, into the developers\' battle debug menu '
+            'with Metal Mario, Giant Donkey Kong, Master Hand and the polygons. Start opens the menu; '
+            'Start again begins the battle."));\n' + anchor,
+        )
+        # Classic Co-op is opt-in on Warwing; ClassicCoop.cpp reads the same default.
+        tooltip = '"Classic. Restart required for the toggle to take effect.")\n                     '
+        text = once(text, tooltip + ".DefaultValue(true));", tooltip + ".DefaultValue(false));")
+    elif relative == "port/enhancements/ClassicCoop.cpp":
+        text = once(
+            text,
+            "CVarGetInteger(ssb64::enhancements::ClassicCoopCVarName(), 1)",
+            "CVarGetInteger(ssb64::enhancements::ClassicCoopCVarName(), 0)",
+        )
     elif relative == "port/enhancements/enhancements.h":
         start = text.index("// Discord Rich Presence")
         end = text.index("// Libretro shader pack downloader.", start)
@@ -341,6 +365,7 @@ def prepare():
                     "port/gameloop.cpp",
                     "port/gui/PortMenu.cpp",
                     "port/enhancements/enhancements.h",
+                    "port/enhancements/ClassicCoop.cpp",
                 ],
                 "backend_ids": {"FAST3D_XENOS": 3, "XAUDIO2": 4},
             },

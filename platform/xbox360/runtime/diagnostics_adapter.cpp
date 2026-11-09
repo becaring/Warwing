@@ -9,6 +9,8 @@
 #include <stdlib.h>
 
 extern "C" unsigned long __cdecl DbgPrint(const char*, ...);
+extern "C" LONG __stdcall XexGetModuleHandle(const char* name, HANDLE* module);
+extern "C" LONG __stdcall XexGetProcedureAddress(HANDLE module, DWORD ordinal, void** procedure);
 
 namespace {
 using Shipyard::Diagnostics::Record;
@@ -35,6 +37,23 @@ void FileError(const char* operation) {
     if (InterlockedIncrement(&fileErrors) == 1)
         DbgPrint("WARWING diagnostic file %s failed errno=%d; console output retained\n", operation, error);
 }
+// Fault and hang reports bypass the queue and the CRT: the thread holding either may be the one stopped.
+void AppendDirect(char* line, int length) {
+    line[length++] = '\n';
+    line[length] = 0;
+    DbgPrint("WARWING %s", line);
+    HANDLE file = CreateFileA("game:\\warwing.log", GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
+                              OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (file != INVALID_HANDLE_VALUE) {
+        DWORD written = 0;
+        SetFilePointer(file, 0, NULL, FILE_END);
+        WriteFile(file, line, static_cast<DWORD>(length), &written, NULL);
+        FlushFileBuffers(file);
+        CloseHandle(file);
+    }
+}
+// The application and log writer thread IDs, sampled by the hang watchdog.
+DWORD watchedThreads[2];
 void FlushFile(void*) {
     InitSection(fileMutex, fileState);
     EnterCriticalSection(&fileMutex);
@@ -101,6 +120,7 @@ void Accepted(const Record& record, uint32_t captureStart,
     if (record.format) metadata.capture_ticks = __mftb32() - captureStart;
 }
 void WorkerStarted(void*) {
+    watchedThreads[1] = GetCurrentThreadId();
     if (XSetThreadProcessor(GetCurrentThread(), 3) == (DWORD)-1 ||
         !SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_BELOW_NORMAL))
         DbgPrint("WARWING diagnostic worker affinity/priority setup failed\n");
@@ -155,8 +175,18 @@ void Smash360_LogLevel(int level, const char* format, ...) {
     va_list args; va_start(args, format); LogMessage(level, format, args); va_end(args);
 }
 void Smash360_FlushLogs() { GetQueue().flush(); }
+// BattleShip's port_log is upstream debug tracing, some of it per frame and per hurtbox. The console writes
+// it far slower than that and a full queue blocks the caller, so these lines are dropped while the writer is behind.
+volatile LONG droppedPortLines;
 // BattleShip's port_log is C and ends its lines with newlines; the file writer adds its own.
 extern "C" void Smash360_PortLog(const char* text) {
+    const Stats stats = GetQueue().stats();
+    if (stats.accepted - stats.processed >= LOG_LINE_LIMIT / 8) {
+        InterlockedIncrement(&droppedPortLines);
+        return;
+    }
+    const LONG dropped = InterlockedExchange(&droppedPortLines, 0);
+    if (dropped) Smash360_Log("LOG dropped %ld BattleShip debug lines while the writer was behind", dropped);
     size_t length = strlen(text);
     while (length && (text[length - 1] == '\n' || text[length - 1] == '\r')) --length;
     Record record; record.level = 2; record.bytes.assign(text, length);
@@ -217,25 +247,85 @@ LONG WINAPI UnhandledFault(EXCEPTION_POINTERS* information) {
         if (chain > 0) length += chain;
     }
     if (length < 0) length = 0;
-    line[length++] = '\n';
-    line[length] = 0;
-    DbgPrint("WARWING %s", line);
-    HANDLE file = CreateFileA("game:\\warwing.log", GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
-                              OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-    if (file != INVALID_HANDLE_VALUE) {
-        DWORD written = 0;
-        SetFilePointer(file, 0, NULL, FILE_END);
-        WriteFile(file, line, static_cast<DWORD>(length), &written, NULL);
-        FlushFileBuffers(file);
-        CloseHandle(file);
-    }
+    AppendDirect(line, length);
     // A crash powers a retail console off; leave for the dashboard instead.
     XLaunchNewImage(XLAUNCH_KEYWORD_DEFAULT_APP, 0);
     return EXCEPTION_CONTINUE_SEARCH;
 }
+
+// A freeze leaves no fault and can starve the log writer, so a sleeping watchdog samples the stalled threads.
+// The XDK reads another thread's registers only through the debug monitor; it is resolved by ordinal so
+// consoles without xbdm still boot, and then report the stall without registers.
+volatile LONG frameCount;
+const char* const watchedNames[2] = {"application", "diagnostics"};
+typedef HRESULT (__stdcall* DmThreadCall)(DWORD);
+typedef HRESULT (__stdcall* DmContextCall)(DWORD, PCONTEXT);
+DmThreadCall dmSuspend;
+DmThreadCall dmResume;
+DmContextCall dmContext;
+
+void ResolveDebugMonitor() {
+    HANDLE xbdm = NULL;
+    void* suspend = NULL;
+    void* resume = NULL;
+    void* context = NULL;
+    if (XexGetModuleHandle("xbdm.xex", &xbdm) < 0 || !xbdm) return;
+    if (XexGetProcedureAddress(xbdm, 48, &suspend) < 0 || XexGetProcedureAddress(xbdm, 35, &resume) < 0 ||
+        XexGetProcedureAddress(xbdm, 13, &context) < 0)
+        return;
+    dmSuspend = static_cast<DmThreadCall>(suspend);
+    dmResume = static_cast<DmThreadCall>(resume);
+    dmContext = static_cast<DmContextCall>(context);
 }
 
-void Smash360_InstallFaultHandler() { SetUnhandledExceptionFilter(UnhandledFault); }
+void SampleThread(int index, LONG seconds) {
+    char line[320];
+    CONTEXT context = {};
+    context.ContextFlags = CONTEXT_CONTROL | CONTEXT_INTEGER;
+    const DWORD thread = watchedThreads[index];
+    const bool suspended = thread && dmSuspend && SUCCEEDED(dmSuspend(thread));
+    const bool captured = suspended && SUCCEEDED(dmContext(thread, &context));
+    int length = captured
+        ? _snprintf_s(line, sizeof(line), _TRUNCATE, "HANG no frame for %ld s thread=%s iar=%08lx ",
+                      seconds, watchedNames[index], static_cast<DWORD>(context.Iar))
+        : _snprintf_s(line, sizeof(line), _TRUNCATE, "HANG no frame for %ld s thread=%s registers unavailable",
+                      seconds, watchedNames[index]);
+    if (length > 0 && captured) {
+        const int chain = FormatCallChain(context, line + length, sizeof(line) - length - 2);
+        if (chain > 0) length += chain;
+    }
+    if (suspended) dmResume(thread);
+    if (length < 0) length = 0;
+    AppendDirect(line, length);
+}
+
+DWORD WINAPI Watchdog(void*) {
+    LONG seen = 0, still = 0;
+    ResolveDebugMonitor();
+    for (;;) {
+        Sleep(1000);
+        const LONG now = frameCount;
+        if (now != seen || !now) { seen = now; still = 0; continue; }
+        // Scene loads pause presents briefly; three samples a second apart tell a spin from a block.
+        if (++still < 5 || still > 7) continue;
+        for (int i = 0; i < 2; ++i) SampleThread(i, still);
+    }
+}
+}
+
+void Smash360_FrameHeartbeat() { InterlockedIncrement(&frameCount); }
+
+void Smash360_InstallFaultHandler() {
+    SetUnhandledExceptionFilter(UnhandledFault);
+    watchedThreads[0] = GetCurrentThreadId();
+    HANDLE watchdog = CreateThread(NULL, 64 * 1024, Watchdog, NULL, CREATE_SUSPENDED, NULL);
+    if (!watchdog) return;
+    // Hardware thread 1 shares no work with the game (0), audio (2, 4, 5) or the log writer (3).
+    XSetThreadProcessor(watchdog, 1);
+    SetThreadPriority(watchdog, THREAD_PRIORITY_HIGHEST);
+    ResumeThread(watchdog);
+    CloseHandle(watchdog);
+}
 
 void Smash360_Fatal(const char* operation, HRESULT result) {
     Smash360_LogLevel(5, "FAIL %s hr=%08lx", operation, result);

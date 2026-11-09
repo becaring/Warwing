@@ -344,7 +344,7 @@ def game_objects(missing):
     for name, entry in sorted(expected.items()):
         record = records[name]
         if (
-            digest(UP / name) != entry["sha256"]
+            digest(ROOT / entry.get("origin", "upstream/BattleShip") / name) != entry["sha256"]
             or record["sha256"] != entry["sha256"]
             or record["compile_exit"] != 0
         ):

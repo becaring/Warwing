@@ -11,6 +11,7 @@ import re
 
 ROOT = Path(__file__).resolve().parents[1]
 UPSTREAM = ROOT / 'upstream/BattleShip'
+DEBUG_OVERLAY = ROOT / 'scratch/debug-xdk/source'
 CMAKE_SHA256 = '47197c26cdec6370ce0c6b31f802a598240c9375625417c9aded960679fab24f'
 
 
@@ -59,9 +60,17 @@ def manifest(version='us'):
     for directory in ('debug_tools/gbi_trace', 'debug_tools/acmd_trace'):
         for path in sorted((UPSTREAM / directory).glob('*.c')):
             add(path, 'SSB64_DEBUG_TOOLS', 'ssb64')
+    # The battle debug scenes come from decomp history via tools/prepare_debug_xdk.py.
+    lock = json.loads((ROOT / 'platform/xbox360/debug/source-lock.json').read_text(encoding='utf-8'))
+    for relative in [*lock['restored'], 'decomp/src/db/dbwindow.c']:
+        path = DEBUG_OVERLAY / relative
+        if not path.is_file():
+            raise RuntimeError('Run tools/prepare_debug_xdk.py first: ' + relative)
+        entries[relative] = {'path': relative, 'sha256': sha256(path), 'selection': 'WARWING_DEBUG_SCENES',
+                             'upstream_target': 'ssb64_game', 'origin': DEBUG_OVERLAY.relative_to(ROOT).as_posix()}
     return {'schema': 1, 'region': version, 'cmake_sha256': CMAKE_SHA256,
             'scope': 'All upstream C translation units; C++ application dependencies excluded',
-            'excluded': ['decomp/src/db', 'decomp/src/ovl8', '*.inc.c',
+            'excluded': ['decomp/src/db except the restored battle debug scenes', 'decomp/src/ovl8', '*.inc.c',
                          'decomp/src/libultra except explicit CMake lists'],
             'sources': [entries[key] for key in sorted(entries)]}
 

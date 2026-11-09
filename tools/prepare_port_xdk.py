@@ -152,7 +152,7 @@ def transform(relative, text):
         text = re.sub(r"constexpr const char\* (\w+)", r"const char* const \1", text)
         text = text.replace("constexpr ", "const ")
     if relative == "port/bridge/lbreloc_byteswap.cpp":
-        text = '#include "crt/snprintf.h"\n' + text
+        text = '#include "crt/snprintf.h"\n' + reloc_lookup_projection.fixup_sets(text)
         text = text.replace(
             "[](auto &a, auto &b)",
             "[](const std::pair<int, uint64_t> &a, const std::pair<int, uint64_t> &b)",
@@ -488,6 +488,7 @@ def transform(relative, text):
 PORT_LOG_XBOX = """
 #ifdef _XBOX
 #include <stdarg.h>
+#include <string.h>
 #include "crt/snprintf.h"
 
 void Smash360_PortLog(const char *text);
@@ -496,10 +497,33 @@ void port_log_init(const char *path) { (void)path; }
 void port_log_close(void) {}
 int port_log_get_fd(void) { return -1; }
 
+/* Upstream traces every status change six times, and every figatree bind, hurtbox test and object
+   alloc/eject, each frame. A team intro writes about 67 lines a frame, which the console log writer
+   cannot keep up with. These are skipped before formatting; each status change keeps its first line. */
+static int port_log_is_frame_trace(const char *fmt)
+{
+    static const char *const traces[] = {
+        "SSB64: ftMainSetStatus - before ",
+        "SSB64: ftMainSetStatus - after ",
+        "SSB64: figatree-bind ",
+        "SSB64: gmCollItemFighterDmg ",
+        "SSB64: gcEjectGObj ",
+        "SSB64: gobj_alloc ",
+    };
+    size_t i;
+
+    for (i = 0; i < sizeof(traces) / sizeof(traces[0]); i++)
+    {
+        if (strncmp(fmt, traces[i], strlen(traces[i])) == 0) return 1;
+    }
+    return 0;
+}
+
 void port_log(const char *fmt, ...)
 {
     char text[2048];
     va_list ap;
+    if (port_log_is_frame_trace(fmt)) return;
     va_start(ap, fmt);
     Smash360_Vsnprintf(text, sizeof(text), fmt, ap);
     va_end(ap);

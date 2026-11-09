@@ -16,6 +16,7 @@ bool Shipyard_VerifyFast3DReuse();
 void Smash360_InitializeGuiForXenos();
 __declspec(noreturn) void Smash360_Fatal(const char* operation, HRESULT result);
 double Smash360_Time();
+void Smash360_FrameHeartbeat();
 bool Smash360_WriteFile(const char* relative, const void* data, size_t size);
 bool Smash360_QueueShaderCacheWrite(const std::string& record, bool truncate,
                                   void (*complete)(bool));

@@ -120,12 +120,47 @@ smash360_perf_detail);
     return text
 
 
+VERTEX_PHASES = (
+    ("    EnsureMatrixProduct();\n    if (XboxDeferVertices(", "VERTEX_MATRIX", True),
+    ("    static_assert(sizeof(F3DVtx)==16,", "VERTEX_TRANSFORM", False),
+    ("    const float xboxAspectScale=", "VERTEX_SETUP", False),
+    ("    for (size_t i = 0; i < n_vertices; i++, dest_index++) {\n        bool xboxStoreShade=false;", "VERTEX_SHADE", False),
+    ("    if (xboxTransformBatch) {\n        if (xboxFiniteClip) Shipyard::Fast3D::ClipFiniteVertices(", "VERTEX_CLIP", False),
+)
+VERTEX_COUNTS = (
+    ("            if (xboxReuseShade && xboxShadeSources[i]!=i) {\n", "VERTEX_REUSE"),
+    ("            if(xboxCachedShade) {\n", "VERTEX_SHADE_HIT"),
+    ("            if (mRsp->geometry_mode & G_TEXTURE_GEN) {\n                float dotx = 0, doty = 0;\n", "VERTEX_TEXGEN"),
+)
+
+
+def vertex_phases(text):
+    """Split GfxSpVertex into its phases and count each shading path; apply after every vertex projection."""
+    for anchor, section, first in VERTEX_PHASES:
+        code = ("Smash360PerfScope vertexPhase(SMASH_PERF_" + section + ", smash360_perf_detail);" if first
+                else "vertexPhase.Switch(SMASH_PERF_" + section + ");")
+        text = once(text, anchor, "    " + code + "\n" + anchor)
+    for anchor, counter in VERTEX_COUNTS:
+        text = once(text, anchor, anchor + "                Smash360_PerfDetailCount(SMASH_COUNT_" + counter + ");\n")
+    text = once(text, "                    dotx = acosf(-dotx)",
+                "                    Smash360_PerfDetailCount(SMASH_COUNT_VERTEX_TEXGEN_LINEAR);\n"
+                "                    dotx = acosf(-dotx)")
+    text = once(text, "            int r = mRsp->current_lights[mRsp->current_num_lights - 1].l.col[0];\n",
+                "            Smash360_PerfDetailCount(SMASH_COUNT_VERTEX_LIT);\n"
+                "            Smash360_PerfDetailCount(SMASH_COUNT_VERTEX_LIGHTS, (unsigned)mRsp->current_num_lights);\n"
+                "            int r = mRsp->current_lights[mRsp->current_num_lights - 1].l.col[0];\n")
+    return once(text, "    const float xboxAspectScale=",
+                "    if (!xboxTransformBatch) Smash360_PerfDetailCount(SMASH_COUNT_VERTEX_SLOW, (unsigned)n_vertices);\n"
+                "    const float xboxAspectScale=")
+
+
 def port(relative, text):
     functions = {
         "port/bridge/lbreloc_bridge.cpp": (
             ("portRelocFindContainingFile", "RELOC_RANGE"),
             ("portRelocFindFileIdAndBase", "RELOC_ID"),
         ),
+        "port/resource/RelocPointerTable.cpp": (("portRelocTryResolvePointer", "RELOC_TOKEN"),),
         "port/bridge/lbreloc_byteswap.cpp": (
             ("portRelocFixupVertexAtRuntime", "RELOC_VERTEX"),
             ("portRelocFixupTextureAtRuntime", "RELOC_TEXTURE"),

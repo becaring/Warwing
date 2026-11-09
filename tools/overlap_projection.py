@@ -65,6 +65,8 @@ RELOC_FUNCTIONS = {
         ['portRelocScanContainingFile', 'portRelocFindFileIdAndBase', 'portRelocEvictFileRangesInRange']),
     'port/bridge/particle_bank_bridge.cpp': (['portParticleLoadBank'], []),
 }
+BIG_ENDIAN_EXIT = re.compile(r'    Smash360RelocGuard relocGuard;\n((?:    Smash360PerfScope [^\n]*\n)?)'
+                             r'( if \(SMASH360_HOST_BIG_ENDIAN && [^\n]*\) return;)')
 BYTESWAP = re.compile(r'(?m)^extern "C" [^;{]*?\b((?:portFixup|portReloc)\w*)\s*\([^;{}]*\)\s*\{')
 CAPTURE = {
     'port_capture_register_fb_for_subrect': '''if (Shipyard_OverlapIsGameWorker()) {
@@ -117,6 +119,11 @@ def port(relative, text):
         text, count = BYTESWAP.subn(lambda match: match.group(0) + '\n    ' + LOCKED, text)
         if count < 15:
             raise ValueError('Reloc fixup entry drift: ' + str(count))
+        # On a big-endian host the per-command runtime fixups return before touching fixup state;
+        # taking the lock first made every G_VTX and G_SETTIMG contend with game-worker loads.
+        text, early = BIG_ENDIAN_EXIT.subn(r'\1\2\n    ' + LOCKED, text)
+        if early != 2:
+            raise ValueError('Big-endian fixup exit drift: ' + str(early))
         return RELOC + text
     if relative == 'port/bridge/framebuffer_capture.cpp':
         # Capture issues GPU work; the game's calls run on render after the replay.

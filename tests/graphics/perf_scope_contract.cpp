@@ -73,7 +73,23 @@ int main() {
     assert(smash360_perf_samples[SMASH_PERF_OPCODE_BASE+0xdb].self == 7);
     assert(smash360_perf_samples[SMASH_PERF_INSTANCE_ACQUIRE].self == 3);
     assert(!smash360_perf_parent);
-    puts("PASS actual profiler: nesting, recursion, early return, rollover, disabled mode and counters");
+    // Phase switches close one section and open the next under the same parent.
+    now = 300;
+    {
+        Smash360PerfScope vertex(SMASH_PERF_TRIANGLE);
+        now = 301;
+        Smash360PerfScope phase(SMASH_PERF_VERTEX_MATRIX);
+        now = 304;
+        { Smash360PerfScope nested(SMASH_PERF_RELOC_LOCK); now = 305; }
+        phase.Switch(SMASH_PERF_VERTEX_SHADE);
+        now = 311;
+    }
+    assert(smash360_perf_samples[SMASH_PERF_VERTEX_MATRIX].ticks == 4);
+    assert(smash360_perf_samples[SMASH_PERF_VERTEX_MATRIX].self == 3);
+    assert(smash360_perf_samples[SMASH_PERF_VERTEX_SHADE].self == 6);
+    assert(smash360_perf_samples[SMASH_PERF_TRIANGLE].self == 1);
+    assert(!smash360_perf_parent);
+    puts("PASS actual profiler: nesting, recursion, early return, rollover, disabled mode, phases and counters");
     {SmashTriangleTrace off;off.Mark(SMASH_TRI_PACK);}
     assert(smash360_triangle_samples.calls==0);
     smash360_triangle_trace=true;

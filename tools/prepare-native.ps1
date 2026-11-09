@@ -11,6 +11,8 @@ function Invoke-SmashPreparation {
 Push-Location $smashPrepareRoot
 try {
     Invoke-SmashPreparation 'tools/audit_sources.py'
+    # The game source manifest lists the restored debug scenes from this overlay.
+    Invoke-SmashPreparation 'tools/prepare_debug_xdk.py'
     Invoke-SmashPreparation 'tools/application_source_manifest.py'
     foreach ($smashStage in @('value_types','binary_reader_xdk','thread_pool_xdk','json_xdk','logging_xdk',
                               'audio_xdk','config_xdk','resources_xdk','filesystem_xdk','graphics_xdk',
@@ -19,7 +21,7 @@ try {
         Invoke-SmashPreparation ("tools/prepare_$smashStage.py")
     }
     Invoke-SmashPreparation 'tools/prepare_game_xdk.py' -Options @('--source-overlay','scratch/endian-xdk/source',
-        '--generated-include','scratch/generated/include','--generated-include','scratch/generated/decomp/src',
+        '--source-overlay','scratch/debug-xdk/source','--generated-include','scratch/generated/include','--generated-include','scratch/generated/decomp/src',
         '--keep-going','--archive')
     foreach ($smashStage in @('input_xdk','controllers_xdk','startup_xdk','gui_widgets_xdk',
                               'input_editor_xdk','gui_xdk','context_xdk','hires_xdk','libultra_xdk',

@@ -82,8 +82,22 @@ struct Vec2b { signed char x,y; };
         + declaration(wptext, "struct WPAttributes")
         + "\ntypedef char checkWPSize[(sizeof(WPAttributes)==0x34)?1:-1];\n"
     )
+    it = (OVERLAY / "decomp/src/it/ittypes.h").read_text()
+    source += declaration(it, "struct ITAttackEvent") + "\n" + declaration(it, "struct ITMonsterEvent") + "\n"
+    sc = (OVERLAY / "decomp/src/sc/sctypes.h").read_text()
+    source += (
+        "typedef unsigned char u8; typedef int sb32; struct SCStaffrollName; typedef struct SCStaffrollName SCStaffrollName;\n"
+        + declaration(sc, "struct SCStaffrollMatrix")
+        + "\n"
+        + declaration(sc, "struct SCStaffrollName")
+        + "\n#define SC_PUN(a, b) ((u32)&((SCStaffrollMatrix*)0)->a == (u32)&((SCStaffrollName*)0)->b)\n"
+        + "typedef char checkStaffrollPun[(SC_PUN(unk_gmcreditsmtx_0xC, offset_x)"
+        + " && SC_PUN(unk_gmcreditsmtx_0x14, interpolation))?1:-1];\n"
+    )
     source += """
 extern "C" {
+u32 it_layout[] = {sizeof(ITAttackEvent),sizeof(ITMonsterEvent),(u32)&((ITMonsterEvent*)0)->knockback_scale};
+ITAttackEvent it_event = {4,361,30,300};
 u32 endian_flags[] = {SMASH360_HOST_BIG_ENDIAN,IS_BIG_ENDIAN};
 s32 signcheck[] = {BITFIELD_SEXT8(-1),BITFIELD_SEXT8(255),BITFIELD_SEXT10(-512),BITFIELD_SEXT10(512)};
 u32 wp_size = sizeof(WPAttributes);
@@ -129,6 +143,9 @@ float probeFloat() { unsigned char b[4]={0x42,0xc8,0,0}; float f; smash360CopyBE
     assert symbol_bytes(obj, "wp_size", 4) == bytes.fromhex("00000034")
     assert symbol_bytes(obj, "sizes", 20) == bytes.fromhex("0000000200000004000000020000000400000004")
     assert symbol_bytes(obj, "attack", 4) == bytes.fromhex("053080b6")
+    # Explosion events are 8 bytes in ROM: timer:8 angle:10 damage:8, then size in the next high half.
+    assert symbol_bytes(obj, "it_layout", 12) == bytes.fromhex("000000080000002400000008")
+    assert symbol_bytes(obj, "it_event", 8) == bytes.fromhex("045a4780012c0000")
     assert symbol_bytes(obj, "du_one", 8) == bytes.fromhex("3ff0000000000000")
     assert symbol_bytes(obj, "du_one", 8) == symbol_bytes(obj, "native_one", 8)
     assembly = asm.read_text()
